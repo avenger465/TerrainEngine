@@ -7,7 +7,7 @@
 #define _SCENE_HELPERS_H_INCLUDED_
 
 #include "../Math/CMatrix4x4.h"
-#include "Src/ProcGen/Common.h"
+#include "project/Common.h"
 #include <d3d11.h>
 
 

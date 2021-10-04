@@ -4,128 +4,158 @@
     <Filter Include="External">
       <UniqueIdentifier>{089DB854-F469-1360-1D83-010809AF48EE}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External\Math">
-      <UniqueIdentifier>{E166CA57-4D27-468E-1662-8F0B82E18A6A}</UniqueIdentifier>
+    <Filter Include="External\ImGui">
+      <UniqueIdentifier>{32B8D450-1E86-C856-071A-397DF386A4BB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External\Utility">
-      <UniqueIdentifier>{4BE35487-37DC-73D9-600E-595E4C6653E5}</UniqueIdentifier>
+    <Filter Include="External\ImGui\backends">
+      <UniqueIdentifier>{9C8A49CF-08C2-9166-11CC-F5897D82B85F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ProcGen">
-      <UniqueIdentifier>{53D6EE23-BFB5-6DBF-C8CD-F895342CD420}</UniqueIdentifier>
+    <Filter Include="Src">
+      <UniqueIdentifier>{0D23880B-792C-887C-02A8-9E7C6EB0937C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{EFAC8DF2-5B8C-0C8E-64A4-9764D00273EF}</UniqueIdentifier>
+    <Filter Include="Src\External">
+      <UniqueIdentifier>{DFF3C666-CB56-560B-74DC-8EC1601E228E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\External\Math">
+      <UniqueIdentifier>{189CC373-84B2-C109-CD29-4D2B397F9291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\External\Utility">
+      <UniqueIdentifier>{2221DC69-0EB0-6533-B7CE-792EA33C76D9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Shaders">
+      <UniqueIdentifier>{E6043150-52BA-A945-DBAE-A31C4763A049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\project">
+      <UniqueIdentifier>{731CDE20-DFD1-5616-68C6-50EDD47A4D1A}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\ImGui\backends\imgui_impl_dx11.h">
+      <Filter>External\ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h">
+      <Filter>External\ImGui\backends</Filter>
+    </ClInclude>
     <ClInclude Include="Src\External\Math\CMatrix4x4.h">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Math\CVector2.h">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Math\CVector3.h">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Math\MathHelpers.h">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Utility\ColourRGBA.h">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Utility\GraphicsHelpers.h">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Utility\Input.h">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Src\External\Utility\Timer.h">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Camera.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Camera.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Common.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Common.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Direct3DSetup.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Direct3DSetup.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Mesh.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Mesh.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Model.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Model.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Scene.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Scene.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\Shader.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\Shader.h">
+      <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\ProcGen\State.h">
-      <Filter>ProcGen</Filter>
+    <ClInclude Include="Src\project\State.h">
+      <Filter>Src\project</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\tepch.h">
+      <Filter>Src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp">
+      <Filter>External\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp">
+      <Filter>External\ImGui\backends</Filter>
+    </ClCompile>
     <ClCompile Include="Src\External\Math\CMatrix4x4.cpp">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClCompile>
     <ClCompile Include="Src\External\Math\CVector2.cpp">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClCompile>
     <ClCompile Include="Src\External\Math\CVector3.cpp">
-      <Filter>External\Math</Filter>
+      <Filter>Src\External\Math</Filter>
     </ClCompile>
     <ClCompile Include="Src\External\Utility\GraphicsHelpers.cpp">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Src\External\Utility\Input.cpp">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Src\External\Utility\Timer.cpp">
-      <Filter>External\Utility</Filter>
+      <Filter>Src\External\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Camera.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Camera.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Direct3DSetup.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Direct3DSetup.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Main.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Main.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Mesh.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Mesh.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Model.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Model.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Scene.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Scene.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\Shader.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\Shader.cpp">
+      <Filter>Src\project</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ProcGen\State.cpp">
-      <Filter>ProcGen</Filter>
+    <ClCompile Include="Src\project\State.cpp">
+      <Filter>Src\project</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\tepch.cpp">
+      <Filter>Src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\LightModel_ps.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\PixelLighting_ps.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\PixelLighting_vs.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\Skinning_vs.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Src\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

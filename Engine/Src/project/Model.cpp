@@ -4,10 +4,12 @@
 // Holds a pointer to a mesh as well as position, rotation and scaling, which are converted to a world matrix when required
 // This is more of a convenience class, the Mesh class does most of the difficult work.
 
+#include "tepch.h"
 #include "Model.h"
 
+
 #include "Common.h"
-#include "Src/External/Utility/GraphicsHelpers.h"
+#include "External/Utility/GraphicsHelpers.h"
 #include "Mesh.h"
 
 

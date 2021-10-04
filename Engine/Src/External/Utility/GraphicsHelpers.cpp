@@ -2,10 +2,12 @@
 // Helper functions to unclutter and simplify code elsewhere
 //--------------------------------------------------------------------------------------
 
+#include "tepch.h"
 #include "GraphicsHelpers.h"
 
-#include "Src/ProcGen/Shader.h"
-#include "Src/ProcGen/Common.h"
+
+#include "project/Shader.h"
+#include "project/Common.h"
 #include <windows.h>
 
 #include <WICTextureLoader.h>

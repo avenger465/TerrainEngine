@@ -4,10 +4,10 @@
 // Holds position, rotation, near/far clip and field of view. These to a view and projection matrices as required
 
 #include "Common.h"
-#include "Src/External/Math/CVector3.h"
-#include "Src/External/Math/CMatrix4x4.h"
-#include "Src/External/Math/MathHelpers.h"
-#include "Src/External/Utility/Input.h"
+#include "External/Math/CVector3.h"
+#include "External/Math/CMatrix4x4.h"
+#include "External/Math/MathHelpers.h"
+#include "External/Utility/Input.h"
 
 #ifndef _CAMERA_H_INCLUDED_
 #define _CAMERA_H_INCLUDED_

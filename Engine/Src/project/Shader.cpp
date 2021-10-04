@@ -3,7 +3,9 @@
 // Creation of constant buffers to help send C++ values to shaders each frame
 //--------------------------------------------------------------------------------------
 
+#include "tepch.h"
 #include "Shader.h"
+
 #include <fstream>
 #include <vector>
 #include <d3dcompiler.h>

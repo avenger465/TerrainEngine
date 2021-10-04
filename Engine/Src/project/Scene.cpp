@@ -2,6 +2,7 @@
 // Scene geometry and layout preparation
 // Scene rendering & update
 //--------------------------------------------------------------------------------------
+#include "tepch.h"
 
 #include "Scene.h"
 #include "Mesh.h"
@@ -405,17 +406,17 @@ void RenderScene()
 
   //ImGui::ShowDemoWindow();
 
-    if (!ImGui::Begin("Controls", 0, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::End();
-        return;
-    }
-    //ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+    //if (!ImGui::Begin("Controls", 0, ImGuiWindowFlags_AlwaysAutoResize))
+    //{
+    //    ImGui::End();
+    //    return;
+    //}
+    ////ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
-    ImGui::Text("dear imgui says hello.");
-    ImGui::Spacing();
+    //ImGui::Text("dear imgui says hello.");
+    //ImGui::Spacing();
 
-    ImGui::End();
+    //ImGui::End();
 
 
     //*******************************

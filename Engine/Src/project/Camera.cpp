@@ -3,7 +3,9 @@
 //--------------------------------------------------------------------------------------
 // Holds position, rotation, near/far clip and field of view. These to a view and projection matrices as required
 
+#include "tepch.h"
 #include "Camera.h"
+
 
 // Control the camera's position and rotation using keys provided
 void Camera::Control(float frameTime, KeyCode turnUp, KeyCode turnDown, KeyCode turnLeft, KeyCode turnRight,

@@ -1,4 +1,4 @@
-workspace "Engine"
+workspace "TerrainEngine"
 	architecture "x64"
 	 
 	configurations
@@ -15,6 +15,7 @@ IncludeDir["ImGuiBackends"] = "Engine/External/ImGui/backends"
 IncludeDir["Assimp"] = "Engine/External/assimp/include"
 IncludeDir["DirectX"] = "Engine/External/DirectXTK"
 
+
 LibDir = {}
 LibDir["assimp"] = "Engine/External/assimp/lib/x64"
 LibDir["DirectXTK"] = "Engine/External/DirectXTK/%{cfg.buildcfg}"
@@ -30,6 +31,9 @@ project "Engine"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "tepch.h"
+	pchsource "Engine/Src/tepch.cpp"
+
 	files
 	{
 		"%{prj.name}/Src/**.cpp",
@@ -44,7 +48,7 @@ project "Engine"
 		
 	includedirs
 	{
-		"%{prj.name}/",
+		"%{prj.name}/Src",
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuiBackends}",

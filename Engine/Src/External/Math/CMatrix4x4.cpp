@@ -2,7 +2,9 @@
 // Matrix4x4 class (cut down version) to hold matrices for 3D
 //--------------------------------------------------------------------------------------
 
+#include "tepch.h"
 #include "CMatrix4x4.h"
+
 
 #include <algorithm>
 

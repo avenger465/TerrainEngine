@@ -2,7 +2,9 @@
 // Initialisation of Direct3D and main resources (textures, shaders etc.)
 //--------------------------------------------------------------------------------------
 
+#include "tepch.h"
 #include "Direct3DSetup.h"
+
 #include "Shader.h"
 #include "Common.h"
 #include <d3d11.h>

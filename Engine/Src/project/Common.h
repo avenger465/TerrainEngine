@@ -9,8 +9,8 @@
 #include <d3d11.h>
 #include <string>
 
-#include "Src/External/Math/CVector3.h"
-#include "Src/External/Math/CMatrix4x4.h"
+#include "External/Math/CVector3.h"
+#include "External/Math/CMatrix4x4.h"
 
 
 //--------------------------------------------------------------------------------------
