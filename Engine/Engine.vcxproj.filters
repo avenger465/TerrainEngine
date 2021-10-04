@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="External">
+      <UniqueIdentifier>{089DB854-F469-1360-1D83-010809AF48EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\Math">
+      <UniqueIdentifier>{E166CA57-4D27-468E-1662-8F0B82E18A6A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\Utility">
+      <UniqueIdentifier>{4BE35487-37DC-73D9-600E-595E4C6653E5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ProcGen">
+      <UniqueIdentifier>{53D6EE23-BFB5-6DBF-C8CD-F895342CD420}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{EFAC8DF2-5B8C-0C8E-64A4-9764D00273EF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\External\Math\CMatrix4x4.h">
+      <Filter>External\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Math\CVector2.h">
+      <Filter>External\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Math\CVector3.h">
+      <Filter>External\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Math\MathHelpers.h">
+      <Filter>External\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Utility\ColourRGBA.h">
+      <Filter>External\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Utility\GraphicsHelpers.h">
+      <Filter>External\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Utility\Input.h">
+      <Filter>External\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\External\Utility\Timer.h">
+      <Filter>External\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Camera.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Common.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Direct3DSetup.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Mesh.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Model.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Scene.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\Shader.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ProcGen\State.h">
+      <Filter>ProcGen</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\External\Math\CMatrix4x4.cpp">
+      <Filter>External\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\External\Math\CVector2.cpp">
+      <Filter>External\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\External\Math\CVector3.cpp">
+      <Filter>External\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\External\Utility\GraphicsHelpers.cpp">
+      <Filter>External\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\External\Utility\Input.cpp">
+      <Filter>External\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\External\Utility\Timer.cpp">
+      <Filter>External\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Camera.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Direct3DSetup.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Main.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Mesh.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Model.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Scene.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\Shader.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ProcGen\State.cpp">
+      <Filter>ProcGen</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\LightModel_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\Skinning_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
