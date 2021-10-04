@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\bin\Debug-windows-x86_64\Engine\Engine.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\BasicTransform_vs.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\LightModel_ps.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\PixelLighting_ps.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\PixelLighting_vs.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\Skinning_vs.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

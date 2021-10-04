@@ -10,16 +10,16 @@
 #include "Camera.h"
 #include "State.h"
 #include "Shader.h"
-#include "../External/Utility/Input.h"
+#include "Utility/Input.h"
 #include "Common.h"
 
-#include "../External/Math/CVector2.h" 
-#include "../External/Math/CVector3.h" 
-#include "../External/Math/CMatrix4x4.h"
-#include "../External/Math/MathHelpers.h"     // Helper functions for maths
-#include "../External/Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
+#include "Math/CVector2.h" 
+#include "Math/CVector3.h" 
+#include "Math/CMatrix4x4.h"
+#include "Math/MathHelpers.h"     // Helper functions for maths
+#include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
-#include "../External/Utility/ColourRGBA.h" 
+#include "Utility/ColourRGBA.h" 
 
 
 #include "imgui.h"
@@ -125,10 +125,10 @@ bool InitGeometry()
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try 
     {
-        gCharacterMesh = new Mesh("Src/Procgen/Man.x");
-        gCrateMesh     = new Mesh("Src/Procgen/CargoContainer.x");
-        gGroundMesh    = new Mesh("Src/Procgen/Hills.x");
-        gLightMesh     = new Mesh("Src/Procgen/Light.x");
+        gCharacterMesh = new Mesh("Src/Data/Man.x");
+        gCrateMesh     = new Mesh("Src/Data/CargoContainer.x");
+        gGroundMesh    = new Mesh("Src/Data/Hills.x");
+        gLightMesh     = new Mesh("Src/Data/Light.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -163,10 +163,10 @@ bool InitGeometry()
     // The LoadTexture function requires you to pass a ID3D11Resource* (e.g. &gCubeDiffuseMap), which manages the GPU memory for the
     // texture and also a ID3D11ShaderResourceView* (e.g. &gCubeDiffuseMapSRV), which allows us to use the texture in shaders
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
-    if (!LoadTexture("Src/ProcGen/ManDiffuseSpecular.dds", &gCharacterDiffuseSpecularMap, &gCharacterDiffuseSpecularMapSRV) ||
-        !LoadTexture("Src/ProcGen/CargoA.dds",               &gCrateDiffuseSpecularMap,     &gCrateDiffuseSpecularMapSRV    ) ||
-        !LoadTexture("Src/ProcGen/GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
-        !LoadTexture("Src/ProcGen/Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
+    if (!LoadTexture("Src/Data/ManDiffuseSpecular.dds", &gCharacterDiffuseSpecularMap, &gCharacterDiffuseSpecularMapSRV) ||
+        !LoadTexture("Src/Data/CargoA.dds",               &gCrateDiffuseSpecularMap,     &gCrateDiffuseSpecularMapSRV    ) ||
+        !LoadTexture("Src/Data/GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
+        !LoadTexture("Media/Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
         gLastError = "Error loading textures";
         return false;

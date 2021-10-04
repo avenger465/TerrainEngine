@@ -105,14 +105,14 @@
   <ItemGroup>
     <ClInclude Include="External\ImGui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h" />
-    <ClInclude Include="Src\External\Math\CMatrix4x4.h" />
-    <ClInclude Include="Src\External\Math\CVector2.h" />
-    <ClInclude Include="Src\External\Math\CVector3.h" />
-    <ClInclude Include="Src\External\Math\MathHelpers.h" />
-    <ClInclude Include="Src\External\Utility\ColourRGBA.h" />
-    <ClInclude Include="Src\External\Utility\GraphicsHelpers.h" />
-    <ClInclude Include="Src\External\Utility\Input.h" />
-    <ClInclude Include="Src\External\Utility\Timer.h" />
+    <ClInclude Include="Src\Math\CMatrix4x4.h" />
+    <ClInclude Include="Src\Math\CVector2.h" />
+    <ClInclude Include="Src\Math\CVector3.h" />
+    <ClInclude Include="Src\Math\MathHelpers.h" />
+    <ClInclude Include="Src\Utility\ColourRGBA.h" />
+    <ClInclude Include="Src\Utility\GraphicsHelpers.h" />
+    <ClInclude Include="Src\Utility\Input.h" />
+    <ClInclude Include="Src\Utility\Timer.h" />
     <ClInclude Include="Src\project\Camera.h" />
     <ClInclude Include="Src\project\Common.h" />
     <ClInclude Include="Src\project\Direct3DSetup.h" />
@@ -126,12 +126,12 @@
   <ItemGroup>
     <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp" />
-    <ClCompile Include="Src\External\Math\CMatrix4x4.cpp" />
-    <ClCompile Include="Src\External\Math\CVector2.cpp" />
-    <ClCompile Include="Src\External\Math\CVector3.cpp" />
-    <ClCompile Include="Src\External\Utility\GraphicsHelpers.cpp" />
-    <ClCompile Include="Src\External\Utility\Input.cpp" />
-    <ClCompile Include="Src\External\Utility\Timer.cpp" />
+    <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
+    <ClCompile Include="Src\Math\CVector2.cpp" />
+    <ClCompile Include="Src\Math\CVector3.cpp" />
+    <ClCompile Include="Src\Utility\GraphicsHelpers.cpp" />
+    <ClCompile Include="Src\Utility\Input.cpp" />
+    <ClCompile Include="Src\Utility\Timer.cpp" />
     <ClCompile Include="Src\project\Camera.cpp" />
     <ClCompile Include="Src\project\Direct3DSetup.cpp" />
     <ClCompile Include="Src\project\Main.cpp" />

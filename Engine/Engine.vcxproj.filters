@@ -13,17 +13,14 @@
     <Filter Include="Src">
       <UniqueIdentifier>{0D23880B-792C-887C-02A8-9E7C6EB0937C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Src\External">
-      <UniqueIdentifier>{DFF3C666-CB56-560B-74DC-8EC1601E228E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Src\External\Math">
-      <UniqueIdentifier>{189CC373-84B2-C109-CD29-4D2B397F9291}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Src\External\Utility">
-      <UniqueIdentifier>{2221DC69-0EB0-6533-B7CE-792EA33C76D9}</UniqueIdentifier>
+    <Filter Include="Src\Math">
+      <UniqueIdentifier>{0678E746-F244-4252-1B5E-30FA078A77E0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Src\Shaders">
       <UniqueIdentifier>{E6043150-52BA-A945-DBAE-A31C4763A049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Utility">
+      <UniqueIdentifier>{509EB806-BC53-31FC-4548-2BD3B1FC2700}</UniqueIdentifier>
     </Filter>
     <Filter Include="Src\project">
       <UniqueIdentifier>{731CDE20-DFD1-5616-68C6-50EDD47A4D1A}</UniqueIdentifier>
@@ -36,29 +33,29 @@
     <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h">
       <Filter>External\ImGui\backends</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Math\CMatrix4x4.h">
-      <Filter>Src\External\Math</Filter>
+    <ClInclude Include="Src\Math\CMatrix4x4.h">
+      <Filter>Src\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Math\CVector2.h">
-      <Filter>Src\External\Math</Filter>
+    <ClInclude Include="Src\Math\CVector2.h">
+      <Filter>Src\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Math\CVector3.h">
-      <Filter>Src\External\Math</Filter>
+    <ClInclude Include="Src\Math\CVector3.h">
+      <Filter>Src\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Math\MathHelpers.h">
-      <Filter>Src\External\Math</Filter>
+    <ClInclude Include="Src\Math\MathHelpers.h">
+      <Filter>Src\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Utility\ColourRGBA.h">
-      <Filter>Src\External\Utility</Filter>
+    <ClInclude Include="Src\Utility\ColourRGBA.h">
+      <Filter>Src\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Utility\GraphicsHelpers.h">
-      <Filter>Src\External\Utility</Filter>
+    <ClInclude Include="Src\Utility\GraphicsHelpers.h">
+      <Filter>Src\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Utility\Input.h">
-      <Filter>Src\External\Utility</Filter>
+    <ClInclude Include="Src\Utility\Input.h">
+      <Filter>Src\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\External\Utility\Timer.h">
-      <Filter>Src\External\Utility</Filter>
+    <ClInclude Include="Src\Utility\Timer.h">
+      <Filter>Src\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Src\project\Camera.h">
       <Filter>Src\project</Filter>
@@ -95,23 +92,23 @@
     <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp">
       <Filter>External\ImGui\backends</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Math\CMatrix4x4.cpp">
-      <Filter>Src\External\Math</Filter>
+    <ClCompile Include="Src\Math\CMatrix4x4.cpp">
+      <Filter>Src\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Math\CVector2.cpp">
-      <Filter>Src\External\Math</Filter>
+    <ClCompile Include="Src\Math\CVector2.cpp">
+      <Filter>Src\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Math\CVector3.cpp">
-      <Filter>Src\External\Math</Filter>
+    <ClCompile Include="Src\Math\CVector3.cpp">
+      <Filter>Src\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Utility\GraphicsHelpers.cpp">
-      <Filter>Src\External\Utility</Filter>
+    <ClCompile Include="Src\Utility\GraphicsHelpers.cpp">
+      <Filter>Src\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Utility\Input.cpp">
-      <Filter>Src\External\Utility</Filter>
+    <ClCompile Include="Src\Utility\Input.cpp">
+      <Filter>Src\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Src\External\Utility\Timer.cpp">
-      <Filter>Src\External\Utility</Filter>
+    <ClCompile Include="Src\Utility\Timer.cpp">
+      <Filter>Src\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\Camera.cpp">
       <Filter>Src\project</Filter>

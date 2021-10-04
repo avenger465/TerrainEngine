@@ -8,9 +8,9 @@
 #include "tepch.h"
 #include "Mesh.h"
 #include "Shader.h" // Needed for helper function CreateSignatureForVertexLayout
-#include "../External/Math/CVector2.h" 
-#include "../External/Math/CVector3.h" 
-#include "../External/Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
+#include "Math/CVector2.h" 
+#include "Math/CVector3.h" 
+#include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
 
 

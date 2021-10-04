@@ -5,9 +5,9 @@
 // This is more of a convenience class, the Mesh class does most of the difficult work.
 
 #include "Common.h"
-#include "External/Math/CVector3.h"
-#include "External/Math/CMatrix4x4.h"
-#include "External/Utility/Input.h"
+#include "Math/CVector3.h"
+#include "Math/CMatrix4x4.h"
+#include "Utility/Input.h"
 
 #include <vector>
 

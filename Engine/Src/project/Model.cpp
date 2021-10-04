@@ -9,7 +9,7 @@
 
 
 #include "Common.h"
-#include "External/Utility/GraphicsHelpers.h"
+#include "Utility/GraphicsHelpers.h"
 #include "Mesh.h"
 
 
