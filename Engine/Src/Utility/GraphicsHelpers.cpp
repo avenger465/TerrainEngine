@@ -8,13 +8,9 @@
 
 #include "project/Shader.h"
 #include "project/Common.h"
-#include <windows.h>
 
 #include <WICTextureLoader.h>
 #include <DDSTextureLoader.h>
-#include <cmath>
-#include <cctype>
-#include <atlbase.h> // C-string to unicode conversion function CA2CT
 
 //--------------------------------------------------------------------------------------
 // Texture Loading

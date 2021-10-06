@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>D:\Users\JMills14\Documents\GitHub\TerrainEngine\bin\Debug-windows-x86_64\Engine\Engine.exe</ProjectOutputs>
+  <ContentFiles>D:\Users\JMills14\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\BasicTransform_vs.cso;D:\Users\JMills14\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\LightModel_ps.cso;D:\Users\JMills14\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\PixelLighting_ps.cso;D:\Users\JMills14\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\PixelLighting_vs.cso;D:\Users\JMills14\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\Skinning_vs.cso</ContentFiles>
+  <SatelliteDlls></SatelliteDlls>
+  <NonRecipeFileRefs></NonRecipeFileRefs>
+</Project>

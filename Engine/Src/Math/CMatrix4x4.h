@@ -7,8 +7,6 @@
 #define _CMATRIX4X4_H_DEFINED_
 
 #include "CVector3.h"
-#include <cmath>
-
 
 // Matrix class
 class CMatrix4x4

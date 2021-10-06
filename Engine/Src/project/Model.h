@@ -9,8 +9,6 @@
 #include "Math/CMatrix4x4.h"
 #include "Utility/Input.h"
 
-#include <vector>
-
 #ifndef _MODEL_H_INCLUDED_
 #define _MODEL_H_INCLUDED_
 

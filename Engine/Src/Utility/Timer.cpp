@@ -5,7 +5,7 @@
 #include "tepch.h"
 #include "Timer.h"
 
-#include <Windows.h>
+
 
 // Constructor //
 

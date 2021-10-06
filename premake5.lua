@@ -17,7 +17,7 @@ IncludeDir["DirectX"] = "Engine/External/DirectXTK"
 
 
 LibDir = {}
-LibDir["assimp"] = "Engine/External/assimp/lib/x64"
+LibDir["assimp"] = "Engine/External/assimp/lib/xSixtyFour"
 LibDir["DirectXTK"] = "Engine/External/DirectXTK/%{cfg.buildcfg}"
 
 include "Engine/External/ImGui"

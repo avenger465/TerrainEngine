@@ -5,9 +5,6 @@
 #define _COMMON_H_INCLUDED_
 
 #define NOMINMAX
-#include <windows.h>
-#include <d3d11.h>
-#include <string>
 
 #include "Math/CVector3.h"
 #include "Math/CMatrix4x4.h"

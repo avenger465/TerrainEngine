@@ -26,9 +26,6 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
-#include <sstream>
-#include <memory>
-
 
 //--------------------------------------------------------------------------------------
 // Scene Data
@@ -406,17 +403,17 @@ void RenderScene()
 
   //ImGui::ShowDemoWindow();
 
-    //if (!ImGui::Begin("Controls", 0, ImGuiWindowFlags_AlwaysAutoResize))
-    //{
-    //    ImGui::End();
-    //    return;
-    //}
-    ////ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+    if (!ImGui::Begin("Controls", 0, ImGuiWindowFlags_NoCollapse))
+    {
+        ImGui::End();
+        return;
+    }
+    //ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
-    //ImGui::Text("dear imgui says hello.");
-    //ImGui::Spacing();
+    ImGui::Text("dear imgui says hello.");
+    ImGui::Separator();
 
-    //ImGui::End();
+    ImGui::End();
 
 
     //*******************************

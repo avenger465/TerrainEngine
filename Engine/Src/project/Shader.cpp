@@ -6,9 +6,6 @@
 #include "tepch.h"
 #include "Shader.h"
 
-#include <fstream>
-#include <vector>
-#include <d3dcompiler.h>
 
 //--------------------------------------------------------------------------------------
 // Global Variables

@@ -7,10 +7,6 @@
 
 #include "common.h"
 
-#include <assimp/scene.h>
-
-#include <string>
-#include <vector>
 
 #ifndef _MESH_H_INCLUDED_
 #define _MESH_H_INCLUDED_
