@@ -70,6 +70,12 @@ project "Engine"
 		"d3dcompiler.lib",
 		"winmm.lib"
 	}
+	
+	files("Engine/External/ImGui/backends/imgui_impl_win32.cpp")
+	flags("NoPCH")
+
+	files("Engine/External/ImGui/backends/imgui_impl_dx11.cpp")
+	flags("NoPCH")
 
 	files("Engine/Src/Shaders/*.hlsl")
 	shadermodel("5.0")
@@ -88,6 +94,8 @@ project "Engine"
 		--removeflags("ExcludeFromBuild")
 		shadertype("Vertex")
 		shaderoptions({"/WX"})
+
+	
 
 	filter "system:windows"
 		cppdialect "C++17"
