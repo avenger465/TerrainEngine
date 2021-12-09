@@ -74,6 +74,9 @@ struct PerFrameConstants
 
     CVector3   cameraPosition;
     float      padding5;
+
+    bool       enableLights;
+    CVector3   padding6;
 };
 
 extern PerFrameConstants gPerFrameConstants;      // This variable holds the CPU-side constant buffer described above
@@ -89,7 +92,7 @@ struct PerModelConstants
 {
     CMatrix4x4 worldMatrix;
     CVector3   objectColour; // Allows each light model to be tinted to match the light colour they cast
-    float      padding6;
+    float      padding7;
     CMatrix4x4 boneMatrices[/*** MISSING - fill in this array size - easy. Relates to another MISSING*/];
 };
 extern PerModelConstants gPerModelConstants;      // This variable holds the CPU-side constant buffer described above

@@ -23,6 +23,8 @@ public:
 
     Model(Mesh* mesh, CVector3 position = { 0,0,0 }, CVector3 rotation = { 0,0,0 }, float scale = 1);
 
+    //Model::Model(TerrainMesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*= { 0,0,0 }*/, float scale /*= 1*/);
+
 
     // The render function simply passes this model's matrices over to Mesh:Render.
     // All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
@@ -72,6 +74,26 @@ public:
 	void SetScale(float scale)  { SetScale({ scale, scale, scale });}
 
     void SetWorldMatrix(CMatrix4x4 matrix, int node = 0)  { mWorldMatrices[node] = matrix; }
+
+    //----------------//
+    //    New Code    //
+    //----------------//
+
+    void SetStates(ID3D11BlendState* BlendState, ID3D11DepthStencilState* DepthStencilState, ID3D11RasterizerState* Rasterizerstate);
+
+    void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture);
+
+    //Function overloading for the different scenarios of setting the shaders
+    void Setup(ID3D11VertexShader* VertexShader);
+    void Setup(ID3D11PixelShader* PixelShader);
+    void Setup(ID3D11VertexShader* VertexShader, ID3D11PixelShader* PixelShader);
+
+
+    void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
+
+
+
+
 
 
 	//-------------------------------------

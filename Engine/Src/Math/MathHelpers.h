@@ -2,6 +2,8 @@
 // Math convenience functions
 //--------------------------------------------------------------------------------------
 
+#include "tepch.h"
+
 #ifndef _MATH_HELPERS_H_DEFINED_
 #define _MATH_HELPERS_H_DEFINED_
 

@@ -36,8 +36,6 @@ void UpdateConstantBuffer(ID3D11Buffer* buffer, const T& bufferData)
 // This function requires you to pass a ID3D11Resource* (e.g. &gTilesDiffuseMap), which manages the GPU memory for the
 // texture and also a ID3D11ShaderResourceView* (e.g. &gTilesDiffuseMapSRV), which allows us to use the texture in shaders
 // The function will fill in these pointers with usable data. Returns false on failure
-bool LoadTexture(std::string filename, ID3D11Resource** texture, ID3D11ShaderResourceView** textureSRV);
-
 
 //--------------------------------------------------------------------------------------
 // Camera helpers

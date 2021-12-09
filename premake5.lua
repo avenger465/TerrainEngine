@@ -41,7 +41,8 @@ project "Engine"
 		"%{prj.name}/External/ImGui/backends/imgui_impl_dx11.h",
 		"%{prj.name}/External/ImGui/backends/imgui_impl_dx11.cpp",
 		"%{prj.name}/External/ImGui/backends/imgui_impl_win32.h",
-		"%{prj.name}/External/ImGui/backends/imgui_impl_win32.cpp"
+		"%{prj.name}/External/ImGui/backends/imgui_impl_win32.cpp",
+		"%{prj.name}/Src/Shaders/Common.hlsli"
 
 	}
 

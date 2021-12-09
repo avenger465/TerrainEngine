@@ -91,6 +91,9 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
 
     float3   gCameraPosition;
     float    padding5;
+    
+    bool     gEnableLights;
+    float3   padding6;
 }
 // Note constant buffers are not structs: we don't use the name of the constant buffer, these are really just a collection of global variables (hence the 'g')
 
@@ -107,7 +110,7 @@ cbuffer PerModelConstants : register(b1) // The b1 gives this constant buffer th
     float4x4 gWorldMatrix;
 
     float3   gObjectColour;
-    float    padding6;  // See notes on padding in structure above
+    float    padding7;  // See notes on padding in structure above
 
     float4x4 gBoneMatrices[MAX_BONES];
 }

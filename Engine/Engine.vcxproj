@@ -107,10 +107,12 @@
     <ClInclude Include="Src\Math\CVector2.h" />
     <ClInclude Include="Src\Math\CVector3.h" />
     <ClInclude Include="Src\Math\MathHelpers.h" />
+    <ClInclude Include="Src\Utility\CResourceManager.h" />
     <ClInclude Include="Src\Utility\ColourRGBA.h" />
     <ClInclude Include="Src\Utility\GraphicsHelpers.h" />
     <ClInclude Include="Src\Utility\Input.h" />
     <ClInclude Include="Src\Utility\Timer.h" />
+    <ClInclude Include="Src\project\CLight.h" />
     <ClInclude Include="Src\project\Camera.h" />
     <ClInclude Include="Src\project\Common.h" />
     <ClInclude Include="Src\project\Direct3DSetup.h" />
@@ -127,9 +129,11 @@
     <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
     <ClCompile Include="Src\Math\CVector2.cpp" />
     <ClCompile Include="Src\Math\CVector3.cpp" />
+    <ClCompile Include="Src\Utility\CResourceManager.cpp" />
     <ClCompile Include="Src\Utility\GraphicsHelpers.cpp" />
     <ClCompile Include="Src\Utility\Input.cpp" />
     <ClCompile Include="Src\Utility\Timer.cpp" />
+    <ClCompile Include="Src\project\CLight.cpp" />
     <ClCompile Include="Src\project\Camera.cpp" />
     <ClCompile Include="Src\project\Direct3DSetup.cpp" />
     <ClCompile Include="Src\project\Main.cpp" />
@@ -164,6 +168,9 @@
       <ObjectFileOutput>Src/Shaders/Skinning_vs.cso</ObjectFileOutput>
       <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Shaders\Common.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="External\ImGui\ImGui.vcxproj">
