@@ -48,6 +48,8 @@ struct LightingPixelShaderInput
                                             // automatically by the GPU (rasterizer stage) so each pixel will know
                                             // its position and normal in the world - required for lighting equations
     
+    float3 normal : normal;
+    
     float2 uv : uv; // UVs are texture coordinates. The artist specifies for every vertex which point on the texture is "pinned" to that vertex.
 };
 

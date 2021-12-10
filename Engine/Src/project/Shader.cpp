@@ -42,7 +42,7 @@ bool LoadShaders()
     gLightModelPixelShader      = LoadPixelShader ("Src/Shaders/LightModel_ps");
 
     gTerrainVertexShader = LoadVertexShader("Src/Shaders/PixelLighting_vs");
-    gTerrainPixelShader = LoadPixelShader("Src/Shaders/PixelLighting_ps");
+    gTerrainPixelShader = LoadPixelShader("Src/Shaders/TerrainShader_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader    == nullptr ||

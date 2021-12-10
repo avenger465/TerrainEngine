@@ -23,6 +23,7 @@ extern ID3D11PixelShader*  gLightModelPixelShader;
 extern ID3D11VertexShader* gTerrainVertexShader;
 extern ID3D11PixelShader* gTerrainPixelShader;
 
+
 //--------------------------------------------------------------------------------------
 // Shader creation / destruction
 //--------------------------------------------------------------------------------------

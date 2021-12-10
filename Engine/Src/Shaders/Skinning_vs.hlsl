@@ -21,6 +21,7 @@ LightingPixelShaderInput main(SkinningVertex modelVertex)
     // Add 4th element to vertex position and normal (1 for positions, 0 for vectors)
     float4 modelPosition = float4(modelVertex.position, 1); 
     float4 modelNormal   = float4(modelVertex.normal,   0);
+    output.normal = modelVertex.normal;
 
     float4 worldPosition;
 	worldPosition  = mul( gBoneMatrices[modelVertex.bones[0]], modelPosition ) * modelVertex.weights[0];

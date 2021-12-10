@@ -21,7 +21,7 @@ SamplerState TexSampler      : register(s0); // A sampler is a filter for a text
 //--------------------------------------------------------------------------------------
 // Shader code
 //--------------------------------------------------------------------------------------
-
+    
 // Pixel shader entry point - each shader has a "main" function
 // This shader just samples a diffuse texture map
 float4 main(LightingPixelShaderInput input) : SV_Target
@@ -69,8 +69,9 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 diffuseMaterialColour = textureColour.rgb; // Diffuse material colour in texture RGB (base colour of model)
     float specularMaterialColour = textureColour.a;   // Specular material colour in texture A (shininess of the surface)
 
-    float3 finalColour = { 0.1f, 0.1f, 0.1f };
+    float3 finalColour = { 0.5f, 0.5f, 0.5f };
     // Combine lighting with texture colours
+    
     if(gEnableLights)
     {
         finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;

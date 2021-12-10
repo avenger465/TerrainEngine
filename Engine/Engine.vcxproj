@@ -168,6 +168,10 @@
       <ObjectFileOutput>Src/Shaders/Skinning_vs.cso</ObjectFileOutput>
       <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
+    <FxCompile Include="Src\Shaders\TerrainShader_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/TerrainShader_ps.cso</ObjectFileOutput>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shaders\Common.hlsli" />

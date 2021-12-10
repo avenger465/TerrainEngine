@@ -21,6 +21,9 @@
     <ContentFile>
       <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\Skinning_vs.cso</FullPath>
     </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\TerrainShader_ps.cso</FullPath>
+    </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />

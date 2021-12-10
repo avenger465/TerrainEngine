@@ -55,6 +55,9 @@ bool enableTerrain = true;
 bool enableLights = true;
 bool enableObjects = true;
 
+float frequency = 0.12;
+int amplitude = 10;
+
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 2;
 CLight* gLights[NUM_LIGHTS];
@@ -121,19 +124,9 @@ bool InitGeometry()
         return false;
     }
 
-    //m_Terrain      = new TerrainMesh(gD3DDevice, gD3DContext);
+    //m_Terrain = new TerrainMesh(gD3DDevice, gD3DContext);
     //shader = new LightShader(gD3DDevice, gHWnd);
-    //textureMgr->loadTexture(L"grass", L"Media/Grass.png");
-    //textureMgr->loadTexture(L"rock", L"Media/rock.png");
-    //textureMgr->loadTexture(L"dirt", L"Media/dirtColour.jpg");
-    //textureMgr->loadTexture(L"red", L"Media/redColour.jpg");
-    //textureMgr->loadTexture(L"black", L"Media/blackColour.jpg");
-    //textureMgr->loadTexture(L"white", L"Media/whiteColour.png");
-    //textureMgr->loadTexture(L"blue", L"Media/blueColour.jpg");
-    //textureMgr->loadTexture(L"water", L"Media/water.jpg");
-    //textureMgr->loadTexture(L"sand", L"Media/sand.jpg");
-    // 
-    // 
+
     //terrainResolution = m_Terrain->GetResolution();
     //m_Terrain->sendData(gD3DContext);
     //shader->setShaderParameters(gD3DContext, textureMgr->getTexture(L"grass"),textureMgr->getTexture(L"rock"), textureMgr->getTexture(L"dirt"), textureMgr->getTexture(L"sand"), 0.0f, false);
@@ -165,9 +158,12 @@ bool InitGeometry()
     //  LOADING OF TEXTURES  //
     //-----------------------//
     resourceManager->loadTexture(L"Cargo", L"Src/Data/CargoA.dds");
-    resourceManager->loadTexture(L"Grass", L"Src/Data/GrassDiffuseSpecular.dds");
+    //resourceManager->loadTexture(L"Grass", L"Src/Data/GrassDiffuseSpecular.dds");
     resourceManager->loadTexture(L"Light", L"Media/Flare.jpg");
     resourceManager->loadTexture(L"Character", L"Src/Data/ManDiffuseSpecular.dds");
+    resourceManager->loadTexture(L"Grass", L"Media/Grass2.jpg");
+    resourceManager->loadTexture(L"Rock", L"Media/rock.png");
+    resourceManager->loadTexture(L"Dirt", L"Media/dirtColour.jpg");
 
   	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
 	if (!CreateStates())
@@ -287,13 +283,13 @@ void RenderSceneFromCamera(Camera* camera)
 
     if (enableTerrain)
     {
-        gGround->Setup(gPixelLightingVertexShader, gPixelLightingPixelShader);
+        gGround->Setup(gPixelLightingVertexShader, gTerrainPixelShader);
         gGround->SetStates(gNoBlendingState, gUseDepthBufferState, gCullBackState);
         gGround->SetShaderResources(0, resourceManager->getTexture(L"Grass"));
+        gGround->SetShaderResources(1, resourceManager->getTexture(L"Rock"));
+        gGround->SetShaderResources(2, resourceManager->getTexture(L"Dirt"));
         gGround->Render();
     }
-
-
 
     //// Render lights ////
     if (enableLights)
@@ -374,32 +370,42 @@ void RenderScene()
     // Render the scene from the main camera
     RenderSceneFromCamera(gCamera);
 
-    //if (!ImGui::Begin("Controls", 0, ImGuiWindowFlags_NoResize))
-    //{
-    //    ImGui::End();
-    //    return;
-    //}
-    //ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-
-    //ImGui::Text("FPS: %.2f", FPS);
-    //ImGui::Separator();
-    static float f = 0.0f;
-    CVector3 clear_color = { 0.45f, 0.55f, 0.6f };
-    static int counter = 0;
-    bool p = false;
-
     ImGui::Begin("Controls");
 
     ImGui::Checkbox("Render Terrain", &enableTerrain);
+    if (enableTerrain)
+    {
+        ImGui::Separator();
+        ImGui::Text("");
+        ImGui::Button("Perlin");
+        ImGui::Text("");
+        ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01, 0.5);
+        ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
+        ImGui::Text("");
+        ImGui::Button("Midpoint Displacement");
+        ImGui::Text("");
+        ImGui::Separator();
+    }
+
     ImGui::Checkbox("Render Lights", &enableLights);
+    if (enableLights)
+    {
+        ImGui::Separator();
+        ImGui::Text("");
+        ImGui::ColorEdit3("Light One Colour", &gLights[0]->LightColour.x);
+        ImGui::ColorEdit3("Light Two Colour", &gLights[1]->LightColour.x);
+        ImGui::Text("");
+        ImGui::SliderFloat("Light One Scale", &gLights[0]->LightStrength, 1.0f, 90.0f);
+        ImGui::SliderFloat("Light Two Scale", &gLights[1]->LightStrength, 1.0f, 90.0f);
+        ImGui::Text("");
+        ImGui::Separator();
+    }
     ImGui::Checkbox("Render Objects", &enableObjects);
 
 
     ImGui::End();
 
-
     //*******************************
-
 
     //// Scene completion ////
 
