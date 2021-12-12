@@ -15,7 +15,7 @@ void CResourceManager::loadTexture(const wchar_t* uniqueID, const wchar_t* filen
 	// Check whether the filename that was given is a valid path
 	if (!filename)
 	{
-		filename = L"../Media/DefaultDiffuse.png";
+		filename = L"../Media/tiles1.jpg";
 	}
 
 	// Set the texture to the default one if this filename is not valid
@@ -23,7 +23,7 @@ void CResourceManager::loadTexture(const wchar_t* uniqueID, const wchar_t* filen
 	{
 		// Set the texture to the default on to make it easier
 		// to see which texture did not load correctly
-		filename = L"../Media/DefaultDiffuse.png";
+		filename = L"../Media/tiles1.jpg";
 	}
 
 	// check file extension for correct loading function.

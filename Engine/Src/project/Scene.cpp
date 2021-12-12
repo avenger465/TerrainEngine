@@ -15,6 +15,7 @@
 #include "../Utility/CResourceManager.h"
 #include "CLight.h"
 
+#include <fstream>
 
 #include "Math/CVector2.h" 
 #include "Math/CVector3.h" 
@@ -23,6 +24,7 @@
 #include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
 #include "Utility/ColourRGBA.h" 
+#include "../CPerlinNoise.h"
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -43,7 +45,6 @@ int terrainResolution = 128;
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
 
 Model* gCharacter;
-Model* gCrate;
 Model* gGround;
 
 CResourceManager* resourceManager;
@@ -51,9 +52,8 @@ Camera* gCamera;
 
 std::ostringstream frameTimeMs;
 
-bool enableTerrain = true;
-bool enableLights = true;
-bool enableObjects = true;
+bool enableTerrain = false;
+bool enableLights = false;
 
 float frequency = 0.12;
 int amplitude = 10;
@@ -62,7 +62,7 @@ int amplitude = 10;
 const int NUM_LIGHTS = 2;
 CLight* gLights[NUM_LIGHTS];
 
-float LightScale[NUM_LIGHTS] = {10.0f, 40.0f};
+float LightScale[NUM_LIGHTS] = {10.0f, 30.0f};
 
 CVector3 LightsColour[NUM_LIGHTS] = { {1.0f, 0.8f, 1.0f},
                                       {1.0f, 0.8f, 0.2f} };
@@ -98,6 +98,37 @@ ID3D11Buffer*     gPerFrameConstantBuffer; // The GPU buffer that will recieve t
 PerModelConstants gPerModelConstants;      // As above, but constant that change per-model (e.g. world matrix)
 ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 
+int resolution = 128;
+float* heightMap = new float[resolution * resolution];
+
+void BuildHeightMap()
+{
+    float height = 0.0f;
+
+    for (int i = 0; i < (resolution); ++i) {
+        for (int j = 0; j < (resolution); ++j) {
+            height = 1;
+            heightMap[(i * resolution) + j] = height;
+        }
+    }
+}
+
+void BuildPerlinHeightMap(int Amplitude, float frequency)
+{
+    BuildHeightMap();
+    const float scale = 100.0f / (float(resolution));
+
+    for (int i = 0; i < (resolution); ++i)
+    {
+        for (int j = 0; j < (resolution); ++j)
+        {
+            float test[2] = { (float)j * frequency * scale, (float)i * frequency * scale };
+
+            heightMap[(j * resolution) + i] += CPerlinNoise::noise2(test) * Amplitude;
+        }
+    }
+}
+
 //--------------------------------------------------------------------------------------
 // Initialise scene geometry, constant buffers and states
 //--------------------------------------------------------------------------------------
@@ -108,7 +139,7 @@ bool InitGeometry()
 {
     // Initialise texture manager with the default texture
     resourceManager = new CResourceManager(gD3DDevice, gD3DContext);
-    resourceManager->loadTexture(L"default", L"Media/DefaultDiffuse.png");
+    resourceManager->loadTexture(L"default", L"Media/tiles1.jpg");
 
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try 
@@ -126,7 +157,6 @@ bool InitGeometry()
 
     //m_Terrain = new TerrainMesh(gD3DDevice, gD3DContext);
     //shader = new LightShader(gD3DDevice, gHWnd);
-
     //terrainResolution = m_Terrain->GetResolution();
     //m_Terrain->sendData(gD3DContext);
     //shader->setShaderParameters(gD3DContext, textureMgr->getTexture(L"grass"),textureMgr->getTexture(L"rock"), textureMgr->getTexture(L"dirt"), textureMgr->getTexture(L"sand"), 0.0f, false);
@@ -134,7 +164,6 @@ bool InitGeometry()
     //delete m_Terrain; m_Terrain = nullptr;
     //TerrainMesh* m_Terrain;
     //LightShader* shader;
-    //TextureManager* textureMgr;
 
     // Load the shaders required for the geometry we will use (see Shader.cpp / .h)
     if (!LoadShaders())
@@ -154,17 +183,24 @@ bool InitGeometry()
         return false;
     }
 
+
     //-----------------------//
     //  LOADING OF TEXTURES  //
     //-----------------------//
-    resourceManager->loadTexture(L"Cargo", L"Src/Data/CargoA.dds");
-    //resourceManager->loadTexture(L"Grass", L"Src/Data/GrassDiffuseSpecular.dds");
-    resourceManager->loadTexture(L"Light", L"Media/Flare.jpg");
-    resourceManager->loadTexture(L"Character", L"Src/Data/ManDiffuseSpecular.dds");
-    resourceManager->loadTexture(L"Grass", L"Media/Grass2.jpg");
-    resourceManager->loadTexture(L"Rock", L"Media/rock.png");
-    resourceManager->loadTexture(L"Dirt", L"Media/dirtColour.jpg");
 
+    try
+    {
+        resourceManager->loadTexture(L"Light", L"Media/Flare.jpg");
+        resourceManager->loadTexture(L"Grass", L"Media/Grass2.jpg");
+        resourceManager->loadTexture(L"Rock", L"Media/rock1.png");
+        resourceManager->loadTexture(L"Dirt", L"Media/Dirt2.png");
+    }
+    catch (std::runtime_error e)
+    {
+        gLastError = e.what();
+        return false;
+    }
+    
   	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
 	if (!CreateStates())
 	{
@@ -182,17 +218,7 @@ bool InitScene()
     //// Set up scene ////
 
     gCharacter = new Model(resourceManager->getMesh(L"ManMesh"));
-    gCrate     = new Model(resourceManager->getMesh(L"CrateMesh"));
     gGround = new Model(resourceManager->getMesh(L"GroundMesh"));
-
-
-	// Initial positions
-	gCharacter->SetPosition({ 25, 1, 10 });
-    gCharacter->SetScale(1.0f);
-    gCharacter->SetRotation({ 0.0f, ToRadians(140.0f), 0.0f });
-	gCrate-> SetPosition({ 45, 0, 45 });
-	gCrate-> SetScale( 6.0f );
-	gCrate-> SetRotation({ 0.0f, ToRadians(-50.0f), 0.0f });
 
 
     // Light set-up - using an array this time
@@ -204,8 +230,8 @@ bool InitScene()
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 25, 12,-10 });
-    gCamera->SetRotation({ ToRadians(13.0f), ToRadians(15.0f), 0.0f });
+    gCamera->SetPosition({ 0, 270, -500 });
+    gCamera->SetRotation({ ToRadians(28.6f), 0.0f, 0.0f });
 
     return true;
 }
@@ -228,8 +254,6 @@ void ReleaseResources()
     }
     delete gCamera;     gCamera    = nullptr;
     delete gGround;     gGround    = nullptr;
-    delete gCrate;      gCrate     = nullptr;
-    delete gCharacter;  gCharacter = nullptr;
 }
 
 
@@ -255,32 +279,11 @@ void RenderSceneFromCamera(Camera* camera)
     //// Render skinned models ////
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
-    if (enableObjects)
-    {
-        // Select which shaders to use next
-        gCharacter->Setup(gSkinningVertexShader, gPixelLightingPixelShader);
-
-        // States - no blending, normal depth buffer and culling
-        gCharacter->SetStates(gNoBlendingState, gUseDepthBufferState, gCullBackState);
-
-        // Select the approriate textures and sampler to use in the pixel shader
-        gCharacter->SetShaderResources(0, resourceManager->getTexture(L"Character"));
-
-        gCharacter->Render();
-
-        gCrate->Setup(gPixelLightingVertexShader);
-        gCrate->SetShaderResources(0, resourceManager->getTexture(L"Cargo"));
-        gCrate->Render();
-    }
-
 
     //// Render non-skinned models ////
-
     // Select which shaders to use next
-
     // Render lit models, only change textures for each onee
     
-
     if (enableTerrain)
     {
         gGround->Setup(gPixelLightingVertexShader, gTerrainPixelShader);
@@ -370,19 +373,43 @@ void RenderScene()
     // Render the scene from the main camera
     RenderSceneFromCamera(gCamera);
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", 0, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Text("");
+    ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", gCamera->Position().x, gCamera->Position().y, gCamera->Position().z );
+    ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", gCamera->Rotation().x, gCamera->Rotation().y, gCamera->Rotation().z );
+    ImGui::Text("");
+
 
     ImGui::Checkbox("Render Terrain", &enableTerrain);
     if (enableTerrain)
     {
-        ImGui::Separator();
-        ImGui::Text("");
-        ImGui::Button("Perlin");
         ImGui::Text("");
         ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01, 0.5);
         ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
         ImGui::Text("");
+        if (ImGui::Button("Generate Perlin Height Map"))
+        {
+            BuildPerlinHeightMap(amplitude, frequency);
+        }
         ImGui::Button("Midpoint Displacement");
+        ImGui::Text("");
+        if (ImGui::Button("Display Perlin Height Map"))
+        {
+            std::ofstream MyFile("PerlinHeightMap.txt");
+            int index = 0;
+            float height;
+            for (int i = 0; i < resolution; ++i)
+            {
+                for (int j = 0; j < resolution; ++j)
+                {
+                    height = heightMap[index];
+                    MyFile << height << " ";
+                    index++;
+                }
+                MyFile << "\n";
+            }
+            MyFile.close();
+        }
         ImGui::Text("");
         ImGui::Separator();
     }
@@ -390,18 +417,15 @@ void RenderScene()
     ImGui::Checkbox("Render Lights", &enableLights);
     if (enableLights)
     {
-        ImGui::Separator();
         ImGui::Text("");
         ImGui::ColorEdit3("Light One Colour", &gLights[0]->LightColour.x);
         ImGui::ColorEdit3("Light Two Colour", &gLights[1]->LightColour.x);
         ImGui::Text("");
-        ImGui::SliderFloat("Light One Scale", &gLights[0]->LightStrength, 1.0f, 90.0f);
-        ImGui::SliderFloat("Light Two Scale", &gLights[1]->LightStrength, 1.0f, 90.0f);
+        ImGui::SliderFloat("Light One Scale", &gLights[0]->LightStrength, 0.0f, 30.0f, "%.1f");
+        ImGui::SliderFloat("Light Two Scale", &gLights[1]->LightStrength, 0.0f, 30.0f, "%.1f");
         ImGui::Text("");
         ImGui::Separator();
     }
-    ImGui::Checkbox("Render Objects", &enableObjects);
-
 
     ImGui::End();
 
@@ -427,9 +451,6 @@ void RenderScene()
 // Update models and camera. frameTime is the time passed since the last frame
 void UpdateScene(float frameTime)
 {
-	// Control character part. First parameter is node number - index from flattened depth-first array of model parts. 0 is root
-	gCharacter->Control(17, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
-
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	static float rotate = 0.0f;
     static bool go = true;

@@ -69,12 +69,14 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 diffuseMaterialColour = textureColour.rgb; // Diffuse material colour in texture RGB (base colour of model)
     float specularMaterialColour = textureColour.a;   // Specular material colour in texture A (shininess of the surface)
 
-    float3 finalColour = { 0.5f, 0.5f, 0.5f };
-    // Combine lighting with texture colours
     
-    if(gEnableLights)
+    // Combine lighting with texture colours
+    float3 finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
+    
+    
+    if (!gEnableLights)
     {
-        finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
+        finalColour = diffuseMaterialColour;
     }
 
     return float4(finalColour, 1.0f); // Always use 1.0f for output alpha - no alpha blending in this lab

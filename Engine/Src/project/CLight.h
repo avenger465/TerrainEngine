@@ -8,7 +8,6 @@
 class CLight
 {
 public:
-public:
 	CLight(Mesh* Mesh, float Strength, CVector3 Colour, CVector3 Position, float Scale);
 	~CLight();
 

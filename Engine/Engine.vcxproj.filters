@@ -90,6 +90,7 @@
     <ClInclude Include="Src\tepch.h">
       <Filter>Src</Filter>
     </ClInclude>
+    <ClInclude Include="CPerlinNoise.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp">
@@ -149,6 +150,7 @@
     <ClCompile Include="Src\tepch.cpp">
       <Filter>Src</Filter>
     </ClCompile>
+    <ClCompile Include="CPerlinNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">

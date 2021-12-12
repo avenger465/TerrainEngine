@@ -19,12 +19,12 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
 
     
     float slope = 1.0f - input.normal.y;
-    if (slope < 0.2) //check if the slope value is less than 0.2 (flat)
+    if (slope < 0.2) 
     {
-        blendAmount = slope / 0.2f; //calculate the blend amount
+        blendAmount = slope / 0.2f; 
         textureColour = lerp(grassColour, dirtColour, blendAmount);
     }
-    else if ((slope < 0.7f) && (slope >= 0.2f)) //check if the slo[e value is between 0.2 and 0.7 (average)
+    else if ((slope < 0.7f) && (slope >= 0.2f)) 
     {
         blendAmount = (slope - 0.2f) * (1.0f / (0.7f - 0.2f));
 
@@ -35,11 +35,14 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
         textureColour = rockColour;
     }
     
+    
+    
+    ///////////////////////
+	// Calculate lighting
     // Normal might have been scaled by model scaling or interpolation so renormalise
     input.worldNormal = normalize(input.worldNormal);
 
-	///////////////////////
-	// Calculate lighting
+	
     
     // Direction from pixel to camera
     float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
@@ -66,11 +69,16 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
 
     float3 diffuseMaterialColour = textureColour.rgb;
     float specularMaterialColour = textureColour.a;
+    
 	// Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)
     float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2;
     float3 specularLight = specularLight1 + specularLight2;
     
     float3 finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
     
-	return float4(finalColour, 1.0f);
+    if (!gEnableLights)
+    {
+        finalColour = diffuseMaterialColour;
+    }
+    return float4(finalColour, 1.0f);
 }

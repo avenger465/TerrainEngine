@@ -101,6 +101,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CPerlinNoise.h" />
     <ClInclude Include="External\ImGui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h" />
     <ClInclude Include="Src\Math\CMatrix4x4.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="Src\tepch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CPerlinNoise.cpp" />
     <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
