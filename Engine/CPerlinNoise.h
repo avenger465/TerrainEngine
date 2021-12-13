@@ -15,9 +15,9 @@
 #define BM 0xff
 #define N 0x1000
 
-#define lerp(t, a, b) (a + t * (b-a)) 
-#define s_curve(t) (t * t * (3. - 2. * t))
-#define dotProduct(x1, y1, x2, y2) (x1 * x2 + y1 * y2)
+#define LERP(t, a, b) (a + t * (b-a)) 
+#define S_CURVE(t) (t * t * (3. - 2. * t))
+#define DOTPRODUCT(x1, y1, x2, y2) (x1 * x2 + y1 * y2)
 
 #include <cstdlib>
 

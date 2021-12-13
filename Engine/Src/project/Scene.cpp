@@ -30,6 +30,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
+const int resolution = 128;
 
 //--------------------------------------------------------------------------------------
 // Scene Data
@@ -98,16 +99,16 @@ ID3D11Buffer*     gPerFrameConstantBuffer; // The GPU buffer that will recieve t
 PerModelConstants gPerModelConstants;      // As above, but constant that change per-model (e.g. world matrix)
 ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 
-int resolution = 128;
-float* heightMap = new float[resolution * resolution];
+
+float heightMap[resolution * resolution];
+float sizeOfTerrain = 100.0f;
 
 void BuildHeightMap()
 {
-    float height = 0.0f;
+    float height = 1.0f;
 
-    for (int i = 0; i < (resolution); ++i) {
-        for (int j = 0; j < (resolution); ++j) {
-            height = 1;
+    for (int i = 0; i < resolution; ++i) {
+        for (int j = 0; j < resolution; ++j) {
             heightMap[(i * resolution) + j] = height;
         }
     }
@@ -116,15 +117,15 @@ void BuildHeightMap()
 void BuildPerlinHeightMap(int Amplitude, float frequency)
 {
     BuildHeightMap();
-    const float scale = 100.0f / (float(resolution));
+    const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
 
-    for (int i = 0; i < (resolution); ++i)
+    for (int i = 0; i < resolution; ++i) // loop through the y 
     {
-        for (int j = 0; j < (resolution); ++j)
+        for (int j = 0; j < resolution; ++j) //loop through the x
         {
-            float test[2] = { (float)j * frequency * scale, (float)i * frequency * scale };
+            float twoPoints[2] = { j * frequency * scale, i * frequency * scale };
 
-            heightMap[(j * resolution) + i] += CPerlinNoise::noise2(test) * Amplitude;
+            heightMap[(j * resolution) + i] += CPerlinNoise::noise2(twoPoints) * Amplitude;
         }
     }
 }
@@ -138,20 +139,35 @@ void BuildPerlinHeightMap(int Amplitude, float frequency)
 bool InitGeometry()
 {
     // Initialise texture manager with the default texture
-    resourceManager = new CResourceManager(gD3DDevice, gD3DContext);
-    resourceManager->loadTexture(L"default", L"Media/tiles1.jpg");
+    resourceManager = new CResourceManager();
+    resourceManager->loadTexture(L"default", "Media/tiles1.jpg");
 
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try 
     {
-        resourceManager->loadMesh(L"ManMesh",std::string("Src/Data/Man.x"));
         resourceManager->loadMesh(L"GroundMesh", std::string("Src/Data/Hills.x"));
-        resourceManager->loadMesh(L"CrateMesh", std::string("Src/Data/CargoContainer.x"));
         resourceManager->loadMesh(L"LightMesh", std::string("Src/Data/Light.x"));
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
         gLastError = e.what(); // This picks up the error message put in the exception (see Mesh.cpp)
+        return false;
+    }
+
+    //-----------------------//
+    //  LOADING OF TEXTURES  //
+    //-----------------------//
+
+    try
+    {
+        resourceManager->loadTexture(L"Light", "Media/Flare.jpg");
+        resourceManager->loadTexture(L"Grass", "Media/Grass2.jpg");
+        resourceManager->loadTexture(L"Rock", "Media/rock1.png");
+        resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
+    }
+    catch (std::runtime_error e)
+    {
+        gLastError = e.what();
         return false;
     }
 
@@ -182,24 +198,6 @@ bool InitGeometry()
         gLastError = "Error creating constant buffers";
         return false;
     }
-
-
-    //-----------------------//
-    //  LOADING OF TEXTURES  //
-    //-----------------------//
-
-    try
-    {
-        resourceManager->loadTexture(L"Light", L"Media/Flare.jpg");
-        resourceManager->loadTexture(L"Grass", L"Media/Grass2.jpg");
-        resourceManager->loadTexture(L"Rock", L"Media/rock1.png");
-        resourceManager->loadTexture(L"Dirt", L"Media/Dirt2.png");
-    }
-    catch (std::runtime_error e)
-    {
-        gLastError = e.what();
-        return false;
-    }
     
   	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
 	if (!CreateStates())
@@ -216,8 +214,6 @@ bool InitGeometry()
 bool InitScene()
 {
     //// Set up scene ////
-
-    gCharacter = new Model(resourceManager->getMesh(L"ManMesh"));
     gGround = new Model(resourceManager->getMesh(L"GroundMesh"));
 
 
@@ -255,7 +251,6 @@ void ReleaseResources()
     delete gCamera;     gCamera    = nullptr;
     delete gGround;     gGround    = nullptr;
 }
-
 
 
 //--------------------------------------------------------------------------------------
@@ -333,8 +328,7 @@ void RenderScene()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    //*******************************
-
+    //*********************//
     //// Common settings ////
 
     // Set up the light information in the constant buffer
@@ -368,7 +362,6 @@ void RenderScene()
     vp.TopLeftX = 0;
     vp.TopLeftY = 0;
     gD3DContext->RSSetViewports(1, &vp);
-
 
     // Render the scene from the main camera
     RenderSceneFromCamera(gCamera);
@@ -443,7 +436,6 @@ void RenderScene()
     gSwapChain->Present(lockFPS ? 1 : 0, 0);
 }
 
-
 //--------------------------------------------------------------------------------------
 // Scene Update
 //--------------------------------------------------------------------------------------
@@ -454,7 +446,7 @@ void UpdateScene(float frameTime)
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	static float rotate = 0.0f;
     static bool go = true;
-	gLights[0]->LightModel->SetPosition( gCharacter->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLights[0]->LightModel->SetPosition( gGround->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 

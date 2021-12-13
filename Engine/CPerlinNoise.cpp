@@ -30,13 +30,13 @@ double CPerlinNoise::noise1(double arg)
 	setup(vec, 0, bx0, bx1, rx0, rx1);
 
 
-	sx = s_curve(rx0);
+	sx = S_CURVE(rx0);
 
 	u = rx0 * g1[p[bx0]];
 	v = rx1 * g1[p[bx1]];
 
 	//blending the two values based on the position on the curve
-	return lerp(sx, u, v);
+	return LERP(sx, u, v);
 }
 
 double CPerlinNoise::noise2(float vec[2])
@@ -73,23 +73,23 @@ double CPerlinNoise::noise2(float vec[2])
 	b01 = p[i + by1];
 	b11 = p[j + by1];
 
-	sx = s_curve(rx0);
-	sy = s_curve(ry0);
+	sx = S_CURVE(rx0);
+	sy = S_CURVE(ry0);
 
 	q = g2[b00];
-	u = dotProduct(rx0, ry0, q[0], q[1]);	
+	u = DOTPRODUCT(rx0, ry0, q[0], q[1]);	
 	q = g2[b10];
-	v = dotProduct(rx1, ry0, q[0], q[1]);	
-	a = lerp(sx, u, v);						
+	v = DOTPRODUCT(rx1, ry0, q[0], q[1]);
+	a = LERP(sx, u, v);
 
 	q = g2[b01];
-	u = dotProduct(rx0, ry1, q[0], q[1]);	
+	u = DOTPRODUCT(rx0, ry1, q[0], q[1]);
 	q = g2[b11];
-	v = dotProduct(rx1, ry1, q[0], q[1]);	
-	b = lerp(sx, u, v);						
+	v = DOTPRODUCT(rx1, ry1, q[0], q[1]);
+	b = LERP(sx, u, v);
 
 	//blending the final two values
-	return lerp(sy, a, b);
+	return LERP(sy, a, b);
 }
 
 void CPerlinNoise::init(void)
