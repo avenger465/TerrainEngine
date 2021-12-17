@@ -354,6 +354,225 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 }
 
 
+Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals /* = false */, bool uvs /* = true */)
+{
+
+    // Create a single node, disable skinning
+    mNodes.push_back({ "Grid", MatrixIdentity(), MatrixIdentity(), 0, {}, {0} });
+    mHasBones = false;
+
+    mSubMeshes.resize(1); // Grid will be in a single sub-mesh
+
+    // Determine vertex layout based on parameters
+    std::vector<D3D11_INPUT_ELEMENT_DESC> vertexElements;
+    unsigned int offset = 0;
+
+    unsigned int positionOffset = offset;
+    vertexElements.push_back({ "position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, positionOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+    offset += 12;
+
+    unsigned int normalOffset = offset;
+    if (normals)
+    {
+        vertexElements.push_back({ "normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, normalOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+        offset += 12;
+    }
+
+    unsigned int uvOffset = offset;
+    if (uvs)
+    {
+        vertexElements.push_back({ "uv", 0, DXGI_FORMAT_R32G32_FLOAT, 0, uvOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+        offset += 8;
+    }
+
+    mSubMeshes[0].vertexSize = offset;
+
+    // Create a vertex layout object from above array - used by DirectX to understand the data in each vertex of this mesh
+    auto shaderSignature = CreateSignatureForVertexLayout(vertexElements.data(), static_cast<int>(vertexElements.size()));
+    HRESULT hr = gD3DDevice->CreateInputLayout(vertexElements.data(), static_cast<UINT>(vertexElements.size()),
+        shaderSignature->GetBufferPointer(), shaderSignature->GetBufferSize(),
+        &mSubMeshes[0].vertexLayout);
+    if (shaderSignature)  shaderSignature->Release();
+    if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for grid mesh");
+
+    // Allocate space to create the grid vertices (CPU-side first)
+    mSubMeshes[0].numVertices = (subDivX + 1) * (subDivZ + 1);
+    auto vertexData = std::make_unique<char[]>(mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize); // Smart pointer
+
+    // Create the grid vertices (CPU-side), to be passed to the GPU afterwards
+    float xStep = (maxPt.x - minPt.x) / subDivX; // X-size of a single grid square
+    float zStep = (maxPt.z - minPt.z) / subDivZ; // Z-size of a single grid square
+    float uStep = 1.0f / subDivX;                // U-size of a single grid square (UVs go from 0 to 1 over the whole grid)
+    float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
+    CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
+    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
+    CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
+    // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
+    auto currVert = vertexData.get();
+    for (int z = 0; z < subDivZ; ++z)
+    {
+        for (int x = 0; x < subDivX; ++x)
+        {
+            *reinterpret_cast<CVector3*>(currVert) = pt;
+            currVert += sizeof(CVector3);
+            if (normals)
+            {
+                *reinterpret_cast<CVector3*>(currVert) = normal;
+                currVert += sizeof(CVector3);
+            }
+            if (uvs)
+            {
+                *reinterpret_cast<CVector2*>(currVert) = uv;
+                currVert += sizeof(CVector2);
+            }
+            pt.x += xStep;
+            uv.x += uStep;
+            pt.y = heightMap[z][x];
+        }
+        pt.x = minPt.x;
+        pt.z += zStep;
+        //pt.y += heightMap[(z * subDivX)];
+        uv.x = 0;
+        uv.y -= vStep; // V axis is opposite direction to Z
+    }
+
+    // Allocate space to create the grid indices. To keep model rendering code simpler using a triangle
+    // list, even though a strip would work nicely here
+    mSubMeshes[0].numIndices = subDivX * subDivZ * 6; // Two triangles for each grid square
+    auto indexData = std::make_unique<char[]>(mSubMeshes[0].numIndices * 4); // 4 byte integer for each index
+
+    // Create the grid indexes (CPU-side first)
+    uint32_t tlIndex = 0;
+    auto currIndex = reinterpret_cast<uint32_t*>(indexData.get()); // uint32_t = 4-byte indexes
+    for (int z = 0; z < subDivZ; ++z)
+    {
+        for (int x = 0; x < subDivX; ++x)
+        {
+            // Bottom-left triangle in grid square (looking down on the grid)
+            *currIndex++ = tlIndex;
+            *currIndex++ = tlIndex + subDivX + 1;
+            *currIndex++ = tlIndex + 1;
+
+            // Top-right triangle in grid square
+            *currIndex++ = tlIndex + 1;
+            *currIndex++ = tlIndex + subDivX + 1;
+            *currIndex++ = tlIndex + subDivX + 2;
+
+            ++tlIndex;
+        }
+        ++tlIndex;
+    }
+
+    RegenerateMesh(vertexData.get(), indexData.get());
+}
+
+void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals /* = false */, bool uvs /* = true */)
+{
+
+    //mSubMeshes[0].numVertices = (subDivX + 1) * (subDivZ + 1);
+    auto vertexData = std::make_unique<char[]>(mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize); // Smart pointer
+
+        // Create the grid vertices (CPU-side), to be passed to the GPU afterwards
+    float xStep = (maxPt.x - minPt.x) / subDivX; // X-size of a single grid square
+    float zStep = (maxPt.z - minPt.z) / subDivZ; // Z-size of a single grid square
+    float uStep = 1.0f / subDivX;                // U-size of a single grid square (UVs go from 0 to 1 over the whole grid)
+    float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
+    CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
+    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
+    CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
+    // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
+    auto currVert = vertexData.get();
+    for (int z = 0; z < subDivZ; ++z)
+    {
+        for (int x = 0; x < subDivX; ++x)
+        {
+            *reinterpret_cast<CVector3*>(currVert) = pt;
+            currVert += sizeof(CVector3);
+            if (normals)
+            {
+                *reinterpret_cast<CVector3*>(currVert) = normal;
+                currVert += sizeof(CVector3);
+            }
+            if (uvs)
+            {
+                *reinterpret_cast<CVector2*>(currVert) = uv;
+                currVert += sizeof(CVector2);
+            }
+            pt.x += xStep;
+            uv.x += uStep;
+            pt.y = heightMap[z][x];
+        }
+        pt.x = minPt.x;
+        pt.z += zStep;
+        //pt.y += heightMap[z][0];
+        uv.x = 0;
+        uv.y -= vStep; // V axis is opposite direction to Z
+    }
+
+
+    mSubMeshes[0].numIndices = subDivX * subDivZ * 6; // Two triangles for each grid square
+    auto indexData = std::make_unique<char[]>(mSubMeshes[0].numIndices * 4); // 4 byte integer for each index
+
+    // Create the grid indexes (CPU-side first)
+    uint32_t tlIndex = 0;
+    auto currIndex = reinterpret_cast<uint32_t*>(indexData.get()); // uint32_t = 4-byte indexes
+    for (int z = 0; z < subDivZ; ++z)
+    {
+        for (int x = 0; x < subDivX; ++x)
+        {
+            // Bottom-left triangle in grid square (looking down on the grid)
+            *currIndex++ = tlIndex;
+            *currIndex++ = tlIndex + subDivX + 1;
+            *currIndex++ = tlIndex + 1;
+
+            // Top-right triangle in grid square
+            *currIndex++ = tlIndex + 1;
+            *currIndex++ = tlIndex + subDivX + 1;
+            *currIndex++ = tlIndex + subDivX + 2;
+
+            ++tlIndex;
+        }
+        ++tlIndex;
+    }
+    
+    mSubMeshes[0].vertexBuffer->Release();
+    //mSubMeshes[0].vertexBuffer = 0;
+    RegenerateMesh(vertexData.get(), indexData.get());
+
+}
+
+void Mesh::RegenerateMesh(const void* vertices, const void* indices)
+{
+
+    // Create the vertex buffer and fill it with the loaded vertex data
+    D3D11_BUFFER_DESC bufferDesc;
+    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT; // a dynamic buffer
+    bufferDesc.ByteWidth = mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize; // Buffer size
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA initData; // Initial data
+    initData.pSysMem = vertices;
+    initData.SysMemPitch = 0;
+    initData.SysMemSlicePitch = 0;
+    if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].vertexBuffer)))
+    {
+        throw std::runtime_error("Failure creating vertex buffer for grid mesh");
+    }
+    // Create the index buffer
+    bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.ByteWidth = mSubMeshes[0].numIndices * 4;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+    initData.pSysMem = indices;
+    if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].indexBuffer)))
+    {
+        throw std::runtime_error("Failure creating index buffer for grid mesh");
+    }
+}
+
 Mesh::~Mesh()
 {
     for (auto& subMesh : mSubMeshes)

@@ -23,6 +23,7 @@
 ID3D11SamplerState* gPointSampler         = nullptr;
 ID3D11SamplerState* gTrilinearSampler     = nullptr;
 ID3D11SamplerState* gAnisotropic4xSampler = nullptr;
+ID3D11SamplerState* gBilinearMirrorSampler = nullptr;
 
 // Blend states allow us to switch between blending modes (none, additive, multiplicative etc.)
 ID3D11BlendState* gNoBlendingState       = nullptr;
@@ -106,6 +107,22 @@ bool CreateStates()
 		return false;
 	}
 
+    ////-------- Bilinear filtering with mirroring - used for wiggling reflection/refractions --------////
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT; // Bilinear filtering
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;    // Wrap addressing mode for texture coordinates outside 0->1
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;    // --"--
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;    // --"--
+    samplerDesc.MaxAnisotropy = 4;                        // Number of samples used if using anisotropic filtering, more is better but max value depends on GPU
+
+    samplerDesc.MaxLOD = 0; // Controls how much mip-mapping can be used. This is for no mip-mapping
+    samplerDesc.MinLOD = 0; // --"--
+
+    // Then create a DirectX object for your description that can be used by a shader
+    if (FAILED(gD3DDevice->CreateSamplerState(&samplerDesc, &gBilinearMirrorSampler)))
+    {
+        gLastError = "Error creating bilinear mirror sampler";
+        return false;
+    }
 
     //--------------------------------------------------------------------------------------
 	// Rasterizer States
@@ -271,6 +288,7 @@ void ReleaseStates()
     if (gNoBlendingState)        gNoBlendingState->Release();
     if (gAdditiveBlendingState)  gAdditiveBlendingState->Release();
     if (gAnisotropic4xSampler)   gAnisotropic4xSampler->Release();
+    if (gBilinearMirrorSampler)  gBilinearMirrorSampler->Release();
     if (gTrilinearSampler)       gTrilinearSampler->Release();
     if (gPointSampler)           gPointSampler->Release();
 }

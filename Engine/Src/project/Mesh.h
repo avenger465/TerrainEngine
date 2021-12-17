@@ -22,6 +22,8 @@ public:
     // Optionally request tangents to be calculated (for normal and parallax mapping - see later lab)
     // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
     Mesh(const std::string& fileName, bool requireTangents = false);
+
+    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals = false, bool uvs = true);
     ~Mesh();
 
 
@@ -37,6 +39,9 @@ public:
 	// Handles rigid body meshes (including single part meshes) as well as skinned meshes
 	// LIMITATION: The mesh must use a single texture throughout
     void Render(std::vector<CMatrix4x4>& modelMatrices);
+
+    void RegenerateMesh(const void* vertices, const void* indices);
+    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals /* = false */, bool uvs /* = true */);
 
 
 
@@ -101,10 +106,12 @@ private:
 //--------------------------------------------------------------------------------------
 private:
 
-    std::vector<SubMesh> mSubMeshes; // The mesh geometry. Nodes refer to sub-meshes in this vector
     std::vector<Node>    mNodes;     // The mesh hierarchy. First entry is root. remainder aree stored in depth-first order
 
 	bool mHasBones; // If any submesh has bones, then all submeshes are given bones - makes rendering easier (one shader for the whole mesh)
+
+protected:
+    std::vector<SubMesh> mSubMeshes; // The mesh geometry. Nodes refer to sub-meshes in this vector
 };
 
 

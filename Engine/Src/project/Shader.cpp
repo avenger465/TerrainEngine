@@ -20,8 +20,8 @@ ID3D11VertexShader* gBasicTransformVertexShader = nullptr;
 ID3D11VertexShader* gSkinningVertexShader       = nullptr; // Skinning is performed in the vertex shader (matrix work), we can use any pixel shader for lighting etc.
 ID3D11PixelShader*  gLightModelPixelShader      = nullptr;
 
-ID3D11VertexShader* gTerrainVertexShader = nullptr;
 ID3D11PixelShader*  gTerrainPixelShader = nullptr;
+
 
 
 
@@ -41,12 +41,12 @@ bool LoadShaders()
     gSkinningVertexShader       = LoadVertexShader("Src/Shaders/Skinning_vs");
     gLightModelPixelShader      = LoadPixelShader ("Src/Shaders/LightModel_ps");
 
-    gTerrainVertexShader = LoadVertexShader("Src/Shaders/PixelLighting_vs");
-    gTerrainPixelShader = LoadPixelShader("Src/Shaders/TerrainShader_ps");
+ 
+    gTerrainPixelShader  = LoadPixelShader("Src/Shaders/TerrainShader_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader    == nullptr ||
-        gTerrainVertexShader == nullptr || gTerrainPixelShader == nullptr)
+        gTerrainPixelShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -63,7 +63,6 @@ void ReleaseShaders()
     if (gBasicTransformVertexShader)  gBasicTransformVertexShader->Release();
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
-    if (gTerrainVertexShader)         gTerrainVertexShader->Release();
     if (gTerrainPixelShader)          gTerrainPixelShader->Release();
 }
 

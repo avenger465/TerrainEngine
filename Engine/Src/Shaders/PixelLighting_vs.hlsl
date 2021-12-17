@@ -20,8 +20,9 @@ LightingPixelShaderInput main(BasicVertex modelVertex)
 
     // Input position is x,y,z only - need a 4th element to multiply by a 4x4 matrix. Use 1 for a point (0 for a vector) - recall lectures
     float4 modelPosition = float4(modelVertex.position, 1); 
-
-    output.normal = modelVertex.normal;
+    
+    output.normal = mul(modelVertex.normal, (float3x3) gWorldMatrix);
+    output.normal = normalize(output.normal);
     
     // Multiply by the world matrix passed from C++ to transform the model vertex position into world space. 
     // In a similar way use the view matrix to transform the vertex from world space into view space (camera's point of view)

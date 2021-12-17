@@ -53,6 +53,12 @@ void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename)
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
+void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals, bool uvs)
+{
+	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, heightMap, normals, uvs);
+	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
+}
+
 // Release resource.
 CResourceManager::~CResourceManager()
 {

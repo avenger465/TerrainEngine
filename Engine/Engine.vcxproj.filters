@@ -36,6 +36,9 @@
     <ClInclude Include="Src\Math\CMatrix4x4.h">
       <Filter>Src\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Math\CPerlinNoise.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Math\CVector2.h">
       <Filter>Src\Math</Filter>
     </ClInclude>
@@ -90,7 +93,6 @@
     <ClInclude Include="Src\tepch.h">
       <Filter>Src</Filter>
     </ClInclude>
-    <ClInclude Include="CPerlinNoise.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp">
@@ -100,6 +102,9 @@
       <Filter>External\ImGui\backends</Filter>
     </ClCompile>
     <ClCompile Include="Src\Math\CMatrix4x4.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\CPerlinNoise.cpp">
       <Filter>Src\Math</Filter>
     </ClCompile>
     <ClCompile Include="Src\Math\CVector2.cpp">
@@ -150,7 +155,6 @@
     <ClCompile Include="Src\tepch.cpp">
       <Filter>Src</Filter>
     </ClCompile>
-    <ClCompile Include="CPerlinNoise.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">

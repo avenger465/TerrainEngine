@@ -21,6 +21,7 @@
 extern ID3D11SamplerState* gPointSampler;
 extern ID3D11SamplerState* gTrilinearSampler;
 extern ID3D11SamplerState* gAnisotropic4xSampler;
+extern ID3D11SamplerState* gBilinearMirrorSampler;
 
 extern ID3D11BlendState* gNoBlendingState;
 extern ID3D11BlendState* gAdditiveBlendingState;

@@ -16,15 +16,14 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     grassColour = texture0.Sample(sampler0, input.uv);
     rockColour = texture1.Sample(sampler0, input.uv);
     dirtColour = texture2.Sample(sampler0, input.uv);
-
     
     float slope = 1.0f - input.normal.y;
-    if (slope < 0.2) 
+    if (slope < 0.2)
     {
-        blendAmount = slope / 0.2f; 
+        blendAmount = slope / 0.2f;
         textureColour = lerp(grassColour, dirtColour, blendAmount);
     }
-    else if ((slope < 0.7f) && (slope >= 0.2f)) 
+    else if ((slope < 0.7f) && (slope >= 0.2f))
     {
         blendAmount = (slope - 0.2f) * (1.0f / (0.7f - 0.2f));
 
@@ -47,10 +46,7 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
 	// Direction and distance from pixel to light
     float3 light1Direction = normalize(gLight1Position - input.worldPosition);
     float3 light1Dist = length(gLight1Position - input.worldPosition);
-    
-    // Equations from lighting lecture
     float3 diffuseLight1 = gLight1Colour * max(dot(input.worldNormal, light1Direction), 0) / light1Dist;
-
 
     ////---------////
 	//// Light 2 ////
@@ -59,7 +55,6 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     float3 light2Dist = length(gLight2Position - input.worldPosition);
     float3 diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Dist;
 
-
     //colour from the texture 
     float3 diffuseMaterialColour = textureColour.rgb;
     
@@ -67,6 +62,7 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2;
     
     float3 finalColour = diffuseLight * diffuseMaterialColour;
+    
     
     if (!gEnableLights)
     {

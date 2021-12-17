@@ -24,13 +24,13 @@
 #include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
 #include "Utility/ColourRGBA.h" 
-#include "../CPerlinNoise.h"
+#include "Math/CPerlinNoise.h"
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
-const int resolution = 128;
+const int sizeOfArray = resolution * resolution;
 
 //--------------------------------------------------------------------------------------
 // Scene Data
@@ -40,24 +40,26 @@ const int resolution = 128;
 
 // Constants controlling speed of movement/rotation (measured in units per second because we're using frame time)
 const float ROTATION_SPEED = 2.0f;  // 2 radians per second for rotation
-const float MOVEMENT_SPEED = 50.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
+const float MOVEMENT_SPEED = 150.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
 
 int terrainResolution = 128;
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
 
-Model* gCharacter;
 Model* gGround;
+Model* gTerrain;
+Model* gSky;
+Mesh* skky;
 
 CResourceManager* resourceManager;
 Camera* gCamera;
 
 std::ostringstream frameTimeMs;
 
-bool enableTerrain = false;
+bool enableTerrain = true;
 bool enableLights = false;
 
-float frequency = 0.12;
-int amplitude = 10;
+float frequency = 0.5;
+int amplitude = 45;
 
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 2;
@@ -68,7 +70,7 @@ float LightScale[NUM_LIGHTS] = {10.0f, 30.0f};
 CVector3 LightsColour[NUM_LIGHTS] = { {1.0f, 0.8f, 1.0f},
                                       {1.0f, 0.8f, 0.2f} };
 
-CVector3 LightsPosition[NUM_LIGHTS] = { { 30, 10, 0 },
+CVector3 LightsPosition[NUM_LIGHTS] = { { 60, 10, 0 },
                                         { -10, 25, -30 } };
 
 // Additional light information
@@ -100,8 +102,10 @@ PerModelConstants gPerModelConstants;      // As above, but constant that change
 ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 
 
-float heightMap[resolution * resolution];
-float sizeOfTerrain = 100.0f;
+
+
+std::array<std::array<float, resolution>, resolution> heightMap;
+float sizeOfTerrain = 15;
 
 void BuildHeightMap()
 {
@@ -109,7 +113,7 @@ void BuildHeightMap()
 
     for (int i = 0; i < resolution; ++i) {
         for (int j = 0; j < resolution; ++j) {
-            heightMap[(i * resolution) + j] = height;
+            heightMap[i][j] = height;
         }
     }
 }
@@ -119,13 +123,14 @@ void BuildPerlinHeightMap(int Amplitude, float frequency)
     BuildHeightMap();
     const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
 
+
     for (int i = 0; i < resolution; ++i) // loop through the y 
     {
         for (int j = 0; j < resolution; ++j) //loop through the x
         {
             float twoPoints[2] = { j * frequency * scale, i * frequency * scale };
 
-            heightMap[(j * resolution) + i] += CPerlinNoise::noise2(twoPoints) * Amplitude;
+            heightMap[i][j] += CPerlinNoise::noise2(twoPoints) * Amplitude;
         }
     }
 }
@@ -138,15 +143,19 @@ void BuildPerlinHeightMap(int Amplitude, float frequency)
 // Returns true on success
 bool InitGeometry()
 {
-    // Initialise texture manager with the default texture
     resourceManager = new CResourceManager();
-    resourceManager->loadTexture(L"default", "Media/tiles1.jpg");
+    BuildHeightMap();
+    // Initialise texture manager with the default texture
+  
+    resourceManager->loadTexture(L"default", "Media/v.bmp");
 
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try 
     {
         resourceManager->loadMesh(L"GroundMesh", std::string("Src/Data/Hills.x"));
         resourceManager->loadMesh(L"LightMesh", std::string("Src/Data/Light.x"));
+        resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), resolution, resolution, heightMap, true, true);
+        resourceManager->loadMesh(L"SkyMesh", std::string("Src/Data/Skybox.x"));
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -161,7 +170,7 @@ bool InitGeometry()
     try
     {
         resourceManager->loadTexture(L"Light", "Media/Flare.jpg");
-        resourceManager->loadTexture(L"Grass", "Media/Grass2.jpg");
+        resourceManager->loadTexture(L"Grass", "Media/Grass.jpg");
         resourceManager->loadTexture(L"Rock", "Media/rock1.png");
         resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
     }
@@ -214,8 +223,10 @@ bool InitGeometry()
 bool InitScene()
 {
     //// Set up scene ////
-    gGround = new Model(resourceManager->getMesh(L"GroundMesh"));
-
+    gGround = new Model(resourceManager->getMesh(L"TerrainMesh"));
+    //skky = resourceManager->getMesh(L"TerrainMesh");
+    //gTerrain = new Model(resourceManager->getMesh(L"TerrainMesh"));
+    //gTerrain->SetPosition({ 0,30,0 });
 
     // Light set-up - using an array this time
     for (int i = 0; i < NUM_LIGHTS; ++i)
@@ -250,6 +261,7 @@ void ReleaseResources()
     }
     delete gCamera;     gCamera    = nullptr;
     delete gGround;     gGround    = nullptr;
+    delete gTerrain; gTerrain = nullptr;
 }
 
 
@@ -278,6 +290,8 @@ void RenderSceneFromCamera(Camera* camera)
     //// Render non-skinned models ////
     // Select which shaders to use next
     // Render lit models, only change textures for each onee
+
+    // Detach the water height map from being a source texture so it can be used as a render target again next frame (if you don't do this DX emits lots of warnings)
     
     if (enableTerrain)
     {
@@ -289,6 +303,7 @@ void RenderSceneFromCamera(Camera* camera)
         gGround->Render();
     }
 
+
     //// Render lights ////
     if (enableLights)
     {
@@ -299,7 +314,7 @@ void RenderSceneFromCamera(Camera* camera)
         // Select the texture and sampler to use in the pixel shader
         ID3D11ShaderResourceView* LightTexture = resourceManager->getTexture(L"Light");
         gD3DContext->PSSetShaderResources(0, 1, &LightTexture); // First parameter must match texture slot number in the shaer
-        gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
+        
 
         // States - additive blending, read-only depth buffer and no culling (standard set-up for blending
         gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
@@ -379,10 +394,18 @@ void RenderScene()
         ImGui::Text("");
         ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01, 0.5);
         ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
+        ImGui::SliderFloat("Terrain Resolution", &sizeOfTerrain, 1, 300);
         ImGui::Text("");
         if (ImGui::Button("Generate Perlin Height Map"))
         {
             BuildPerlinHeightMap(amplitude, frequency);
+            gGround->ResizeModel(heightMap);
+        }
+        if (ImGui::Button("Reset Terrain"))
+        {
+            BuildHeightMap();
+            gGround->ResizeModel(heightMap);
+
         }
         ImGui::Button("Midpoint Displacement");
         ImGui::Text("");
@@ -395,7 +418,7 @@ void RenderScene()
             {
                 for (int j = 0; j < resolution; ++j)
                 {
-                    height = heightMap[index];
+                    height = heightMap[i][j];
                     MyFile << height << " ";
                     index++;
                 }
@@ -452,7 +475,7 @@ void UpdateScene(float frameTime)
 
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
-
+    gGround->Control(NULL, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;
