@@ -15,6 +15,7 @@
 
 // Vertex and pixel shader DirectX objects
 ID3D11VertexShader* gPixelLightingVertexShader  = nullptr;
+ID3D11VertexShader* gWorldTransformVertexShader = nullptr;
 ID3D11PixelShader*  gPixelLightingPixelShader   = nullptr;
 ID3D11VertexShader* gBasicTransformVertexShader = nullptr;
 ID3D11VertexShader* gSkinningVertexShader       = nullptr; // Skinning is performed in the vertex shader (matrix work), we can use any pixel shader for lighting etc.
@@ -22,7 +23,7 @@ ID3D11PixelShader*  gLightModelPixelShader      = nullptr;
 
 ID3D11PixelShader*  gTerrainPixelShader = nullptr;
 
-
+ID3D11GeometryShader* gTriangleGeometryShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ ID3D11PixelShader*  gTerrainPixelShader = nullptr;
 //--------------------------------------------------------------------------------------
 
 // Load shaders required for this app, returns true on success
-bool LoadShaders()
+bool LoadShaders(std::string LastError)
 {
     // Shaders must be added to the Visual Studio project to be compiled, they use the extension ".hlsl".
     // To load them for use, include them here without the extension. Use the correct function for each.
@@ -40,15 +41,17 @@ bool LoadShaders()
     gBasicTransformVertexShader = LoadVertexShader("Src/Shaders/BasicTransform_vs");
     gSkinningVertexShader       = LoadVertexShader("Src/Shaders/Skinning_vs");
     gLightModelPixelShader      = LoadPixelShader ("Src/Shaders/LightModel_ps");
+    gWorldTransformVertexShader = LoadVertexShader ("Src/Shaders/WorldTransformOnly_vs");
 
  
     gTerrainPixelShader  = LoadPixelShader("Src/Shaders/TerrainShader_ps");
+    gTriangleGeometryShader  = LoadGeometryShader("Src/Shaders/Triangle_Normals_gs");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader    == nullptr ||
-        gTerrainPixelShader == nullptr)
+        gTerrainPixelShader == nullptr || gTriangleGeometryShader == nullptr || gWorldTransformVertexShader == nullptr)
     {
-        gLastError = "Error loading shaders";
+        LastError = "Error loading shaders";
         return false;
     }
 
@@ -64,6 +67,8 @@ void ReleaseShaders()
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
     if (gTerrainPixelShader)          gTerrainPixelShader->Release();
+    if (gTriangleGeometryShader)      gTriangleGeometryShader->Release();
+    if (gWorldTransformVertexShader)  gWorldTransformVertexShader->Release();
 }
 
 
@@ -92,6 +97,39 @@ ID3D11VertexShader* LoadVertexShader(std::string shaderName)
     // Create shader object from loaded file (we will use the object later when rendering)
     ID3D11VertexShader* shader;
     HRESULT hr = gD3DDevice->CreateVertexShader(byteCode.data(), byteCode.size(), nullptr, &shader);
+    if (FAILED(hr))
+    {
+        return nullptr;
+    }
+
+    return shader;
+}
+
+// Load a geometry shader, include the file in the project and pass the name (without the .hlsl extension)
+// to this function. The returned pointer needs to be released before quitting. Returns nullptr on failure. 
+// Basically the same code as above but for pixel shaders
+ID3D11GeometryShader* LoadGeometryShader(std::string shaderName)
+{
+    // Open compiled shader object file
+    std::ifstream shaderFile(shaderName + ".cso", std::ios::in | std::ios::binary | std::ios::ate);
+    if (!shaderFile.is_open())
+    {
+        return nullptr;
+    }
+
+    // Read file into vector of chars
+    std::streamoff fileSize = shaderFile.tellg();
+    shaderFile.seekg(0, std::ios::beg);
+    std::vector<char>byteCode(fileSize);
+    shaderFile.read(&byteCode[0], fileSize);
+    if (shaderFile.fail())
+    {
+        return nullptr;
+    }
+
+    // Create shader object from loaded file (we will use the object later when rendering)
+    ID3D11GeometryShader* shader;
+    HRESULT hr = gD3DDevice->CreateGeometryShader(byteCode.data(), byteCode.size(), nullptr, &shader);
     if (FAILED(hr))
     {
         return nullptr;

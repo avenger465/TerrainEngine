@@ -30,6 +30,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
+int resolution = 25;
 const int sizeOfArray = resolution * resolution;
 
 //--------------------------------------------------------------------------------------
@@ -58,7 +59,7 @@ std::ostringstream frameTimeMs;
 bool enableTerrain = true;
 bool enableLights = false;
 
-float frequency = 0.5;
+float frequency = 0.45;
 int amplitude = 45;
 
 // Store lights in an array in this exercise
@@ -100,20 +101,24 @@ ID3D11Buffer*     gPerFrameConstantBuffer; // The GPU buffer that will recieve t
 
 PerModelConstants gPerModelConstants;      // As above, but constant that change per-model (e.g. world matrix)
 ID3D11Buffer*     gPerModelConstantBuffer; // --"--
+int sizeOfTerrain = 100;
+CVector3 TerrainYScale = {5, 5, 5};
 
 
 
-
-std::array<std::array<float, resolution>, resolution> heightMap;
-float sizeOfTerrain = 15;
+//std::array<std::array<float, resolution>, resolution> heightMap;
+float* heightMap;
 
 void BuildHeightMap()
 {
+    float n = (resolution + 1) * (resolution + 1);
+    heightMap = new float[(resolution + 1) * (resolution + 1)];
     float height = 1.0f;
 
-    for (int i = 0; i < resolution; ++i) {
-        for (int j = 0; j < resolution; ++j) {
-            heightMap[i][j] = height;
+    for (int i = 0; i <= resolution; ++i) {
+        for (int j = 0; j <= resolution; ++j) {
+            heightMap[(i * (resolution + 1)) + j] = height;
+            //heightMap[i][j] = height;
         }
     }
 }
@@ -124,13 +129,13 @@ void BuildPerlinHeightMap(int Amplitude, float frequency)
     const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
 
 
-    for (int i = 0; i < resolution; ++i) // loop through the y 
+    for (int i = 0; i <= resolution; ++i) // loop through the y 
     {
-        for (int j = 0; j < resolution; ++j) //loop through the x
+        for (int j = 0; j <= resolution; ++j) //loop through the x
         {
             float twoPoints[2] = { j * frequency * scale, i * frequency * scale };
 
-            heightMap[i][j] += CPerlinNoise::noise2(twoPoints) * Amplitude;
+            heightMap[(i * (resolution + 1)) + j] = CPerlinNoise::noise2(twoPoints) * Amplitude;
         }
     }
 }
@@ -141,10 +146,11 @@ void BuildPerlinHeightMap(int Amplitude, float frequency)
 
 // Prepare the geometry required for the scene
 // Returns true on success
-bool InitGeometry()
+bool InitGeometry(std::string LastError)
 {
     resourceManager = new CResourceManager();
     BuildHeightMap();
+    //BuildPerlinHeightMap(amplitude, frequency);
     // Initialise texture manager with the default texture
   
     resourceManager->loadTexture(L"default", "Media/v.bmp");
@@ -154,12 +160,13 @@ bool InitGeometry()
     {
         resourceManager->loadMesh(L"GroundMesh", std::string("Src/Data/Hills.x"));
         resourceManager->loadMesh(L"LightMesh", std::string("Src/Data/Light.x"));
+        resourceManager->loadMesh(L"SphereMesh", std::string("Src/Data/Sphere.x"));
         resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), resolution, resolution, heightMap, true, true);
         resourceManager->loadMesh(L"SkyMesh", std::string("Src/Data/Skybox.x"));
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
-        gLastError = e.what(); // This picks up the error message put in the exception (see Mesh.cpp)
+        LastError = e.what(); // This picks up the error message put in the exception (see Mesh.cpp)
         return false;
     }
 
@@ -170,13 +177,14 @@ bool InitGeometry()
     try
     {
         resourceManager->loadTexture(L"Light", "Media/Flare.jpg");
-        resourceManager->loadTexture(L"Grass", "Media/Grass.jpg");
+        resourceManager->loadTexture(L"Grass", "Media/Grass.png");
         resourceManager->loadTexture(L"Rock", "Media/rock1.png");
         resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
+        resourceManager->loadTexture(L"Moon", "Media/moon.jpg");
     }
     catch (std::runtime_error e)
     {
-        gLastError = e.what();
+        LastError = e.what();
         return false;
     }
 
@@ -191,9 +199,9 @@ bool InitGeometry()
     //LightShader* shader;
 
     // Load the shaders required for the geometry we will use (see Shader.cpp / .h)
-    if (!LoadShaders())
+    if (!LoadShaders(LastError))
     {
-        gLastError = "Error loading shaders";
+        LastError = "Error loading shaders";
         return false;
     }
 
@@ -204,14 +212,14 @@ bool InitGeometry()
     gPerModelConstantBuffer = CreateConstantBuffer(sizeof(gPerModelConstants));
     if (gPerFrameConstantBuffer == nullptr || gPerModelConstantBuffer == nullptr)
     {
-        gLastError = "Error creating constant buffers";
+        LastError = "Error creating constant buffers";
         return false;
     }
     
   	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
-	if (!CreateStates())
+	if (!CreateStates(LastError))
 	{
-		gLastError = "Error creating states";
+		LastError = "Error creating states";
 		return false;
 	}
 
@@ -224,6 +232,7 @@ bool InitScene()
 {
     //// Set up scene ////
     gGround = new Model(resourceManager->getMesh(L"TerrainMesh"));
+    //gGround = new Model(resourceManager->getMesh(L"SphereMesh"));
     //skky = resourceManager->getMesh(L"TerrainMesh");
     //gTerrain = new Model(resourceManager->getMesh(L"TerrainMesh"));
     //gTerrain->SetPosition({ 0,30,0 });
@@ -237,7 +246,8 @@ bool InitScene()
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 0, 270, -500 });
+    //gCamera->SetPosition({ 0, 270, -500 });
+    gCamera->SetPosition({ 12.5, 910, -1657 });
     gCamera->SetRotation({ ToRadians(28.6f), 0.0f, 0.0f });
 
     return true;
@@ -280,6 +290,7 @@ void RenderSceneFromCamera(Camera* camera)
 
     // Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
     gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer); // First parameter must match constant buffer number in the shader 
+    gD3DContext->GSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
     gD3DContext->PSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
 
 
@@ -295,14 +306,16 @@ void RenderSceneFromCamera(Camera* camera)
     
     if (enableTerrain)
     {
-        gGround->Setup(gPixelLightingVertexShader, gTerrainPixelShader);
-        gGround->SetStates(gNoBlendingState, gUseDepthBufferState, gCullBackState);
+        gGround->Setup(gWorldTransformVertexShader, gTerrainPixelShader);
+        gD3DContext->GSSetShader(gTriangleGeometryShader, nullptr, 0);
+        gGround->SetStates(gNoBlendingState, gUseDepthBufferState, gCullNoneState);
         gGround->SetShaderResources(0, resourceManager->getTexture(L"Grass"));
         gGround->SetShaderResources(1, resourceManager->getTexture(L"Rock"));
         gGround->SetShaderResources(2, resourceManager->getTexture(L"Dirt"));
+        gPerModelConstants.explodeAmount = 1;
         gGround->Render();
     }
-
+    gD3DContext->GSSetShader(nullptr, nullptr, 0);
 
     //// Render lights ////
     if (enableLights)
@@ -370,8 +383,8 @@ void RenderScene()
 
     // Setup the viewport to the size of the main window
     D3D11_VIEWPORT vp;
-    vp.Width  = static_cast<FLOAT>(gViewportWidth);
-    vp.Height = static_cast<FLOAT>(gViewportHeight);
+    vp.Width  = static_cast<FLOAT>(1280);
+    vp.Height = static_cast<FLOAT>(960);
     vp.MinDepth = 0.0f;
     vp.MaxDepth = 1.0f;
     vp.TopLeftX = 0;
@@ -385,6 +398,8 @@ void RenderScene()
     ImGui::Text("");
     ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", gCamera->Position().x, gCamera->Position().y, gCamera->Position().z );
     ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", gCamera->Rotation().x, gCamera->Rotation().y, gCamera->Rotation().z );
+    ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)", gGround->Scale().x, gGround->Scale().y, gGround->Scale().z );
+    ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", gGround->Position().x, gGround->Position().y, gGround->Position().z );
     ImGui::Text("");
 
 
@@ -394,17 +409,18 @@ void RenderScene()
         ImGui::Text("");
         ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01, 0.5);
         ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
-        ImGui::SliderFloat("Terrain Resolution", &sizeOfTerrain, 1, 300);
+        ImGui::SliderInt("Terrain Resolution", &sizeOfTerrain, 100, 135);
+        //ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 0.1, 10);
         ImGui::Text("");
         if (ImGui::Button("Generate Perlin Height Map"))
         {
             BuildPerlinHeightMap(amplitude, frequency);
-            gGround->ResizeModel(heightMap);
+            gGround->ResizeModel(heightMap, resolution);
         }
         if (ImGui::Button("Reset Terrain"))
         {
             BuildHeightMap();
-            gGround->ResizeModel(heightMap);
+            gGround->ResizeModel(heightMap, resolution);
 
         }
         ImGui::Button("Midpoint Displacement");
@@ -414,17 +430,18 @@ void RenderScene()
             std::ofstream MyFile("PerlinHeightMap.txt");
             int index = 0;
             float height;
-            for (int i = 0; i < resolution; ++i)
+            for (int i = 0; i <= resolution; ++i)
             {
-                for (int j = 0; j < resolution; ++j)
+                for (int j = 0; j <= resolution; ++j)
                 {
-                    height = heightMap[i][j];
+                    height = heightMap[index];
                     MyFile << height << " ";
                     index++;
                 }
                 MyFile << "\n";
             }
             MyFile.close();
+            index = 0;
         }
         ImGui::Text("");
         ImGui::Separator();
@@ -464,7 +481,7 @@ void RenderScene()
 //--------------------------------------------------------------------------------------
 
 // Update models and camera. frameTime is the time passed since the last frame
-void UpdateScene(float frameTime)
+void UpdateScene(float frameTime, HWND HWnd)
 {
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	static float rotate = 0.0f;
@@ -476,6 +493,7 @@ void UpdateScene(float frameTime)
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
     gGround->Control(NULL, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
+    gGround->SetScale(TerrainYScale);
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;
@@ -490,13 +508,9 @@ void UpdateScene(float frameTime)
     {
         // Displays FPS rounded to nearest int, and frame time (more useful for developers) in milliseconds to 2 decimal places
         float avgFrameTime = totalFrameTime / frameCount;
-        std::ostringstream frameTimeMs;
-        frameTimeMs.precision(2);
-        frameTimeMs << std::fixed << avgFrameTime * 1000;
         FPS = std::to_string(static_cast<int>(1 / avgFrameTime + 0.5f));
-        std::string windowTitle = "CO2409 Week 22: Skinning - Frame Time: " + frameTimeMs.str() +
-                                  "ms, FPS: " + FPS;
-        SetWindowTextA(gHWnd, windowTitle.c_str());
+        std::string windowTitle = "Procedural Terrain Generation - FPS: " + FPS;
+        SetWindowTextA(HWnd, windowTitle.c_str());
         totalFrameTime = 0;
         frameCount = 0;
     }

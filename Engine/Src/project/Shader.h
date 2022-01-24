@@ -21,7 +21,9 @@ extern ID3D11VertexShader* gBasicTransformVertexShader;
 extern ID3D11VertexShader* gSkinningVertexShader;   // Skinning is performed in the vertex shader (matrix work), we can use any pixel shader for lighting etc.
 extern ID3D11PixelShader*  gLightModelPixelShader;
 extern ID3D11VertexShader* gTerrainVertexShader;
+extern ID3D11VertexShader* gWorldTransformVertexShader;
 extern ID3D11PixelShader* gTerrainPixelShader;
+extern ID3D11GeometryShader* gTriangleGeometryShader;
 
 
 //--------------------------------------------------------------------------------------
@@ -29,7 +31,7 @@ extern ID3D11PixelShader* gTerrainPixelShader;
 //--------------------------------------------------------------------------------------
 
 // Load shaders required for this app, returns true on success
-bool LoadShaders();
+bool LoadShaders(std::string LastError);
 
 // Release shaders used by the app
 void ReleaseShaders();
@@ -51,6 +53,7 @@ ID3D11Buffer* CreateConstantBuffer(int size);
 // Load a shader, include the file in the project and pass the name (without the .hlsl extension)
 // to this function. The returned pointer needs to be released before quitting. Returns nullptr on failure
 ID3D11VertexShader* LoadVertexShader(std::string shaderName);
+ID3D11GeometryShader* LoadGeometryShader(std::string shaderName);
 ID3D11PixelShader*  LoadPixelShader (std::string shaderName);
 
 // Helper function. Returns nullptr on failure.

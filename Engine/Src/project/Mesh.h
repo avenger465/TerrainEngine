@@ -23,7 +23,7 @@ public:
     // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
     Mesh(const std::string& fileName, bool requireTangents = false);
 
-    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals = false, bool uvs = true);
+    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float *heightMap, bool normals = false, bool uvs = true);
     ~Mesh();
 
 
@@ -41,7 +41,7 @@ public:
     void Render(std::vector<CMatrix4x4>& modelMatrices);
 
     void RegenerateMesh(const void* vertices, const void* indices);
-    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::array<std::array<float, resolution>, resolution> &heightMap, bool normals /* = false */, bool uvs /* = true */);
+    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float *heightMap,float scale, bool normals /* = false */, bool uvs /* = true */);
 
 
 

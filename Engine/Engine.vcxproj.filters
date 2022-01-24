@@ -4,11 +4,11 @@
     <Filter Include="External">
       <UniqueIdentifier>{089DB854-F469-1360-1D83-010809AF48EE}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External\ImGui">
-      <UniqueIdentifier>{32B8D450-1E86-C856-071A-397DF386A4BB}</UniqueIdentifier>
+    <Filter Include="External\GUI">
+      <UniqueIdentifier>{1CE06A0A-0843-FAAE-B1C8-32659D0AC631}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External\ImGui\backends">
-      <UniqueIdentifier>{9C8A49CF-08C2-9166-11CC-F5897D82B85F}</UniqueIdentifier>
+    <Filter Include="External\GUI\backends">
+      <UniqueIdentifier>{C63964FF-32A6-1FFA-FB99-B75767C54162}</UniqueIdentifier>
     </Filter>
     <Filter Include="Src">
       <UniqueIdentifier>{0D23880B-792C-887C-02A8-9E7C6EB0937C}</UniqueIdentifier>
@@ -19,6 +19,9 @@
     <Filter Include="Src\Shaders">
       <UniqueIdentifier>{E6043150-52BA-A945-DBAE-A31C4763A049}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\System">
+      <UniqueIdentifier>{818556AE-6D3D-98FB-D644-7157C21B33EC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Src\Utility">
       <UniqueIdentifier>{509EB806-BC53-31FC-4548-2BD3B1FC2700}</UniqueIdentifier>
     </Filter>
@@ -27,11 +30,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="External\ImGui\backends\imgui_impl_dx11.h">
-      <Filter>External\ImGui\backends</Filter>
+    <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h">
+      <Filter>External\GUI\backends</Filter>
     </ClInclude>
-    <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h">
-      <Filter>External\ImGui\backends</Filter>
+    <ClInclude Include="External\GUI\backends\imgui_impl_win32.h">
+      <Filter>External\GUI\backends</Filter>
     </ClInclude>
     <ClInclude Include="Src\Math\CMatrix4x4.h">
       <Filter>Src\Math</Filter>
@@ -47,6 +50,12 @@
     </ClInclude>
     <ClInclude Include="Src\Math\MathHelpers.h">
       <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\System\Direct3DSetup.h">
+      <Filter>Src\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\System\System.h">
+      <Filter>Src\System</Filter>
     </ClInclude>
     <ClInclude Include="Src\Utility\CResourceManager.h">
       <Filter>Src\Utility</Filter>
@@ -72,9 +81,6 @@
     <ClInclude Include="Src\project\Common.h">
       <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\project\Direct3DSetup.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
     <ClInclude Include="Src\project\Mesh.h">
       <Filter>Src\project</Filter>
     </ClInclude>
@@ -95,11 +101,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp">
-      <Filter>External\ImGui\backends</Filter>
+    <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp">
+      <Filter>External\GUI\backends</Filter>
     </ClCompile>
-    <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp">
-      <Filter>External\ImGui\backends</Filter>
+    <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp">
+      <Filter>External\GUI\backends</Filter>
     </ClCompile>
     <ClCompile Include="Src\Math\CMatrix4x4.cpp">
       <Filter>Src\Math</Filter>
@@ -112,6 +118,12 @@
     </ClCompile>
     <ClCompile Include="Src\Math\CVector3.cpp">
       <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\System\Direct3DSetup.cpp">
+      <Filter>Src\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\System\System.cpp">
+      <Filter>Src\System</Filter>
     </ClCompile>
     <ClCompile Include="Src\Utility\CResourceManager.cpp">
       <Filter>Src\Utility</Filter>
@@ -129,9 +141,6 @@
       <Filter>Src\project</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\Camera.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Direct3DSetup.cpp">
       <Filter>Src\project</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\Main.cpp">
@@ -173,6 +182,12 @@
       <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\TerrainShader_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\Triangle_Normals_gs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\WorldTransformOnly_vs.hlsl">
       <Filter>Src\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

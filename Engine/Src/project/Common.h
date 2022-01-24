@@ -40,7 +40,7 @@ extern const float MOVEMENT_SPEED;
 
 // A global error message to help track down fatal errors - set it to a useful message
 // when a serious error occurs
-extern std::string gLastError;
+extern std::string LastError;
 
 
 
@@ -92,8 +92,9 @@ struct PerModelConstants
 {
     CMatrix4x4 worldMatrix;
     CVector3   objectColour; // Allows each light model to be tinted to match the light colour they cast
-    float      padding7;
-    CMatrix4x4 boneMatrices[/*** MISSING - fill in this array size - easy. Relates to another MISSING*/];
+    float      explodeAmount;
+
+    CMatrix4x4 boneMatrices[MAX_BONES];
 };
 extern PerModelConstants gPerModelConstants;      // This variable holds the CPU-side constant buffer described above
 extern ID3D11Buffer*     gPerModelConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure

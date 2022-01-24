@@ -24,6 +24,12 @@
     <ContentFile>
       <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\TerrainShader_ps.cso</FullPath>
     </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\Triangle_Normals_gs.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\aveng\Documents\GitHub\TerrainEngine\Engine\Src\Shaders\WorldTransformOnly_vs.cso</FullPath>
+    </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
   <NonRecipeFileRefs />

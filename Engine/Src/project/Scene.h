@@ -12,7 +12,7 @@
 
 // Prepare the geometry required for the scene
 // Returns true on success
-bool InitGeometry();
+bool InitGeometry(std::string LastError);
 
 // Layout the scene
 // Returns true on success
@@ -29,7 +29,7 @@ void ReleaseResources();
 void RenderScene();
 
 // frameTime is the time passed since the last frame
-void UpdateScene(float frameTime);
+void UpdateScene(float frameTime, HWND HWnd);
 
 
 

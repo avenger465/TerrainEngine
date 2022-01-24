@@ -91,7 +91,7 @@ public:
 
     void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
 
-    void ResizeModel(std::array<std::array<float, resolution>, resolution> &heightMap);
+    void ResizeModel(float* heightMap, float resolution);
 
 
 

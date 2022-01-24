@@ -40,7 +40,7 @@ extern ID3D11DepthStencilState* gNoDepthBufferState;
 //--------------------------------------------------------------------------------------
 
 // Create all the states used in this app, returns true on success
-bool CreateStates();
+bool CreateStates(std::string LastError);
 
 // Release DirectX state objects
 void ReleaseStates();

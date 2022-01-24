@@ -59,7 +59,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PG_PLATFORM_WINDOWS;PG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Src;External\assimp\include;External\ImGui;External\ImGui\backends;External\DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Src;External\assimp\include;External\GUI;External\GUI\backends;External\DirectXTK;External\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -80,7 +80,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>PG_PLATFORM_WINDOWS;PG_Release;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Src;External\assimp\include;External\ImGui;External\ImGui\backends;External\DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Src;External\assimp\include;External\GUI;External\GUI\backends;External\DirectXTK;External\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -101,13 +101,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="External\ImGui\backends\imgui_impl_dx11.h" />
-    <ClInclude Include="External\ImGui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="External\GUI\backends\imgui_impl_win32.h" />
     <ClInclude Include="Src\Math\CMatrix4x4.h" />
     <ClInclude Include="Src\Math\CPerlinNoise.h" />
     <ClInclude Include="Src\Math\CVector2.h" />
     <ClInclude Include="Src\Math\CVector3.h" />
     <ClInclude Include="Src\Math\MathHelpers.h" />
+    <ClInclude Include="Src\System\Direct3DSetup.h" />
+    <ClInclude Include="Src\System\System.h" />
     <ClInclude Include="Src\Utility\CResourceManager.h" />
     <ClInclude Include="Src\Utility\ColourRGBA.h" />
     <ClInclude Include="Src\Utility\GraphicsHelpers.h" />
@@ -116,7 +118,6 @@
     <ClInclude Include="Src\project\CLight.h" />
     <ClInclude Include="Src\project\Camera.h" />
     <ClInclude Include="Src\project\Common.h" />
-    <ClInclude Include="Src\project\Direct3DSetup.h" />
     <ClInclude Include="Src\project\Mesh.h" />
     <ClInclude Include="Src\project\Model.h" />
     <ClInclude Include="Src\project\Scene.h" />
@@ -125,19 +126,20 @@
     <ClInclude Include="Src\tepch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="External\ImGui\backends\imgui_impl_dx11.cpp" />
-    <ClCompile Include="External\ImGui\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
     <ClCompile Include="Src\Math\CPerlinNoise.cpp" />
     <ClCompile Include="Src\Math\CVector2.cpp" />
     <ClCompile Include="Src\Math\CVector3.cpp" />
+    <ClCompile Include="Src\System\Direct3DSetup.cpp" />
+    <ClCompile Include="Src\System\System.cpp" />
     <ClCompile Include="Src\Utility\CResourceManager.cpp" />
     <ClCompile Include="Src\Utility\GraphicsHelpers.cpp" />
     <ClCompile Include="Src\Utility\Input.cpp" />
     <ClCompile Include="Src\Utility\Timer.cpp" />
     <ClCompile Include="Src\project\CLight.cpp" />
     <ClCompile Include="Src\project\Camera.cpp" />
-    <ClCompile Include="Src\project\Direct3DSetup.cpp" />
     <ClCompile Include="Src\project\Main.cpp" />
     <ClCompile Include="Src\project\Mesh.cpp" />
     <ClCompile Include="Src\project\Model.cpp" />
@@ -174,12 +176,21 @@
       <ShaderType>Pixel</ShaderType>
       <ObjectFileOutput>Src/Shaders/TerrainShader_ps.cso</ObjectFileOutput>
     </FxCompile>
+    <FxCompile Include="Src\Shaders\Triangle_Normals_gs.hlsl">
+      <ShaderType>Geometry</ShaderType>
+      <ObjectFileOutput>Src/Shaders/Triangle_Normals_gs.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\WorldTransformOnly_vs.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>Src/Shaders/WorldTransformOnly_vs.cso</ObjectFileOutput>
+      <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shaders\Common.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="External\ImGui\ImGui.vcxproj">
+    <ProjectReference Include="External\GUI\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
   </ItemGroup>

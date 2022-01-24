@@ -112,7 +112,7 @@ cbuffer PerModelConstants : register(b1) // The b1 gives this constant buffer th
     float4x4 gWorldMatrix;
 
     float3   gObjectColour;
-    float    padding7;  // See notes on padding in structure above
+    float    gExplodeAmount;  // See notes on padding in structure above
 
     float4x4 gBoneMatrices[MAX_BONES];
 }

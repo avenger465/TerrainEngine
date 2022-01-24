@@ -11,7 +11,6 @@
 #include <windows.h>
 #include <Windows.h>
 
-const int resolution = 128;
 
 //------------------------//
 //		Maths

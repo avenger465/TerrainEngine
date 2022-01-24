@@ -10,17 +10,18 @@ workspace "TerrainEngine"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDir = {}
-IncludeDir["ImGui"] = "Engine/External/ImGui"
-IncludeDir["ImGuiBackends"] = "Engine/External/ImGui/backends"
+IncludeDir["ImGui"] = "Engine/External/GUI"
+IncludeDir["ImGuiBackends"] = "Engine/External/GUI/backends"
 IncludeDir["Assimp"] = "Engine/External/assimp/include"
 IncludeDir["DirectX"] = "Engine/External/DirectXTK"
+IncludeDir["TinyXML2"] = "Engine/External/TinyXML2"
 
 
 LibDir = {}
 LibDir["assimp"] = "Engine/External/assimp/lib/xSixtyFour"
 LibDir["DirectXTK"] = "Engine/External/DirectXTK/%{cfg.buildcfg}"
 
-include "Engine/External/ImGui"
+include "Engine/External/GUI"
 
 project "Engine"
 	location "Engine"
@@ -38,10 +39,10 @@ project "Engine"
 	{
 		"%{prj.name}/Src/**.cpp",
 		"%{prj.name}/Src/**.h",
-		"%{prj.name}/External/ImGui/backends/imgui_impl_dx11.h",
-		"%{prj.name}/External/ImGui/backends/imgui_impl_dx11.cpp",
-		"%{prj.name}/External/ImGui/backends/imgui_impl_win32.h",
-		"%{prj.name}/External/ImGui/backends/imgui_impl_win32.cpp",
+		"%{prj.name}/External/GUI/backends/imgui_impl_dx11.h",
+		"%{prj.name}/External/GUI/backends/imgui_impl_dx11.cpp",
+		"%{prj.name}/External/GUI/backends/imgui_impl_win32.h",
+		"%{prj.name}/External/GUI/backends/imgui_impl_win32.cpp",
 		"%{prj.name}/Src/Shaders/Common.hlsli"
 
 	}
@@ -53,7 +54,8 @@ project "Engine"
 		"%{IncludeDir.Assimp}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuiBackends}",
-		"%{IncludeDir.DirectX}"
+		"%{IncludeDir.DirectX}",
+		"%{IncludeDir.TinyXML2}"
 	}
 
 	libdirs
@@ -72,10 +74,10 @@ project "Engine"
 		"winmm.lib"
 	}
 	
-	files("Engine/External/ImGui/backends/imgui_impl_win32.cpp")
+	files("Engine/External/GUI/backends/imgui_impl_win32.cpp")
 	flags("NoPCH")
 
-	files("Engine/External/ImGui/backends/imgui_impl_dx11.cpp")
+	files("Engine/External/GUI/backends/imgui_impl_dx11.cpp")
 	flags("NoPCH")
 
 	files("Engine/Src/Shaders/*.hlsl")
@@ -91,12 +93,14 @@ project "Engine"
 		--removeflags("ExcludeFromBuild")
 		shadertype("Pixel")
 
+	filter("files:**_gs.hlsl")
+		--removeflags("ExcludeFromBuild")
+		shadertype("Geometry")
+
 	filter("files:**_vs.hlsl")
 		--removeflags("ExcludeFromBuild")
 		shadertype("Vertex")
 		shaderoptions({"/WX"})
-
-	
 
 	filter "system:windows"
 		cppdialect "C++17"
