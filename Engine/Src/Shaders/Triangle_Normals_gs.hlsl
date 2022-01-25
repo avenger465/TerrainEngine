@@ -17,7 +17,6 @@ void main
     float3 faceEdgeA = input[1].position - input[0].position;
     float3 faceEdgeB = input[2].position - input[0].position;
     float3 faceNormal = normalize(cross(faceEdgeA, faceEdgeB));
-    float3 explodeVector = faceNormal * gExplodeAmount;
 
 
 	// Outputing a triangle strip, use this variable to build the output vertices one at a time
@@ -28,17 +27,16 @@ void main
     for (int i = 0; i < 3; ++i)
     {
 		// Get exploded position, this is the new world position of the current vertex
-        float3 explodePosition = input[i].position + explodeVector;
         //float3 newNormal = input[i].normal * faceNormal;
-        output.worldPosition = explodePosition;
+        output.worldPosition = input[i].position;
 
 		// The vertex shader didn't transform the vertices into 2D, since this geometry shader needed to work on the vertices while still
 		// in world space. So now the geometry shader needs to perform that transform before outputing the vertices to the pixel shader
-        output.projectedPosition = mul(gViewProjectionMatrix, float4(explodePosition, 1));
+        output.projectedPosition = mul(gViewProjectionMatrix, float4(input[i].position, 1));
 
 		// Pass on the world normal and texture coordinate to be used by pixel shader
         output.worldNormal = input[i].normal;
-        output.normal = input[i].normal;
+        output.normal = faceNormal;
         output.uv = input[i].uv;
 
 		// Add this new vertex to the output stream

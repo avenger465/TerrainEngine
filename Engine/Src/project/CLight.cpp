@@ -37,7 +37,7 @@ void CLight::SetLightStates(ID3D11BlendState* blendSate, ID3D11DepthStencilState
 }
 
 //Call the models render function
-void CLight::RenderLight()
+void CLight::RenderLight(ID3D11Buffer* buffer, PerModelConstants& ModelConstants)
 {
-	LightModel->Render();
+	LightModel->Render(buffer, ModelConstants);
 }

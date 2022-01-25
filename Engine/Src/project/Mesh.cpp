@@ -496,117 +496,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float *heig
     {
         throw std::runtime_error("Failure creating index buffer for grid mesh");
     }
-    //mSubMeshes[0].vertexBuffer->Release();
-    //// Create a single node, disable skinning
-    //mNodes.push_back({ "Grid", MatrixIdentity(), MatrixIdentity(), 0, {}, {0} });
-    //mHasBones = false;
-
-    //mSubMeshes.resize(1); // Grid will be in a single sub-mesh
-
-    //// Determine vertex layout based on parameters
-    //std::vector<D3D11_INPUT_ELEMENT_DESC> vertexElements;
-    //unsigned int offset = 0;
-
-    //unsigned int positionOffset = offset;
-    //vertexElements.push_back({ "position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, positionOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-    //offset += 12;
-
-    //unsigned int normalOffset = offset;
-    //if (normals)
-    //{
-    //    vertexElements.push_back({ "normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, normalOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-    //    offset += 12;
-    //}
-
-    //unsigned int uvOffset = offset;
-    //if (uvs)
-    //{
-    //    vertexElements.push_back({ "uv", 0, DXGI_FORMAT_R32G32_FLOAT, 0, uvOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-    //    offset += 8;
-    //}
-
-    //mSubMeshes[0].vertexSize = offset;
-
-    //// Create a vertex layout object from above array - used by DirectX to understand the data in each vertex of this mesh
-    //auto shaderSignature = CreateSignatureForVertexLayout(vertexElements.data(), static_cast<int>(vertexElements.size()));
-    //HRESULT hr = gD3DDevice->CreateInputLayout(vertexElements.data(), static_cast<UINT>(vertexElements.size()),
-    //    shaderSignature->GetBufferPointer(), shaderSignature->GetBufferSize(),
-    //    &mSubMeshes[0].vertexLayout);
-    //if (shaderSignature)  shaderSignature->Release();
-    //if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for grid mesh");
-
-    //// Allocate space to create the grid vertices (CPU-side first)
-    //mSubMeshes[0].numVertices = (subDivX + 1) * (subDivZ + 1);
-    //auto vertexData = std::make_unique<char[]>(mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize); // Smart pointer
-
-    //// Create the grid vertices (CPU-side), to be passed to the GPU afterwards
-    //float xStep = (maxPt.x - minPt.x) / subDivX; // X-size of a single grid square
-    //float zStep = (maxPt.z - minPt.z) / subDivZ; // Z-size of a single grid square
-    //float uStep = 1.0f / subDivX;                // U-size of a single grid square (UVs go from 0 to 1 over the whole grid)
-    //float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
-    //CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
-    //CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
-    //CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
-    //// A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
-    //int index = 0;
-    //auto currVert = vertexData.get();
-    //for (int z = 0; z < subDivZ; ++z)
-    //{
-    //    for (int x = 0; x < subDivX; ++x)
-    //    {
-    //        *reinterpret_cast<CVector3*>(currVert) = pt;
-    //        currVert += sizeof(CVector3);
-    //        if (normals)
-    //        {
-    //            *reinterpret_cast<CVector3*>(currVert) = normal;
-    //            currVert += sizeof(CVector3);
-    //        }
-    //        if (uvs)
-    //        {
-    //            *reinterpret_cast<CVector2*>(currVert) = uv;
-    //            currVert += sizeof(CVector2);
-    //        }
-    //        pt.x += xStep;
-    //        uv.x += uStep;
-    //        pt.y = heightMap[index];
-    //        ++index;
-    //    }
-    //    pt.x = minPt.x;
-    //    pt.z += zStep;
-    //    //pt.y += heightMap[(z * subDivX)];
-    //    uv.x = 0;
-    //    uv.y -= vStep; // V axis is opposite direction to Z
-    //}
-
-    //// Allocate space to create the grid indices. To keep model rendering code simpler using a triangle
-    //// list, even though a strip would work nicely here
-    //mSubMeshes[0].numIndices = subDivX * subDivZ * 6; // Two triangles for each grid square
-    //auto indexData = std::make_unique<char[]>(mSubMeshes[0].numIndices * 4); // 4 byte integer for each index
-
-    //// Create the grid indexes (CPU-side first)
-    //uint32_t tlIndex = 0;
-    //auto currIndex = reinterpret_cast<uint32_t*>(indexData.get()); // uint32_t = 4-byte indexes
-
-    //for (int z = 0; z < subDivZ; ++z)
-    //{
-    //    for (int x = 0; x < subDivX; ++x)
-    //    {
-    //        // Bottom-left triangle in grid square (looking down on the grid)
-    //        *currIndex++ = tlIndex;
-    //        *currIndex++ = tlIndex + subDivX + 1;
-    //        *currIndex++ = tlIndex + 1;
-
-    //        // Top-right triangle in grid square
-    //        *currIndex++ = tlIndex + 1;
-    //        *currIndex++ = tlIndex + subDivX + 1;
-    //        *currIndex++ = tlIndex + subDivX + 2;
-
-    //        ++tlIndex;
-    //    }
-    //    ++tlIndex;
-    //}
-
-    //RegenerateMesh(vertexData.get(), indexData.get());
+   
 }
 
 void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float *heightMap, float scale, bool normals /* = false */, bool uvs /* = true */)
@@ -681,7 +571,7 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
                 currVert += sizeof(CVector2);
             }
             pt.x += xStep;
-            pt.y = 1 + heightMap[index];
+            pt.y = heightMap[index];
             uv.x += uStep;
             ++index;
             //index += 2;
@@ -896,7 +786,7 @@ void Mesh::RenderSubMesh(const SubMesh& subMesh)
 // Render the mesh with the given matrices
 // Handles rigid body meshes (including single part meshes) as well as skinned meshes
 // LIMITATION: The mesh must use a single texture throughout
-void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices)
+void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, PerModelConstants& ModelConstants)
 {
 	// Skinning needs all matrices available in the shader at the same time, so first calculate all the absolute
 	// matrices before rendering anything
@@ -925,12 +815,12 @@ void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices)
 		// Send all matrices over to the GPU for skinning via a constant buffer - each matrix can represent a bone which influences nearby vertices
 		// MISSING - code to fill the gPerModelConstants.boneMatrices array with the contents of the absoluteMatrices vector
         //-->
-        UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
+        UpdateConstantBuffer(buffer, ModelConstants); // Send to GPU
 
 		// Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
-		gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
-        gD3DContext->GSSetConstantBuffers(1, 1, &gPerModelConstantBuffer);
-        gD3DContext->PSSetConstantBuffers(1, 1, &gPerModelConstantBuffer);
+		gD3DContext->VSSetConstantBuffers(1, 1, &buffer); // First parameter must match constant buffer number in the shader
+        gD3DContext->GSSetConstantBuffers(1, 1, &buffer);
+        gD3DContext->PSSetConstantBuffers(1, 1, &buffer);
 
 		// Already sent over all the absolute matrices for the entire mesh so we can render sub-meshes directly
 		// rather than iterating through the nodes. 
@@ -947,13 +837,13 @@ void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices)
 		for (unsigned int nodeIndex = 0; nodeIndex < mNodes.size(); ++nodeIndex)
 		{
 			// Send this node's matrix to the GPU via a constant buffer
-			gPerModelConstants.worldMatrix = absoluteMatrices[nodeIndex];
-			UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
+			ModelConstants.worldMatrix = absoluteMatrices[nodeIndex];
+			UpdateConstantBuffer(buffer, ModelConstants); // Send to GPU
 
 			// Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
-			gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
-            gD3DContext->GSSetConstantBuffers(1, 1, &gPerModelConstantBuffer);
-            gD3DContext->PSSetConstantBuffers(1, 1, &gPerModelConstantBuffer);
+			gD3DContext->VSSetConstantBuffers(1, 1, &buffer); // First parameter must match constant buffer number in the shader
+            gD3DContext->GSSetConstantBuffers(1, 1, &buffer);
+            gD3DContext->PSSetConstantBuffers(1, 1, &buffer);
 
 			// Render the sub-meshes attached to this node (no bones - rigid movement)
 			for (auto& subMeshIndex : mNodes[nodeIndex].subMeshes)

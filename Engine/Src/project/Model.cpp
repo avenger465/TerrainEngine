@@ -22,21 +22,12 @@ Model::Model(Mesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*
         mWorldMatrices[i] = mesh->GetNodeDefaultMatrix(i);
 }
 
-//Model::Model(TerrainMesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*= { 0,0,0 }*/, float scale /*= 1*/)
-//	: mMesh(mesh)
-//{
-//	// Set default matrices from mesh
-//	mWorldMatrices.resize(mesh->NumberNodes());
-//	for (int i = 0; i < mWorldMatrices.size(); ++i)
-//		mWorldMatrices[i] = mesh->GetNodeDefaultMatrix(i);
-//}
-
 
 // The render function simply passes this model's matrices over to Mesh:Render.
 // All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
-void Model::Render()
+void Model::Render(ID3D11Buffer* buffer, PerModelConstants& ModelConstants)
 {
-    mMesh->Render(mWorldMatrices);
+    mMesh->Render(mWorldMatrices, buffer, ModelConstants);
 }
 
 
@@ -123,9 +114,9 @@ void Model::SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Textu
 	gD3DContext->PSSetShaderResources(NormalMapSlot, 1, &NormalMap);
 }
 
-void Model::ResizeModel(float* heightMap, float resolution)
+void Model::ResizeModel(float* heightMap, float resolution, CVector3 MinX, CVector3 MaxX)
 {
-	mMesh->UpdateVertices(CVector3(-200, 0, -200), CVector3(200, 0, 200), resolution, resolution, heightMap, 100 / resolution, true, true);
+	mMesh->UpdateVertices(MinX, MaxX, resolution, resolution, heightMap, 100 / resolution, true, true);
 }
 
 

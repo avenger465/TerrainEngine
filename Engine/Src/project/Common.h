@@ -34,8 +34,8 @@ extern ID3D11RenderTargetView* gBackBufferRenderTarget;  // Back buffer is where
 extern ID3D11DepthStencilView* gDepthStencil;            // The depth buffer contains a depth for each back buffer pixel
 
 // Input constsnts
-extern const float ROTATION_SPEED;
-extern const float MOVEMENT_SPEED;
+const float ROTATION_SPEED = 2.0f;
+const float MOVEMENT_SPEED = 150.0f;
 
 
 // A global error message to help track down fatal errors - set it to a useful message

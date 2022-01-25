@@ -1,6 +1,7 @@
 #include "System.h"
+//#include "project/Scene.h"
 
-System::System( HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHeight, bool VSYNC, bool FULL_SCREEN)
+System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHeight, bool VSYNC, bool FULL_SCREEN)
 {
     viewportWidth = screenWidth;
     viewportHeight = screenHeight;
@@ -16,6 +17,10 @@ System::System( HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHe
         MessageBoxA(HWnd, LastError.c_str(), NULL, MB_OK);
         exit;
     }
+
+    Scene = scene;
+    Scene->viewportWidth = screenWidth;
+    Scene->viewportHeight = screenHeight;
 
     //IMGUI
     //*******************************
@@ -39,10 +44,11 @@ System::System( HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHe
     //*******************************
 
     // Initialise scene
-    if (!InitGeometry(LastError) || !InitScene())
+    if (!Scene->InitGeometry(LastError) || !Scene->InitScene())
     {
         MessageBoxA(HWnd, LastError.c_str(), NULL, MB_OK);
-        ReleaseResources();
+        Scene->ReleaseResources();
+        //ReleaseResources();
         ShutdownDirect3D();
         exit;
     }
@@ -50,6 +56,11 @@ System::System( HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHe
 
 System::~System()
 {
+    if (Scene)
+    {
+        delete Scene;
+        Scene = 0;
+    }
 }
 
 void System::run()
@@ -75,10 +86,12 @@ void System::run()
         {
             // Update the scene by the amount of time since the last frame
             float frameTime = gTimer.GetLapTime();
-            UpdateScene(frameTime, HWnd);
+            Scene->UpdateScene(frameTime, HWnd);
+            //UpdateScene(frameTime, HWnd);
 
             // Draw the scene
-            RenderScene();
+            Scene->RenderScene();
+            //RenderScene();
 
             if (KeyHit(Key_Escape))
             {
@@ -99,8 +112,9 @@ void System::run()
     //*******************************
 
     // Release everything before quitting
-    ReleaseResources();
-    ShutdownDirect3D();
+    //ReleaseResources();
+    Scene->ReleaseResources();
+    //ShutdownDirect3D();
 }
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

@@ -28,7 +28,7 @@ public:
 
     // The render function simply passes this model's matrices over to Mesh:Render.
     // All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
-    void Render();
+    void Render(ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 
 
 	// Control a given node in the model using keys provided. Amount of motion performed depends on frame time
@@ -91,7 +91,7 @@ public:
 
     void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
 
-    void ResizeModel(float* heightMap, float resolution);
+    void ResizeModel(float* heightMap, float resolution, CVector3 MinX, CVector3 MaxX);
 
 
 

@@ -108,6 +108,8 @@
     <ClInclude Include="Src\Math\CVector2.h" />
     <ClInclude Include="Src\Math\CVector3.h" />
     <ClInclude Include="Src\Math\MathHelpers.h" />
+    <ClInclude Include="Src\Scene\BaseScene.h" />
+    <ClInclude Include="Src\Scene\TerrainGenerationScene.h" />
     <ClInclude Include="Src\System\Direct3DSetup.h" />
     <ClInclude Include="Src\System\System.h" />
     <ClInclude Include="Src\Utility\CResourceManager.h" />
@@ -120,7 +122,6 @@
     <ClInclude Include="Src\project\Common.h" />
     <ClInclude Include="Src\project\Mesh.h" />
     <ClInclude Include="Src\project\Model.h" />
-    <ClInclude Include="Src\project\Scene.h" />
     <ClInclude Include="Src\project\Shader.h" />
     <ClInclude Include="Src\project\State.h" />
     <ClInclude Include="Src\tepch.h" />
@@ -132,6 +133,8 @@
     <ClCompile Include="Src\Math\CPerlinNoise.cpp" />
     <ClCompile Include="Src\Math\CVector2.cpp" />
     <ClCompile Include="Src\Math\CVector3.cpp" />
+    <ClCompile Include="Src\Scene\BaseScene.cpp" />
+    <ClCompile Include="Src\Scene\TerrainGenerationScene.cpp" />
     <ClCompile Include="Src\System\Direct3DSetup.cpp" />
     <ClCompile Include="Src\System\System.cpp" />
     <ClCompile Include="Src\Utility\CResourceManager.cpp" />
@@ -143,7 +146,6 @@
     <ClCompile Include="Src\project\Main.cpp" />
     <ClCompile Include="Src\project\Mesh.cpp" />
     <ClCompile Include="Src\project\Model.cpp" />
-    <ClCompile Include="Src\project\Scene.cpp" />
     <ClCompile Include="Src\project\Shader.cpp" />
     <ClCompile Include="Src\project\State.cpp" />
     <ClCompile Include="Src\tepch.cpp" />

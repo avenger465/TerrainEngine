@@ -17,7 +17,7 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     rockColour = texture1.Sample(sampler0, input.uv);
     dirtColour = texture2.Sample(sampler0, input.uv);
     
-    float slope = 1.0f - input.normal.y;
+    float slope = 1- input.normal.y;
     if (slope < 0.2)
     {
         blendAmount = slope / 0.2f;

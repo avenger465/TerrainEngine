@@ -19,6 +19,6 @@ public:
 	void SetPosition(CVector3 Position);
 	CVector3 GetLightColour();
 	void SetLightStates(ID3D11BlendState* blendSate, ID3D11DepthStencilState* depthState, ID3D11RasterizerState* rasterizerState);
-	void RenderLight();
+	void RenderLight(ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 };
 

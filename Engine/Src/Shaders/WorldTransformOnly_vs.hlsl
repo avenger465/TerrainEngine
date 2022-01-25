@@ -26,6 +26,7 @@ BasicVertex main(BasicVertex modelVertex)
 	// Same process to transfrom model normals into world space
     float4 modelNormal = float4(modelVertex.normal, 0);
     output.normal = mul(gWorldMatrix, modelNormal).xyz;
+    output.normal = normalize(output.normal);
 
 	// Pass texture coordinates (UVs) on to the later shaders unchanged
     output.uv = modelVertex.uv;

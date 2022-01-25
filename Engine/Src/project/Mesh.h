@@ -38,7 +38,7 @@ public:
 	// Render the mesh with the given matrices
 	// Handles rigid body meshes (including single part meshes) as well as skinned meshes
 	// LIMITATION: The mesh must use a single texture throughout
-    void Render(std::vector<CMatrix4x4>& modelMatrices);
+    void Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 
     void RegenerateMesh(const void* vertices, const void* indices);
     void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float *heightMap,float scale, bool normals /* = false */, bool uvs /* = true */);

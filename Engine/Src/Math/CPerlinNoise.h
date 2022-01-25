@@ -11,9 +11,9 @@
 #pragma once
 #include "tepch.h"
 
-#define B 0xf100
-#define BM 0xff
-#define N 0x1000
+//#define B 0xf100
+//#define BM 0xff
+//#define N 0x1000
 
 #define LERP(t, a, b) (a + t * (b-a)) 
 #define S_CURVE(t) (t * t * (3. - 2. * t))
@@ -23,32 +23,33 @@
 
 class CPerlinNoise
 {
+	std::vector<int> p;
 public:
 
-	CPerlinNoise() {}
+	CPerlinNoise();
+	CPerlinNoise(unsigned int seed);
 	~CPerlinNoise() {}
 
-	static double noise1(double arg);
-	static double noise2(float vec[2]);
+	//static double noise1(double arg);
+	double noise(double x, double y, double z);
+	//static double noise2(float vec[2]);
 
 private:
 
+	double fade(double t);
+	double grad(int hash, double x, double y, double z);
 	//determines if the lists need to be initialised
 	static bool start;
 
 	//Permutation list
-	static int p[B + B + 2];
+	//static int p[B + B + 2];
 
 	//Gradient lists 
-	static float g3[B + B + 2][3];
-	static float g2[B + B + 2][2];
-	static float g1[B + B + 2];
+	//static float g3[B + B + 2][3];
+	//static float g2[B + B + 2][2];
+	//static float g1[B + B + 2];
 
 	//function to initialise the lists that will be used throughout the algorithm
-	static void	init(void);
-
-
-	static void	setup(float* vec, int i, int& b0, int& b1, float& r0, float& r1);
 
 
 	///Helper math functions///

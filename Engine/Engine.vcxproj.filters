@@ -16,6 +16,9 @@
     <Filter Include="Src\Math">
       <UniqueIdentifier>{0678E746-F244-4252-1B5E-30FA078A77E0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Scene">
+      <UniqueIdentifier>{EAE54324-5650-F89A-9F8E-A9400B38D6EF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Src\Shaders">
       <UniqueIdentifier>{E6043150-52BA-A945-DBAE-A31C4763A049}</UniqueIdentifier>
     </Filter>
@@ -50,6 +53,12 @@
     </ClInclude>
     <ClInclude Include="Src\Math\MathHelpers.h">
       <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\BaseScene.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\TerrainGenerationScene.h">
+      <Filter>Src\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Src\System\Direct3DSetup.h">
       <Filter>Src\System</Filter>
@@ -87,9 +96,6 @@
     <ClInclude Include="Src\project\Model.h">
       <Filter>Src\project</Filter>
     </ClInclude>
-    <ClInclude Include="Src\project\Scene.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
     <ClInclude Include="Src\project\Shader.h">
       <Filter>Src\project</Filter>
     </ClInclude>
@@ -118,6 +124,12 @@
     </ClCompile>
     <ClCompile Include="Src\Math\CVector3.cpp">
       <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\BaseScene.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\TerrainGenerationScene.cpp">
+      <Filter>Src\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Src\System\Direct3DSetup.cpp">
       <Filter>Src\System</Filter>
@@ -150,9 +162,6 @@
       <Filter>Src\project</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\Model.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Scene.cpp">
       <Filter>Src\project</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\Shader.cpp">

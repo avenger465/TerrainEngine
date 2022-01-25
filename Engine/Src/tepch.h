@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <random>
+#include <numeric>
 
 
 //------------------------//
