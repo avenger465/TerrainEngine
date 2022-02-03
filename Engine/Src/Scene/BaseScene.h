@@ -1,13 +1,13 @@
 #include "tepch.h"
 #include "project/Common.h"
 #include "Utility/CResourceManager.h"
-#include "project/Camera.h"
-#include "project/CLight.h"
+#include "Scene/Camera.h"
+#include "Scene/CLight.h"
 #include "Utility/Input.h"
-#include "project/Mesh.h"
-#include "project/Model.h"
+#include "Data/Mesh.h"
+#include "Data/Model.h"
 #include "project/State.h"
-#include "project/Shader.h"
+#include "Shaders/Shader.h"
 #include "Utility/ColourRGBA.h"
 
 #pragma once

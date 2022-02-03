@@ -53,7 +53,7 @@ void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename)
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
-void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* heightMap, bool normals, bool uvs)
+void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** heightMap, bool normals, bool uvs)
 {
 	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, heightMap, normals, uvs);
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
@@ -97,6 +97,7 @@ Mesh* CResourceManager::getMesh(const wchar_t* uid)
 		mesh = meshMap.at(const_cast<wchar_t*>(uid));
 		return mesh;
 	}
+	return nullptr;
 }
 
 bool CResourceManager::doesFileExist(std::string &fname)

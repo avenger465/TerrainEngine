@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "Math/CPerlinNoise.h"
+#include "../DiamondSquare.h"
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -36,11 +37,12 @@ private:
 	void BrownianMotion(int Amplitude, float frequency, int octaves);
 	void RigidNoise(int Amplitude, float frequency);
 	void InverseRigidNoise(int Amplitude, float frequency);
+	void DiamondSquareMap();
 
 	void IMGUI();
 
 public:
-	float* heightMap;
+	float** heightMap;
 
 private:
 	int sizeOfTerrain = 200;
@@ -50,7 +52,7 @@ private:
 	bool enableTerrain = true;
 	bool enableLights = false;
 
-	float frequency = 0.45;
+	float frequency = 0.45f;
 	int amplitude = 45;
 	int octaves = 10;
 

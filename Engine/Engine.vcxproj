@@ -101,15 +101,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DiamondSquare.h" />
     <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h" />
     <ClInclude Include="External\GUI\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Src\Data\Mesh.h" />
+    <ClInclude Include="Src\Data\Model.h" />
     <ClInclude Include="Src\Math\CMatrix4x4.h" />
     <ClInclude Include="Src\Math\CPerlinNoise.h" />
     <ClInclude Include="Src\Math\CVector2.h" />
     <ClInclude Include="Src\Math\CVector3.h" />
     <ClInclude Include="Src\Math\MathHelpers.h" />
     <ClInclude Include="Src\Scene\BaseScene.h" />
+    <ClInclude Include="Src\Scene\CLight.h" />
+    <ClInclude Include="Src\Scene\Camera.h" />
     <ClInclude Include="Src\Scene\TerrainGenerationScene.h" />
+    <ClInclude Include="Src\Shaders\Shader.h" />
     <ClInclude Include="Src\System\Direct3DSetup.h" />
     <ClInclude Include="Src\System\System.h" />
     <ClInclude Include="Src\Utility\CResourceManager.h" />
@@ -117,36 +123,32 @@
     <ClInclude Include="Src\Utility\GraphicsHelpers.h" />
     <ClInclude Include="Src\Utility\Input.h" />
     <ClInclude Include="Src\Utility\Timer.h" />
-    <ClInclude Include="Src\project\CLight.h" />
-    <ClInclude Include="Src\project\Camera.h" />
     <ClInclude Include="Src\project\Common.h" />
-    <ClInclude Include="Src\project\Mesh.h" />
-    <ClInclude Include="Src\project\Model.h" />
-    <ClInclude Include="Src\project\Shader.h" />
     <ClInclude Include="Src\project\State.h" />
     <ClInclude Include="Src\tepch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DiamondSquare.cpp" />
     <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\Data\Mesh.cpp" />
+    <ClCompile Include="Src\Data\Model.cpp" />
     <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
     <ClCompile Include="Src\Math\CPerlinNoise.cpp" />
     <ClCompile Include="Src\Math\CVector2.cpp" />
     <ClCompile Include="Src\Math\CVector3.cpp" />
     <ClCompile Include="Src\Scene\BaseScene.cpp" />
+    <ClCompile Include="Src\Scene\CLight.cpp" />
+    <ClCompile Include="Src\Scene\Camera.cpp" />
     <ClCompile Include="Src\Scene\TerrainGenerationScene.cpp" />
+    <ClCompile Include="Src\Shaders\Shader.cpp" />
     <ClCompile Include="Src\System\Direct3DSetup.cpp" />
     <ClCompile Include="Src\System\System.cpp" />
     <ClCompile Include="Src\Utility\CResourceManager.cpp" />
     <ClCompile Include="Src\Utility\GraphicsHelpers.cpp" />
     <ClCompile Include="Src\Utility\Input.cpp" />
     <ClCompile Include="Src\Utility\Timer.cpp" />
-    <ClCompile Include="Src\project\CLight.cpp" />
-    <ClCompile Include="Src\project\Camera.cpp" />
     <ClCompile Include="Src\project\Main.cpp" />
-    <ClCompile Include="Src\project\Mesh.cpp" />
-    <ClCompile Include="Src\project\Model.cpp" />
-    <ClCompile Include="Src\project\Shader.cpp" />
     <ClCompile Include="Src\project\State.cpp" />
     <ClCompile Include="Src\tepch.cpp" />
   </ItemGroup>

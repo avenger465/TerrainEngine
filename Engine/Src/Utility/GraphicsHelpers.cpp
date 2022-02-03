@@ -6,7 +6,7 @@
 #include "GraphicsHelpers.h"
 
 
-#include "project/Shader.h"
+#include "Shaders/Shader.h"
 #include "project/Common.h"
 
 #include <WICTextureLoader.h>

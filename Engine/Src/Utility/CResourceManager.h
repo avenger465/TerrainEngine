@@ -1,7 +1,7 @@
 #pragma once
 #include "tepch.h"
 #include "GraphicsHelpers.h"
-#include "project/Mesh.h"
+#include "Data/Mesh.h"
 #include <WICTextureLoader.h>
 #include <DDSTextureLoader.h>
 
@@ -13,7 +13,7 @@ public:
 
 	void loadTexture(const wchar_t* uniqueID, std::string filename);
 	void loadMesh(const wchar_t* uniqueID, std::string &filename);
-	void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* heightMap, bool normals, bool uvs);
+	void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** heightMap, bool normals, bool uvs);
 
 
 	ID3D11ShaderResourceView* getTexture(const wchar_t* uid);

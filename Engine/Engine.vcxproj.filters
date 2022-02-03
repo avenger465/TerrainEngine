@@ -13,6 +13,9 @@
     <Filter Include="Src">
       <UniqueIdentifier>{0D23880B-792C-887C-02A8-9E7C6EB0937C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Data">
+      <UniqueIdentifier>{9688E246-8255-3D52-AB6E-2BFA979A72E0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Src\Math">
       <UniqueIdentifier>{0678E746-F244-4252-1B5E-30FA078A77E0}</UniqueIdentifier>
     </Filter>
@@ -39,6 +42,12 @@
     <ClInclude Include="External\GUI\backends\imgui_impl_win32.h">
       <Filter>External\GUI\backends</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Data\Mesh.h">
+      <Filter>Src\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data\Model.h">
+      <Filter>Src\Data</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Math\CMatrix4x4.h">
       <Filter>Src\Math</Filter>
     </ClInclude>
@@ -57,8 +66,17 @@
     <ClInclude Include="Src\Scene\BaseScene.h">
       <Filter>Src\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Scene\CLight.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scene\Camera.h">
+      <Filter>Src\Scene</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Scene\TerrainGenerationScene.h">
       <Filter>Src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Shaders\Shader.h">
+      <Filter>Src\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Src\System\Direct3DSetup.h">
       <Filter>Src\System</Filter>
@@ -81,22 +99,7 @@
     <ClInclude Include="Src\Utility\Timer.h">
       <Filter>Src\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Src\project\CLight.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\project\Camera.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
     <ClInclude Include="Src\project\Common.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\project\Mesh.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\project\Model.h">
-      <Filter>Src\project</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\project\Shader.h">
       <Filter>Src\project</Filter>
     </ClInclude>
     <ClInclude Include="Src\project\State.h">
@@ -105,6 +108,7 @@
     <ClInclude Include="Src\tepch.h">
       <Filter>Src</Filter>
     </ClInclude>
+    <ClInclude Include="DiamondSquare.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp">
@@ -112,6 +116,12 @@
     </ClCompile>
     <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp">
       <Filter>External\GUI\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data\Mesh.cpp">
+      <Filter>Src\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data\Model.cpp">
+      <Filter>Src\Data</Filter>
     </ClCompile>
     <ClCompile Include="Src\Math\CMatrix4x4.cpp">
       <Filter>Src\Math</Filter>
@@ -128,8 +138,17 @@
     <ClCompile Include="Src\Scene\BaseScene.cpp">
       <Filter>Src\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scene\CLight.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scene\Camera.cpp">
+      <Filter>Src\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Scene\TerrainGenerationScene.cpp">
       <Filter>Src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Shaders\Shader.cpp">
+      <Filter>Src\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="Src\System\Direct3DSetup.cpp">
       <Filter>Src\System</Filter>
@@ -149,22 +168,7 @@
     <ClCompile Include="Src\Utility\Timer.cpp">
       <Filter>Src\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="Src\project\CLight.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Camera.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
     <ClCompile Include="Src\project\Main.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Mesh.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Model.cpp">
-      <Filter>Src\project</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\project\Shader.cpp">
       <Filter>Src\project</Filter>
     </ClCompile>
     <ClCompile Include="Src\project\State.cpp">
@@ -173,6 +177,7 @@
     <ClCompile Include="Src\tepch.cpp">
       <Filter>Src</Filter>
     </ClCompile>
+    <ClCompile Include="DiamondSquare.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">

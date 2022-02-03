@@ -1,7 +1,7 @@
 
-#include "Mesh.h"
-#include "Model.h"
-#include "Common.h"
+#include "Data/Mesh.h"
+#include "Data/Model.h"
+#include "project/Common.h"
 
 #pragma once
 

@@ -5,7 +5,7 @@
 #include "tepch.h"
 #include "Direct3DSetup.h"
 
-#include "../project/Shader.h"
+#include "Shaders/Shader.h"
 #include "../project/Common.h"
 
 

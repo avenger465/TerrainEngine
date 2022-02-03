@@ -10,12 +10,12 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try
     {
-        resourceManager->loadMesh(L"GroundMesh", std::string("Src/Data/Hills.x"));
-        resourceManager->loadMesh(L"LightMesh", std::string("Src/Data/Light.x"));
-        resourceManager->loadMesh(L"SphereMesh", std::string("Src/Data/Sphere.x"));
+        resourceManager->loadMesh(L"GroundMesh", std::string("Data/Hills.x"));
+        resourceManager->loadMesh(L"LightMesh", std::string("Data/Light.x"));
+        resourceManager->loadMesh(L"SphereMesh", std::string("Data/Sphere.x"));
         resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), resolution, resolution, heightMap, true, true);
         resourceManager->loadGrid(L"TerrainMesh1", CVector3(200, 0, -200), CVector3(600, 0, 200), resolution, resolution, heightMap, true, true);
-        resourceManager->loadMesh(L"SkyMesh", std::string("Src/Data/Skybox.x"));
+        resourceManager->loadMesh(L"SkyMesh", std::string("Data/Skybox.x"));
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -271,13 +271,15 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
 
 void TerrainGenerationScene::BuildHeightMap()
 {
-    float n = (resolution + 1) * (resolution + 1);
-    heightMap = new float[(resolution + 1) * (resolution + 1)];
+    float b = (resolution) * (resolution);
+    heightMap = new float*[resolution];
     float height = 1.0f;
-
+    int index = 0;
     for (int i = 0; i <= resolution; ++i) {
+        heightMap[i] = new float[resolution];
         for (int j = 0; j <= resolution; ++j) {
-            heightMap[(i * (resolution + 1)) + j] = height;
+            heightMap[i][j] = height;
+            index++;
             //heightMap[i][j] = height;
         }
     }
@@ -285,7 +287,7 @@ void TerrainGenerationScene::BuildHeightMap()
 
 void TerrainGenerationScene::BuildPerlinHeightMap(int Amplitude, float frequency)
 {
-    const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
     for (int i = 0; i <= resolution; ++i) // loop through the y 
@@ -294,7 +296,7 @@ void TerrainGenerationScene::BuildPerlinHeightMap(int Amplitude, float frequency
         {
             double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            heightMap[(i * (resolution + 1)) + j] += pn->noise(x, y, 0.8) * Amplitude;
+            heightMap[i][j] += (float)pn->noise(x, y, 0.8)* 20;//(float)Amplitude;
         }
     }
 }
@@ -305,14 +307,14 @@ void TerrainGenerationScene::BrownianMotion(int Amplitude, float frequency, int 
     for (int i = 0; i < octaves; ++i)
     {
         BuildPerlinHeightMap(Amplitude, frequency);
-        Amplitude *= 0.5;
+        Amplitude = (int)(Amplitude * 0.5f);
         frequency *= 2;
     }
 }
 
 void TerrainGenerationScene::RigidNoise(int Amplitude, float frequency)
 {
-    const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
     for (int i = 0; i <= resolution; ++i) // loop through the y 
@@ -321,14 +323,14 @@ void TerrainGenerationScene::RigidNoise(int Amplitude, float frequency)
         {
             double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            heightMap[(i * (resolution + 1)) + j] += -(1.0f - abs(pn->noise(x, y, 0.8) * Amplitude));
+            heightMap[i][j]/*(i * (resolution + 1)) + j]*/ += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
         }
     }
 }
 
 void TerrainGenerationScene::InverseRigidNoise(int Amplitude, float frequency)
 {
-    const float scale = sizeOfTerrain / resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
     for (int i = 0; i <= resolution; ++i) // loop through the y 
@@ -337,9 +339,17 @@ void TerrainGenerationScene::InverseRigidNoise(int Amplitude, float frequency)
         {
              double x = j * frequency * scale / 20;
              double y = i * frequency * scale / 20;
-            heightMap[(i * (resolution + 1)) + j] += (1.0f - abs(pn->noise(x, y, 0.8) * Amplitude));
+            heightMap[i][j]/*(i * (resolution + 1)) + j]*/ += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
         }
     }
+}
+
+void TerrainGenerationScene::DiamondSquareMap()
+{
+    DiamondSquare ds(heightMap, resolution);
+    heightMap = ds.process();
+
+
 }
 
 void TerrainGenerationScene::IMGUI()
@@ -364,11 +374,11 @@ void TerrainGenerationScene::IMGUI()
 
         }
         ImGui::Text("");
-        ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01, 0.5);
+        ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01f, 0.5f);
         ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
         ImGui::SliderInt("Terrain Resolution", &sizeOfTerrain, 200, 500);
         ImGui::SliderInt("Perlin Noise Seed", &seed, 1, 250);
-        ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1, 10);
+        ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1.0f, 10.0f);
         ImGui::Text("");
         if (ImGui::Button("Generate Perlin Height Map"))
         {
@@ -394,7 +404,11 @@ void TerrainGenerationScene::IMGUI()
             BrownianMotion(amplitude, frequency, 10);
             gGround->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
         }
-        ImGui::Button("Midpoint Displacement");
+        if (ImGui::Button("Midpoint Displacement"))
+        {
+            DiamondSquareMap();
+            gGround->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+        }
         ImGui::Text("");
         ImGui::Separator();
     }

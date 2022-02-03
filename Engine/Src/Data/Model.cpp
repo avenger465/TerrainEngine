@@ -8,7 +8,7 @@
 #include "Model.h"
 
 
-#include "Common.h"
+#include "project/Common.h"
 #include "Utility/GraphicsHelpers.h"
 #include "Mesh.h"
 
@@ -114,9 +114,9 @@ void Model::SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Textu
 	gD3DContext->PSSetShaderResources(NormalMapSlot, 1, &NormalMap);
 }
 
-void Model::ResizeModel(float* heightMap, float resolution, CVector3 MinX, CVector3 MaxX)
+void Model::ResizeModel(float** heightMap, int resolution, CVector3 MinX, CVector3 MaxX)
 {
-	mMesh->UpdateVertices(MinX, MaxX, resolution, resolution, heightMap, 100 / resolution, true, true);
+	mMesh->UpdateVertices(MinX, MaxX, resolution, resolution, heightMap, true, true);
 }
 
 

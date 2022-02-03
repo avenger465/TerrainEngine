@@ -5,7 +5,7 @@
 #ifndef _SHADER_H_INCLUDED_
 #define _SHADER_H_INCLUDED_
 
-#include "Common.h"
+#include "project/Common.h"
 
 //--------------------------------------------------------------------------------------
 // Global Variables

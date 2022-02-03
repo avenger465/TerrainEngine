@@ -4,7 +4,7 @@
 // Holds a pointer to a mesh as well as position, rotation and scaling, which are converted to a world matrix when required
 // This is more of a convenience class, the Mesh class does most of the difficult work.
 
-#include "Common.h"
+#include "project/Common.h"
 #include "Math/CVector3.h"
 #include "Math/CMatrix4x4.h"
 #include "Utility/Input.h"
@@ -91,7 +91,7 @@ public:
 
     void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
 
-    void ResizeModel(float* heightMap, float resolution, CVector3 MinX, CVector3 MaxX);
+    void ResizeModel(float** heightMap, int resolution, CVector3 MinX, CVector3 MaxX);
 
 
 

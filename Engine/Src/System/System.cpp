@@ -6,7 +6,7 @@ System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWi
     viewportWidth = screenWidth;
     viewportHeight = screenHeight;
     // Create a window to display the scene
-    if (!InitWindow(hInstance, nCmdShow)) { exit; }
+    if (!InitWindow(hInstance, nCmdShow)) { exit(0); }
 
     // Prepare TL-Engine style input functions
     InitInput();
@@ -15,7 +15,7 @@ System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWi
     if (!InitDirect3D(viewportWidth, viewportHeight, HWnd, LastError))
     {
         MessageBoxA(HWnd, LastError.c_str(), NULL, MB_OK);
-        exit;
+        exit(0);
     }
 
     Scene = scene;
@@ -50,7 +50,7 @@ System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWi
         Scene->ReleaseResources();
         //ReleaseResources();
         ShutdownDirect3D();
-        exit;
+        exit(0);
     }
 }
 
