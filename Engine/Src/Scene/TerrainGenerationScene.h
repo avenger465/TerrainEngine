@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "Math/CPerlinNoise.h"
-#include "../DiamondSquare.h"
+#include "Math/DiamondSquare.h"
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -30,10 +30,11 @@ class TerrainGenerationScene :
 	// frameTime is the time passed since the last frame
 	void UpdateScene(float frameTime, HWND HWnd);
 
+
 private:
 	void BuildHeightMap();
 
-	void BuildPerlinHeightMap(int Amplitude, float frequency);
+	void BuildPerlinHeightMap(int Amplitude, float frequency, bool bBrownianMotion);
 	void BrownianMotion(int Amplitude, float frequency, int octaves);
 	void RigidNoise(int Amplitude, float frequency);
 	void InverseRigidNoise(int Amplitude, float frequency);
@@ -56,18 +57,14 @@ private:
 	int amplitude = 45;
 	int octaves = 10;
 
-	Model* gGround;
-	Model* gTerrain;
+	std::ostringstream frameTimeMs;
 
-	static const int NUM_LIGHTS = 2;
-	CLight* gLights[NUM_LIGHTS];
-	float LightScale[NUM_LIGHTS] = { 10.0f, 30.0f };
+	bool lockFPS = true;
+	std::string FPS_String;
+	int FPS;
 
-	CVector3 LightsColour[NUM_LIGHTS] = { {1.0f, 0.8f, 1.0f},
-										  {1.0f, 0.8f, 0.2f} };
-
-	CVector3 LightsPosition[NUM_LIGHTS] = { { 60, 10, 0 },
-											{ -10, 25, -30 } };
+	Model* GroundModel;
+	Model* TerrainModel;
 
 	CVector3 TerrainYScale = { 5, 5, 5 };
 
@@ -75,7 +72,15 @@ private:
 	float    gSpecularPower = 256; // Specular power controls shininess - same for all models in this app
 	ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
 
-	// Variables controlling light1's orbiting of the cube
-	const float gLightOrbit = 20.0f;
-	const float gLightOrbitSpeed = 0.7f;
+	// Dimensions of portal texture - controls quality of rendered scene in portal
+	int textureWidth = 900;
+	int textureHeight = 900;
+
+	// The scene texture - each frame it is rendered to, then it is used as a texture for model
+	ID3D11Texture2D* SceneTexture = nullptr; // This object represents the memory used by the texture on the GPU
+	ID3D11RenderTargetView* SceneRenderTarget = nullptr; // This object is used when we want to render to the texture above
+	ID3D11ShaderResourceView* SceneTextureSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
+
+	ID3D11Texture2D* SceneDepthStencil = nullptr; // This object represents the memory used by the texture on the GPU
+	ID3D11DepthStencilView* SceneDepthStencilView = nullptr; // This object is used when we want to use the texture above as the depth buffer
 };

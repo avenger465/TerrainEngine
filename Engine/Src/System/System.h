@@ -33,5 +33,7 @@ private:
 	std::string LastError;
 	int viewportWidth;
 	int viewportHeight;
+
+	inline void SetupIMGUIiStyle(bool bDarkStyle, float alpha);
 };
 

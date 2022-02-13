@@ -51,10 +51,10 @@ void DiamondSquare::diamondStep(int sideLength, int halfSide)
 				map[x][(y + halfSide) % (size - 1)] +
 				map[x][(y - halfSide + size - 1) % (size - 1)];
 			avg /= 4.0 + dRand(-range, range);
-			map[x][y] = avg;
+			map[x][y] = (float)avg;
 
-			if (x == 0) map[size - 1][y] = avg;
-			if (y == 0) map[x][size - 1] = avg;
+			if (x == 0) map[size - 1][y] = (float)avg;
+			if (y == 0) map[x][size - 1] = (float)avg;
 		}
 	}
 }
@@ -70,7 +70,7 @@ void DiamondSquare::squareStep(int sideLength, int halfSide)
 		{
 			double avg = map[x][y] + map[x + sideLength][y] + map[x][y + sideLength] + map[x + sideLength][y + sideLength];
 			avg /= 4.0;
-			map[x + halfSide][y + halfSide] = avg + dRand(-range, range);
+			map[x + halfSide][y + halfSide] = (float)avg + dRand(-range, range);
 		}
 	}
 }

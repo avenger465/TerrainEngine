@@ -53,10 +53,5 @@ protected:
 
 	CResourceManager* resourceManager;
 	Camera* gCamera;
-
-	std::ostringstream frameTimeMs;
-
-	bool lockFPS = true;
-	std::string FPS;
 };
 

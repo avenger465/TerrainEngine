@@ -10,8 +10,8 @@ workspace "TerrainEngine"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDir = {}
-IncludeDir["ImGui"] = "Engine/External/GUI"
-IncludeDir["ImGuiBackends"] = "Engine/External/GUI/backends"
+IncludeDir["ImGui"] = "Engine/External/imGUI"
+IncludeDir["ImGuiBackends"] = "Engine/External/imGUI/backends"
 IncludeDir["Assimp"] = "Engine/External/assimp/include"
 IncludeDir["DirectX"] = "Engine/External/DirectXTK"
 IncludeDir["TinyXML2"] = "Engine/External/TinyXML2"
@@ -21,7 +21,7 @@ LibDir = {}
 LibDir["assimp"] = "Engine/External/assimp/lib/xSixtyFour"
 LibDir["DirectXTK"] = "Engine/External/DirectXTK/%{cfg.buildcfg}"
 
-include "Engine/External/GUI"
+include "Engine/External/imGUI"
 
 project "Engine"
 	location "Engine"
@@ -39,10 +39,10 @@ project "Engine"
 	{
 		"%{prj.name}/Src/**.cpp",
 		"%{prj.name}/Src/**.h",
-		"%{prj.name}/External/GUI/backends/imgui_impl_dx11.h",
-		"%{prj.name}/External/GUI/backends/imgui_impl_dx11.cpp",
-		"%{prj.name}/External/GUI/backends/imgui_impl_win32.h",
-		"%{prj.name}/External/GUI/backends/imgui_impl_win32.cpp",
+		"%{prj.name}/External/imGUI/backends/imgui_impl_dx11.h",
+		"%{prj.name}/External/imGUI/backends/imgui_impl_dx11.cpp",
+		"%{prj.name}/External/imGUI/backends/imgui_impl_win32.h",
+		"%{prj.name}/External/imGUI/backends/imgui_impl_win32.cpp",
 		"%{prj.name}/Src/Shaders/Common.hlsli"
 
 	}
@@ -74,10 +74,10 @@ project "Engine"
 		"winmm.lib"
 	}
 	
-	files("Engine/External/GUI/backends/imgui_impl_win32.cpp")
+	files("Engine/External/imGUI/backends/imgui_impl_win32.cpp")
 	flags("NoPCH")
 
-	files("Engine/External/GUI/backends/imgui_impl_dx11.cpp")
+	files("Engine/External/imGUI/backends/imgui_impl_dx11.cpp")
 	flags("NoPCH")
 
 	files("Engine/Src/Shaders/*.hlsl")

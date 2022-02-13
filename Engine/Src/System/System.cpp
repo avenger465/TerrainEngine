@@ -32,9 +32,11 @@ System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWi
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    SetupIMGUIiStyle(true, 0.5f);
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer bindings
@@ -101,9 +103,9 @@ void System::run()
     }
 
     //IMGUI
-//*******************************
-// Shutdown ImGui
-//*******************************
+    //*******************************
+    // Shutdown ImGui
+    //*******************************
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -199,7 +201,7 @@ LRESULT System::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
 {
     // Get a stock icon to show on the taskbar for this program.
-    SHSTOCKICONINFO stockIcon;
+    SHSTOCKICONINFO stockIcon{};
     stockIcon.cbSize = sizeof(stockIcon);
     if (SHGetStockIconInfo(SIID_APPLICATION, SHGSI_ICON, &stockIcon) != S_OK) // Returns false on failure
     {
@@ -218,7 +220,7 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW); // What cursor appears over the window
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName = nullptr;
-    wcex.lpszClassName = L"CO2409WindowClass";
+    wcex.lpszClassName = L"Window";
     wcex.hIconSm = stockIcon.hIcon;
     if (!RegisterClassEx(&wcex)) // Returns false on failure
     {
@@ -240,7 +242,7 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
 
     // Create window, the second parameter is the text that appears in the title bar
     HInst = hInstance;
-    HWnd = CreateWindow(L"CO2409WindowClass", L"Direct3D 11", windowStyle,
+    HWnd = CreateWindow(L"Window", L"Procedural Terrain Generation", windowStyle,
         CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
     if (!HWnd)
     {
@@ -251,4 +253,82 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
     UpdateWindow(HWnd);
 
     return TRUE;
+}
+
+inline void System::SetupIMGUIiStyle(bool bDarkStyle, float alpha)
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Alpha = 1.0f;
+    style.FrameRounding = 15.0f;
+    style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 0.94f);
+    style.Colors[ImGuiCol_PopupBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
+
+    style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
+
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(1.0f, 1.0f, 1.0f, 0.4f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(1.0f, 1.0f, 1.0f, 0.4f);
+
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+
+    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+
+    style.Colors[ImGuiCol_CheckMark] = ImVec4(1.0f, 0.8f, 0.4f, 1.0f);
+
+    style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.0f, 0.8f, 0.4f, 0.75f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(1.0f, 0.8f, 0.4f, 1.00f);
+
+    style.Colors[ImGuiCol_Button] =        ImVec4(1.0f, 0.8f, 0.4f, 0.60f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(1.0f, 0.8f, 0.4f, 0.85f);
+    style.Colors[ImGuiCol_ButtonActive] =  ImVec4(1.0f, 0.8f, 0.4f, 1.0f);
+
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+
+    style.Colors[ImGuiCol_Tab] = ImVec4(1.0f, 0.8f, 0.4f, 0.20f);
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(1.0f, 0.8f, 0.4f, 0.60f);
+    style.Colors[ImGuiCol_TabActive] = ImVec4(1.0f, 0.8f, 0.4f, .85f);
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(1.0f, 0.8f, 0.4f, 0.20f);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(1.0f, 0.8f, 0.4f, 0.60f);
+
+    if (bDarkStyle)
+    {
+        for (int i = 0; i <= ImGuiCol_COUNT; i++)
+        {
+            ImVec4& col = style.Colors[i];
+            float H, S, V;
+            ImGui::ColorConvertRGBtoHSV(col.x, col.y, col.z, H, S, V);
+
+            if (S < 0.1f)
+            {
+                V = 1.0f - V;
+            }
+            ImGui::ColorConvertHSVtoRGB(H, S, V, col.x, col.y, col.z);
+            if (col.w < 1.00f)
+            {
+                col.w *= alpha;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i <= ImGuiCol_COUNT; i++)
+        {
+            ImVec4& col = style.Colors[i];
+            if (col.w < 1.00f)
+            {
+                col.x *= alpha;
+                col.y *= alpha;
+                col.z *= alpha;
+                col.w *= alpha;
+            }
+        }
+    }
 }
