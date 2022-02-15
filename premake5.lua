@@ -1,5 +1,6 @@
-workspace "TerrainEngine"
+workspace "Terrain"
 	architecture "x64"
+	startproject "TerrainGeneration"
 	 
 	configurations
 	{
@@ -10,30 +11,31 @@ workspace "TerrainEngine"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDir = {}
-IncludeDir["ImGui"] = "Engine/External/GUI"
-IncludeDir["ImGuiBackends"] = "Engine/External/GUI/backends"
-IncludeDir["Assimp"] = "Engine/External/assimp/include"
-IncludeDir["DirectX"] = "Engine/External/DirectXTK"
-IncludeDir["TinyXML2"] = "Engine/External/TinyXML2"
+IncludeDir["ImGui"]		    = "DirectXEngine/External/GUI"
+IncludeDir["ImGuiBackends"] = "DirectXEngine/External/GUI/backends"
+IncludeDir["Assimp"]		= "DirectXEngine/External/assimp/include"
+IncludeDir["DirectX"]		= "DirectXEngine/External/DirectXTK"
+IncludeDir["TinyXML2"]		= "DirectXEngine/External/TinyXML2"
 
 
 LibDir = {}
-LibDir["assimp"] = "Engine/External/assimp/lib/xSixtyFour"
-LibDir["DirectXTK"] = "Engine/External/DirectXTK/%{cfg.buildcfg}"
+LibDir["assimp"]	= "DirectXEngine/External/assimp/lib/xSixtyFour"
+LibDir["DirectXTK"] = "DirectXEngine/External/DirectXTK/%{cfg.buildcfg}"
 
-include "Engine/External/GUI"
+include "DirectXEngine/External/GUI"
 
-project "Engine"
-	location "Engine"
+project "DirectXEngine"
+	location "DirectXEngine"
 	kind "WindowedApp"
 	language "C++"
-	staticruntime "Off"
+	cppdialect "C++17"
+	staticruntime "off"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "tepch.h"
-	pchsource "Engine/Src/tepch.cpp"
+	pchsource "DirectXEngine/Src/tepch.cpp"
 
 	files
 	{
@@ -74,49 +76,44 @@ project "Engine"
 		"winmm.lib"
 	}
 	
-	files("Engine/External/GUI/backends/imgui_impl_win32.cpp")
+	files("DirectXEngine/External/GUI/backends/imgui_impl_win32.cpp")
 	flags("NoPCH")
 
-	files("Engine/External/GUI/backends/imgui_impl_dx11.cpp")
+	files("DirectXEngine/External/GUI/backends/imgui_impl_dx11.cpp")
 	flags("NoPCH")
 
-	files("Engine/Src/Shaders/*.hlsl")
+	files("DirectXEngine/Src/Shaders/*.hlsl")
 	shadermodel("5.0")
 
 	local shader_dir = "Src/Shaders/"
 	
 	filter("files:**.hlsl")
-		--flags("ExcludeFromBuild")
 		shaderobjectfileoutput(shader_dir.."%{file.basename}"..".cso")
 	
 	filter("files:**_ps.hlsl")
-		--removeflags("ExcludeFromBuild")
 		shadertype("Pixel")
 
 	filter("files:**_gs.hlsl")
-		--removeflags("ExcludeFromBuild")
 		shadertype("Geometry")
 
 	filter("files:**_vs.hlsl")
-		--removeflags("ExcludeFromBuild")
 		shadertype("Vertex")
 		shaderoptions({"/WX"})
 
 	filter "system:windows"
-		cppdialect "C++17"
 		systemversion "latest"
 
 		defines
 		{
-			"PG_PLATFORM_WINDOWS"
+			"DXE_PLATFORM_WINDOWS",
 		}
 
 	filter "configurations:Debug"
-		defines "PG_DEBUG"
+		defines "DXE_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
-		defines "PG_Release"
+		defines "DXE_Release"
 		runtime "Release"
-		optimize "On"	
+		optimize "on"	
