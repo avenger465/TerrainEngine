@@ -9,7 +9,6 @@
 #include "Math/CVector3.h"
 #include "Math/CMatrix4x4.h"
 
-
 //--------------------------------------------------------------------------------------
 // Global Variables
 //--------------------------------------------------------------------------------------
@@ -21,11 +20,6 @@
 // Windows variables
 extern HWND gHWnd;
 
-// Viewport size
-extern int gViewportWidth;
-extern int gViewportHeight;
-
-
 // Important DirectX variables
 extern ID3D11Device*           gD3DDevice;
 extern ID3D11DeviceContext*    gD3DContext;
@@ -35,14 +29,11 @@ extern ID3D11DepthStencilView* gDepthStencil;            // The depth buffer con
 
 // Input constsnts
 const float ROTATION_SPEED = 2.0f;
-const float MOVEMENT_SPEED = 150.0f;
-
+const float MOVEMENT_SPEED = 3000.0f;
 
 // A global error message to help track down fatal errors - set it to a useful message
 // when a serious error occurs
 extern std::string LastError;
-
-
 
 //--------------------------------------------------------------------------------------
 // Constant Buffers
@@ -74,15 +65,10 @@ struct PerFrameConstants
 
     CVector3   cameraPosition;
     float      padding5;
-
-    bool       enableLights;
-    CVector3   padding6;
 };
 
 extern PerFrameConstants gPerFrameConstants;      // This variable holds the CPU-side constant buffer described above
 extern ID3D11Buffer*     gPerFrameConstantBuffer; // This variable controls the GPU-side constant buffer matching to the above structure
-
-
 
 static const int MAX_BONES = 64;
 
@@ -99,32 +85,11 @@ struct PerModelConstants
 extern PerModelConstants gPerModelConstants;      // This variable holds the CPU-side constant buffer described above
 extern ID3D11Buffer*     gPerModelConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure
 
-// Settings used by post-processes - must match the similar structure in the Common.hlsli shader file
-struct PostProcessingConstants
-{
-    // Tint post-process settings
-    CVector3 tintColour;
-    float    paddingA;  // Pad things to collections of 4 floats (see notes in earlier labs to read about padding)
 
-    //// Grey noise post-process settings
-    //CVector2 noiseScale;
-    //CVector2 noiseOffset;
-
-    //// Burn post-process settings
-    //float    burnHeight;
-    //CVector3 paddingC;
-
-    //// Distort post-process settings
-    //float    distortLevel;
-    //CVector3 paddingD;
-
-    //// Spiral post-process settings
-    //float    spiralLevel;
-    //CVector3 paddingE;
-};
-extern PostProcessingConstants gPostProcessingConstants;      // This variable holds the CPU-side constant buffer described above
-extern ID3D11Buffer* PostProcessingConstantBuffer;           // This variable controls the GPU-side constant buffer related to the above structure
-
+//struct HeightMapType
+//{
+//    float y;
+//};
 
 
 #endif //_COMMON_H_INCLUDED_

@@ -48,8 +48,8 @@ bool LoadShaders(std::string LastError)
     gTriangleGeometryShader  = LoadGeometryShader("Src/Shaders/Triangle_Normals_gs");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
-        gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader    == nullptr ||
-        gTerrainPixelShader == nullptr || gTriangleGeometryShader == nullptr || gWorldTransformVertexShader == nullptr)
+        gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader      == nullptr ||
+        gTerrainPixelShader         == nullptr || gTriangleGeometryShader   == nullptr || gWorldTransformVertexShader == nullptr)
     {
         LastError = "Error loading shaders";
         return false;

@@ -255,7 +255,7 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
     return TRUE;
 }
 
-inline void System::SetupIMGUIiStyle(bool bDarkStyle, float alpha)
+void System::SetupIMGUIiStyle(bool bDarkStyle, float alpha)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     //style.Alpha = 1.0f;

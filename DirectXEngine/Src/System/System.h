@@ -23,6 +23,8 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND , UINT , WPARAM , LPARAM);
 
+	void SetupIMGUIiStyle(bool bDarkStyle, float alpha);
+
 private:
 
 	BOOL InitWindow(HINSTANCE, int);
@@ -33,7 +35,5 @@ private:
 	std::string LastError;
 	int viewportWidth;
 	int viewportHeight;
-
-	inline void SetupIMGUIiStyle(bool bDarkStyle, float alpha);
 };
 

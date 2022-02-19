@@ -53,9 +53,9 @@ void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename)
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
-void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** heightMap, bool normals, bool uvs)
+void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, float* temp1, bool normals, bool uvs)
 {
-	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, heightMap, normals, uvs);
+	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, temp1, temp, normals, uvs);
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 

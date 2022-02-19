@@ -3,21 +3,21 @@
 Texture2D texture0 : register(t0);
 Texture2D texture1 : register(t1);
 Texture2D texture2 : register(t2);
+Texture2D texture3 : register(t3);
 SamplerState sampler0 : register(s0);
 
 float4 main(LightingPixelShaderInput input) : SV_TARGET
 {
     float4 textureColour;
-    float4 grassColour;
-    float4 rockColour;
-    float4 dirtColour;
+    float4 grassColour = texture0.Sample(sampler0, input.uv);
+    float4 rockColour = texture1.Sample(sampler0, input.uv);
+    float4 dirtColour = texture2.Sample(sampler0, input.uv);
+    float4 voronoiDiagram = texture3.Sample(sampler0, input.uv);
     float blendAmount;
+
+    float4 white = float4(0.871f, 0.965f, 0.922f, 1.0f);
     
-    grassColour = texture0.Sample(sampler0, input.uv);
-    rockColour = texture1.Sample(sampler0, input.uv);
-    dirtColour = texture2.Sample(sampler0, input.uv);
-    
-    float slope = 1- input.normal.y;
+    float slope = 1 - input.normal.y;
     if (slope < 0.2)
     {
         blendAmount = slope / 0.2f;
@@ -33,6 +33,15 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     {
         textureColour = rockColour;
     }
+
+    //if (all(voronoiDiagram >= (white - 0.02f)) && all(voronoiDiagram <= (white + 0.02f)))
+    //{
+    //    textureColour.rgb = float3(0.0f, 0.0f, 1.0f);
+    //}
+    //else
+    //{
+    //    textureColour.rgb = float3(1.0f, 0.0f, 0.0f);
+    //}
     
     /////////////////////
     
@@ -40,33 +49,11 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     // Normal might have been scaled by model scaling or interpolation so renormalise
     input.worldNormal = normalize(input.worldNormal);
 
-    ////---------////
-	//// Light 1 ////
-    ////---------////
-	// Direction and distance from pixel to light
-    float3 light1Direction = normalize(gLight1Position - input.worldPosition);
-    float3 light1Dist = length(gLight1Position - input.worldPosition);
-    float3 diffuseLight1 = gLight1Colour * max(dot(input.worldNormal, light1Direction), 0) / light1Dist;
-
-    ////---------////
-	//// Light 2 ////
-    ////---------////
-    float3 light2Direction = normalize(gLight2Position - input.worldPosition);
-    float3 light2Dist = length(gLight2Position - input.worldPosition);
-    float3 diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Dist;
-
     //colour from the texture 
     float3 diffuseMaterialColour = textureColour.rgb;
     
-	// Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)
-    float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2;
-    
-    float3 finalColour = diffuseLight * diffuseMaterialColour;
-    
-    
-    if (!gEnableLights)
-    {
-        finalColour = diffuseMaterialColour;
-    }
+    //float3 finalColour = diffuseLight * diffuseMaterialColour;
+    float3 finalColour = diffuseMaterialColour;
+
     return float4(finalColour, 1.0f);
 }

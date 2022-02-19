@@ -45,6 +45,8 @@ public:
 	// frameTime is the time passed since the last frame
 	virtual void UpdateScene(float frameTime, HWND HWnd) = 0;
 
+	virtual void IMGUI() = 0;
+
 	int viewportWidth;
 	int viewportHeight;
 
@@ -57,7 +59,7 @@ protected:
 	ID3D11Buffer* gPerModelConstantBuffer;
 
 	CResourceManager* resourceManager;
-	Camera* gCamera;
+	Camera* MainCamera;
 	Model* GroundModel;
 
 	CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
@@ -82,4 +84,3 @@ protected:
 	ID3D11Texture2D* SceneDepthStencil = nullptr; // This object represents the memory used by the texture on the GPU
 	ID3D11DepthStencilView* SceneDepthStencilView = nullptr; // This object is used when we want to use the texture above as the depth buffer
 };
-

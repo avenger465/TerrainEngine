@@ -354,7 +354,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 }
 
 
-Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** heightMap, bool normals /* = false */, bool uvs /* = true */)
+Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
 {
     // Create a single node, disable skinning
     mNodes.push_back({ "Grid", MatrixIdentity(), MatrixIdentity(), 0, {}, {0} });
@@ -430,7 +430,9 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** hei
                 currVert += sizeof(CVector2);
             }
             pt.x += xStep;
-            pt.y = heightMap[z][x];
+            //pt.y = temp[x + z];
+            pt.y = temp[z][x];
+            //pt.y = temp1[(z * subDivX) + x];;
             uv.x += uStep;
             ++index;
         }
@@ -499,7 +501,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** hei
    
 }
 
-void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float** heightMap, bool normals /* = false */, bool uvs /* = true */)
+void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
 {
 
     //-----------------------------------
@@ -536,7 +538,9 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
                 currVert += sizeof(CVector2);
             }
             pt.x += xStep;
-            pt.y = heightMap[z][x];
+            //pt.y = temp[x + z];
+            pt.y = temp[z][x];
+            //pt.y = temp1[(z * subDivX) + x];
             uv.x += uStep;
             ++index;
             //index += 2;

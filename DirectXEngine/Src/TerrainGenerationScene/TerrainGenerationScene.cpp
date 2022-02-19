@@ -1,9 +1,16 @@
 #include "TerrainGenerationScene.h"
 
+std::vector<float> m_HeightMap(129 * 129, 0);
+
 bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 {
     resourceManager = new CResourceManager();
+
+    Map = new float[(SizeOfTerrain+1) * (SizeOfTerrain+1)];
+
+    HeightMap.resize(SizeOfTerrain + 1, std::vector<float>(SizeOfTerrain + 1, 0));
     BuildHeightMap();
+   
 
     resourceManager->loadTexture(L"default", "Media/v.bmp");
 
@@ -13,8 +20,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
         resourceManager->loadMesh(L"GroundMesh", std::string("Data/Hills.x"));
         //resourceManager->loadMesh(L"LightMesh", std::string("Data/Light.x"));
         resourceManager->loadMesh(L"SphereMesh", std::string("Data/Sphere.x"));
-        resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), resolution, resolution, heightMap, true, true);
-        resourceManager->loadGrid(L"TerrainMesh1", CVector3(200, 0, -200), CVector3(600, 0, 200), resolution, resolution, heightMap, true, true);
+        resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), SizeOfTerrain, SizeOfTerrain, HeightMap, Map, true, true);
         resourceManager->loadMesh(L"SkyMesh", std::string("Data/Skybox.x"));
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
@@ -76,7 +82,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
         return false;
     }
 
-    // We created the portal texture above, now we get a "view" of it as a render target, i.e. get a special pointer to the texture that
+    // We created the Scene texture above, now we get a "view" of it as a render target, i.e. get a special pointer to the texture that
     // we use when rendering to it (see RenderScene function below)
     if (FAILED(gD3DDevice->CreateRenderTargetView(SceneTexture, NULL, &SceneRenderTarget)))
     {
@@ -98,8 +104,6 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 
 
     //**** Create Scene Depth Buffer ****//
-
-    // We also need a depth buffer to go with our portal
     //**** This depth buffer can be shared with any other textures of the same size
     SceneDesc = {};
     SceneDesc.Width = textureWidth;
@@ -115,23 +119,23 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     SceneDesc.MiscFlags = 0;
     if (FAILED(gD3DDevice->CreateTexture2D(&SceneDesc, NULL, &SceneDepthStencil)))
     {
-        LastError = "Error creating portal depth stencil texture";
+        LastError = "Error creating Scene depth stencil texture";
         return false;
     }
 
-    // Create the depth stencil view, i.e. indicate that the texture just created is to be used as a depth buffer
-    D3D11_DEPTH_STENCIL_VIEW_DESC portalDescDSV = {};
-    portalDescDSV.Format = SceneDesc.Format;
-    portalDescDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    portalDescDSV.Texture2D.MipSlice = 0;
-    portalDescDSV.Flags = 0;
-    if (FAILED(gD3DDevice->CreateDepthStencilView(SceneDepthStencil, &portalDescDSV, &SceneDepthStencilView)))
+    // Create the depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC sceneDescDSV = {};
+    sceneDescDSV.Format = SceneDesc.Format;
+    sceneDescDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    sceneDescDSV.Texture2D.MipSlice = 0;
+    sceneDescDSV.Flags = 0;
+    if (FAILED(gD3DDevice->CreateDepthStencilView(SceneDepthStencil, &sceneDescDSV, &SceneDepthStencilView)))
     {
-        LastError = "Error creating portal depth stencil view";
+        LastError = "Error creating Scene depth stencil view";
         return false;
     }
 
-    // Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
+    // Create all filtering modes, blending modes etc.
     if (!CreateStates(LastError))
     {
         LastError = "Error creating states";
@@ -144,15 +148,17 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 bool TerrainGenerationScene::InitScene()
 {
     //// Set up scene ////
-    GroundModel = new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(1000,0,0));
+    GroundModel = new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(0,0,0));
     //gTerrain= new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(400,0,0));
+
+    windowFlags |= ImGuiWindowFlags_NoScrollbar;
+    windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
     //// Set up camera ////
 
-    gCamera = new Camera();
-    //gCamera->SetPosition({ 0, 270, -500 });
-    gCamera->SetPosition({ -2.5, 1323, -2410 });
-    gCamera->SetRotation({ ToRadians(28.6f), 0.0f, 0.0f });
+    MainCamera = new Camera();
+    MainCamera->SetPosition(CameraPosition);
+    MainCamera->SetRotation(CameraRotation);
     return true;
 }
 
@@ -166,7 +172,7 @@ void TerrainGenerationScene::ReleaseResources()
     ReleaseShaders();
 
     // See note in InitGeometry about why we're not using unique_ptr and having to manually delete
-    delete gCamera;     gCamera = nullptr;
+    delete MainCamera;     MainCamera = nullptr;
     delete GroundModel;     GroundModel = nullptr;
     delete TerrainModel; TerrainModel = nullptr;
 }
@@ -196,6 +202,7 @@ void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
         GroundModel->SetShaderResources(0, resourceManager->getTexture(L"Grass"));
         GroundModel->SetShaderResources(1, resourceManager->getTexture(L"Rock"));
         GroundModel->SetShaderResources(2, resourceManager->getTexture(L"Dirt"));
+        GroundModel->SetShaderResources(3, resourceManager->getTexture(L"Default"));
         gPerModelConstants.explodeAmount = 1;
         GroundModel->Render(gPerModelConstantBuffer, gPerModelConstants);
         //gTerrain->Render(gPerModelConstantBuffer, gPerModelConstants);
@@ -220,10 +227,9 @@ void TerrainGenerationScene::RenderScene(float frameTime)
     // Set up the light information in the constant buffer
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
     
-    gPerFrameConstants.ambientColour = gAmbientColour;
-    gPerFrameConstants.specularPower = gSpecularPower;
-    gPerFrameConstants.cameraPosition = gCamera->Position();
-    gPerFrameConstants.enableLights = enableLights;
+    gPerFrameConstants.ambientColour  = gAmbientColour;
+    gPerFrameConstants.specularPower  = gSpecularPower;
+    gPerFrameConstants.cameraPosition = MainCamera->Position();
 
     //// Main scene rendering ////
 
@@ -246,7 +252,7 @@ void TerrainGenerationScene::RenderScene(float frameTime)
     gD3DContext->RSSetViewports(1, &vp);
 
     // Render the scene from the main camera
-    RenderSceneFromCamera(gCamera);
+    RenderSceneFromCamera(MainCamera);
 
     IMGUI();
 
@@ -273,19 +279,20 @@ void TerrainGenerationScene::RenderScene(float frameTime)
 
 void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
 {
-    // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
-    static float rotate = 0.0f;
-    static bool go = true;
-    if (KeyHit(Key_1))  go = !go;
+
+    if (KeyHit(Key_F2))
+    {
+        MainCamera->SetPosition(CameraPosition);
+        MainCamera->SetRotation(CameraRotation);
+    }
+    // Toggle FPS limiting
+    if (KeyHit(Key_T))  lockFPS = !lockFPS;
+
 
     // Control camera (will update its view matrix)
-    gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
-    //gTerrain->Control(0,frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
-    GroundModel->SetScale(TerrainYScale);
-    //gTerrain->SetScale(TerrainYScale);
+    MainCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
 
-    // Toggle FPS limiting
-    if (KeyHit(Key_P))  lockFPS = !lockFPS;
+    GroundModel->SetScale(TerrainYScale);
 
     // Show frame time / FPS in the window title //
     const float fpsUpdateTime = 0.5f; // How long between updates (in seconds)
@@ -308,39 +315,41 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
 
 void TerrainGenerationScene::BuildHeightMap()
 {
-    float b = (float)(resolution * resolution);
-    heightMap = new float*[resolution];
+
     float height = 1.0f;
-    int index = 0;
-    for (int i = 0; i <= resolution; ++i) {
-        heightMap[i] = new float[resolution];
-        for (int j = 0; j <= resolution; ++j) {
-            heightMap[i][j] = height;
-            index++;
+    for (int i = 0; i <= SizeOfTerrain; ++i) {
+        for (int j = 0; j <= SizeOfTerrain; ++j) {
+            m_HeightMap.at(i + j) = height;
+            Map[(i * SizeOfTerrain) + j] = height;
+            HeightMap[i][j] = height;
         }
     }
 }
 
 void TerrainGenerationScene::BuildPerlinHeightMap(int Amplitude, float frequency, bool bBrownianMotion)
 {
-    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int i = 0; i <= resolution; ++i) // loop through the y 
+    for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
     {
-        for (int j = 0; j <= resolution; ++j) //loop through the x
+        for (int j = 0; j <= SizeOfTerrain; ++j) //loop through the x
         {
             double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            if(!bBrownianMotion) heightMap[i][j] += (float)pn->noise(x, y, 0.8)* 20;//(float)Amplitude;
-            else heightMap[i][j] = (float)pn->noise(x, y, 0.8) * 20;
+            if (!bBrownianMotion) {
+                HeightMap[i][j] += (float)pn->noise(x, y, 0.8) * 20;
+            }
+            else
+            {
+                HeightMap[i][j] = (float)pn->noise(x, y, 0.8) * 20;
+            }
         }
     }
 }
 
 void TerrainGenerationScene::BrownianMotion(int Amplitude, float frequency, int octaves)
 {
-    BuildHeightMap();
     for (int i = 0; i < octaves; ++i)
     {
         BuildPerlinHeightMap(Amplitude, frequency, true);
@@ -351,48 +360,52 @@ void TerrainGenerationScene::BrownianMotion(int Amplitude, float frequency, int 
 
 void TerrainGenerationScene::RigidNoise(int Amplitude, float frequency)
 {
-    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int i = 0; i <= resolution; ++i) // loop through the y 
+    for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
     {
-        for (int j = 0; j <= resolution; ++j) //loop through the x
+        for (int j = 0; j <= SizeOfTerrain; ++j) //loop through the x
         {
             double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            heightMap[i][j]/*(i * (resolution + 1)) + j]*/ += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+            m_HeightMap.at(i + j) += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+            Map[(i * SizeOfTerrain) + j] += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+            HeightMap[i][j] += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
         }
     }
 }
 
 void TerrainGenerationScene::InverseRigidNoise(int Amplitude, float frequency)
 {
-    const float scale = (float)sizeOfTerrain / (float)resolution; //make sure that the terrain looks consistent 
+    const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int i = 0; i <= resolution; ++i) // loop through the y 
+    for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
     {
-        for (int j = 0; j <= resolution; ++j) //loop through the x
+        for (int j = 0; j <= SizeOfTerrain; ++j) //loop through the x
         {
              double x = j * frequency * scale / 20;
              double y = i * frequency * scale / 20;
-            heightMap[i][j]/*(i * (resolution + 1)) + j]*/ += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+             m_HeightMap.at(i + j) += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+             Map[(i * SizeOfTerrain) + j] += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+             HeightMap[i][j] += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
         }
     }
 }
 
-void TerrainGenerationScene::DiamondSquareMap()
+void TerrainGenerationScene::DiamondSquareMap(double range)
 {
-    DiamondSquare ds(heightMap, resolution);
-    heightMap = ds.process();
+    DiamondSquare ds(SizeOfTerrain, range);
+    ds.process(HeightMap);
 }
 
 void TerrainGenerationScene::IMGUI()
 {
+
     //---------------------------------------------------------------------------------------------------------------------//
     //First ImGui window created is a dock taken from the docking example in imgui_demo.cpp from the ImGui examples library//
     //---------------------------------------------------------------------------------------------------------------------//
-
     static bool opt_fullscreen = true;
     static bool opt_padding = false;
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -443,63 +456,121 @@ void TerrainGenerationScene::IMGUI()
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
-
     //New ImGui window to contain all the buttons and sliders that the user will be able to use
     {
-        ImGui::Begin("Controls", 0, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("");
-        ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", gCamera->Position().x, gCamera->Position().y, gCamera->Position().z);
-        ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", gCamera->Rotation().x, gCamera->Rotation().y, gCamera->Rotation().z);
-        ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)", GroundModel->Scale().x, GroundModel->Scale().y, GroundModel->Scale().z);
-        ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", GroundModel->Position().x, GroundModel->Position().y, GroundModel->Position().z);
-        ImGui::Text("Frequency: (%.2f)", frequency);
-        ImGui::Text("Amplitude: (%i)", amplitude);
-        ImGui::Text("");
-        ImGui::Separator();
+        {
+            ImGui::Begin("Information", 0, windowFlags);
+            //ImGui::Spacing();
+            ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", MainCamera->Position().x, MainCamera->Position().y, MainCamera->Position().z);
+            ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", MainCamera->Rotation().x, MainCamera->Rotation().y, MainCamera->Rotation().z);
+            ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)", GroundModel->Scale().x, GroundModel->Scale().y, GroundModel->Scale().z);
+            ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", GroundModel->Position().x, GroundModel->Position().y, GroundModel->Position().z);
+            ImGui::Text("");
+            if(ImGui::Button("Toggle FPS", ImVec2(162, 20)))
+            {
+                lockFPS = !lockFPS;
+            }
+            ImGui::End();
+        }
+        ImGui::Begin("Terrain Generation", 0, windowFlags);
         ImGui::Checkbox("Render Terrain", &enableTerrain);
+       
+
         if (enableTerrain)
         {
+
+            //----------------------//
+            // Reset Terrain Button //
+            //----------------------//
             ImGui::Text("");
-            if (ImGui::Button("Reset Terrain"))
+            if (ImGui::Button("Reset Terrain", ImVec2(162, 20)))
             {
                 BuildHeightMap();
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
 
             }
+
+            ImGui::SameLine();
+
+            //---------------------//
+            // Reset Camera Button //
+            //---------------------//
+            if (ImGui::Button("Reset Camera", ImVec2(162, 20)))
+            {
+                MainCamera->SetPosition(CameraPosition);
+                MainCamera->SetRotation(CameraRotation);
+            }
+            if (ImGui::Button("Reset Terrain Settings", ImVec2(162, 20)))
+            {
+                frequency = 0.45f;
+                amplitude = 45;
+                resolution = 500;
+                seed = 0;
+                TerrainYScale = { 10, 10, 10 };
+                octaves = 10;
+                Range = 2.0;
+            }
             ImGui::Text("");
+
+            //---------------------//
+            // Terrain Information //
+            //---------------------//
             ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01f, 0.5f);
             ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
-            ImGui::SliderInt("Terrain Resolution", &sizeOfTerrain, 200, 500);
-            ImGui::SliderInt("Perlin Noise Seed", &seed, 1, 250);
-            ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1.0f, 10.0f);
+            ImGui::SliderInt("Terrain Resolution", &resolution, 250, 750);
+            ImGui::SliderInt("Perlin Noise Seed", &seed, 0, 250);
+            ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1.0f, 20.0f);
             ImGui::Text("");
-            if (ImGui::Button("Generate Perlin Height Map"))
+
+            //------------------------------------------------------//
+            // Generate new Terrain with the Perlin Noise Algorithm //
+            //------------------------------------------------------//
+            if (ImGui::Button("Perlin Noise", ImVec2(162, 20)))
             {
+                BuildHeightMap();
                 BuildPerlinHeightMap(amplitude, frequency, false);
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
             }
-            if (ImGui::Button("Rigid Noise"))
+
+            //-----------------------------------------------------//
+            // Generate new Terrain with the Rigid Noise Algorithm //
+            //-----------------------------------------------------//
+            ImGui::SameLine();
+            if (ImGui::Button("Rigid Noise", ImVec2(162, 20)))
             {
+                BuildHeightMap();
                 RigidNoise(amplitude, frequency);
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
             }
-            if (ImGui::Button("Inverse Rigid Noise"))
+
+            //-------------------------------------------------------------//
+            // Generate new Terrain with the Inverse Rigid Noise Algorithm //
+            //-------------------------------------------------------------//
+            if (ImGui::Button("Inverse Rigid Noise", ImVec2(162, 20)))
             {
+                BuildHeightMap();
                 InverseRigidNoise(amplitude, frequency);
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
             }
+
             ImGui::Text("");
             ImGui::Separator();
+            ImGui::Text("");
             ImGui::SliderInt("Brownian Octaves", &octaves, 1, 20);
-            if (ImGui::Button("Brownian Motion"))
+            ImGui::SliderFloat("Diamond Square Range", &Range, 1.0f, 10.0f);
+            ImGui::Text("");
+            if (ImGui::Button("Brownian Motion", ImVec2(162, 20)))
             {
+                BuildHeightMap();
                 BrownianMotion(amplitude, frequency, 10);
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
             }
-            if (ImGui::Button("Midpoint Displacement"))
+            ImGui::SameLine();
+            if (ImGui::Button("Diamond Square", ImVec2(162, 20)))
             {
-                DiamondSquareMap();
-                GroundModel->ResizeModel(heightMap, resolution, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                BuildHeightMap();
+                DiamondSquareMap((double)Range);
+                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
             }
             ImGui::Text("");
             ImGui::Separator();
@@ -510,7 +581,7 @@ void TerrainGenerationScene::IMGUI()
 
     //New ImGui window to contain the current scene rendered to a 2DTexture//
     {
-        ImGui::Begin("Scene");
+        ImGui::Begin("Scene", 0, windowFlags);
         ImGui::Image(SceneTextureSRV, ImVec2((float)textureWidth, (float)textureHeight));
         ImGui::End();
     }

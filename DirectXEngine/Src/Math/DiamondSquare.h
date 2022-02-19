@@ -1,26 +1,39 @@
 #pragma once
+#include "tepch.h"
 class DiamondSquare
 {
 private:
-	double random_range;
-	double min_val;
-	double max_val;
+	float values[128 * 128];
 
-	float** map;
-	int size;
+	int size = 0;
+	double scale = 0.0;
 
-	int range;
+	float* _copy;
+
+	double range = 1.0f;
+
+	int max = 0;
 
 public:
-	DiamondSquare(float** array, int s);
+	DiamondSquare(int s, double r);
 	~DiamondSquare();
 
-	float** process();
-	void _on_start();
-	void _on_end();
-	void diamondStep(int, int);
-	void squareStep(int, int);
 
-	double dRand(double dMin, double dMax);
+	void process(std::vector<std::vector<float>>& temp);
+	void _on_start(std::vector<std::vector<float>>& temp);
+
+	void Divide(int size);
+	void Set(int x, int y, float Value);
+	float Get(int x, int y);
+
+	//void Square( int size, int x, int y, float offset);
+	void Square(int sideLength, int halfSide, std::vector<std::vector<float>>& temp);
+	//void Diamond(int x, int y, int size, float offset);
+	void Diamond(int sideLength, int halfSide, std::vector<std::vector<float>>& temp);
+
+	void _on_end();
+
+	double fRand2(double fMin, double dMax);
+	void timeReset();
 };
 

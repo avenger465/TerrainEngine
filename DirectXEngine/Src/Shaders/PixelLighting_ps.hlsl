@@ -14,8 +14,8 @@
 // Here we allow the shader access to a texture that has been loaded from the C++ side and stored in GPU memory.
 // Note that textures are often called maps (because texture mapping describes wrapping a texture round a mesh).
 // Get used to people using the word "texture" and "map" interchangably.
-Texture2D DiffuseSpecularMap : register(t0); // Textures here can contain a diffuse map (main colour) in their rgb channels and a specular map (shininess) in the a channel
-SamplerState TexSampler      : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
+Texture2D    DiffuseSpecularMap : register(t0); // Textures here can contain a diffuse map (main colour) in their rgb channels and a specular map (shininess) in the a channel
+SamplerState TexSampler         : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
 
 
 //--------------------------------------------------------------------------------------
@@ -46,7 +46,6 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 halfway = normalize(light1Direction + cameraDirection);
     float3 specularLight1 =  diffuseLight1 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower); // Multiplying by diffuseLight instead of light colour - my own personal preference
 
-
 	//// Light 2 ////
 
 	float3 light2Direction = normalize(gLight2Position - input.worldPosition);
@@ -55,11 +54,9 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     halfway = normalize(light2Direction + cameraDirection);
     float3 specularLight2 =  diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
 
-
 	// Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)
 	float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2;
 	float3 specularLight = specularLight1 + specularLight2;
-
 
 	////////////////////
 	// Combine lighting and textures
@@ -68,16 +65,10 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float4 textureColour = DiffuseSpecularMap.Sample(TexSampler, input.uv);
     float3 diffuseMaterialColour = textureColour.rgb; // Diffuse material colour in texture RGB (base colour of model)
     float specularMaterialColour = textureColour.a;   // Specular material colour in texture A (shininess of the surface)
-
     
     // Combine lighting with texture colours
-    float3 finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
-    
-    
-    if (!gEnableLights)
-    {
-        finalColour = diffuseMaterialColour;
-    }
+    //float3 finalColour = diffuseLight * diffuseMaterialColour + specularLight * specularMaterialColour;
+    float3 finalColour = diffuseMaterialColour;
 
     return float4(finalColour, 1.0f); // Always use 1.0f for output alpha - no alpha blending in this lab
 }
