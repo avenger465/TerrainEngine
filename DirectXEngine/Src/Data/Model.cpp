@@ -114,9 +114,9 @@ void Model::SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Textu
 	gD3DContext->PSSetShaderResources(NormalMapSlot, 1, &NormalMap);
 }
 
-void Model::ResizeModel(std::vector<std::vector<float>>& temp, float* temp1, int resolution, CVector3 MinX, CVector3 MaxX)
+void Model::ResizeModel(std::vector<std::vector<float>>& temp, std::vector<std::vector<CVector3>>& NormalMap, int resolution, CVector3 MinX, CVector3 MaxX)
 {
-	mMesh->UpdateVertices(MinX, MaxX, resolution, resolution, temp1, temp, true, true);
+	mMesh->UpdateVertices(MinX, MaxX, resolution, resolution, NormalMap, temp, true, true);
 }
 
 

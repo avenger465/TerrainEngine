@@ -13,7 +13,7 @@ public:
 
 	void loadTexture(const wchar_t* uniqueID, std::string filename);
 	void loadMesh(const wchar_t* uniqueID, std::string &filename);
-	void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, float* temp1, bool normals, bool uvs);
+	void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, std::vector<std::vector<CVector3>>& NormalMap, bool normals, bool uvs);
 
 
 	ID3D11ShaderResourceView* getTexture(const wchar_t* uid);

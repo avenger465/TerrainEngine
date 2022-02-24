@@ -59,6 +59,13 @@ public:
 
     // Multiply vector by scalar (scales vector);
     CVector3& operator*= (const float s);
+
+    CVector3& operator^ (const CVector3& v);
+
+    static const CVector3 kZero;
+
+    void Normalise();
+    CVector3 Cross(const CVector3& v1);
 };
 	
 

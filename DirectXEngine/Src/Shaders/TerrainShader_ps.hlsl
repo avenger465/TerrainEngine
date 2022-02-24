@@ -14,8 +14,6 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     float4 dirtColour = texture2.Sample(sampler0, input.uv);
     float4 voronoiDiagram = texture3.Sample(sampler0, input.uv);
     float blendAmount;
-
-    float4 white = float4(0.871f, 0.965f, 0.922f, 1.0f);
     
     float slope = 1 - input.normal.y;
     if (slope < 0.2)

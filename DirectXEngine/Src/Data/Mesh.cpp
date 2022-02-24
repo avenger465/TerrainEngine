@@ -8,8 +8,6 @@
 #include "tepch.h"
 #include "Mesh.h"
 #include "Shaders/Shader.h" // Needed for helper function CreateSignatureForVertexLayout
-#include "Math/CVector2.h" 
-#include "Math/CVector3.h" 
 #include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
 
@@ -354,15 +352,14 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 }
 
 
-Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
+Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
 {
     // Create a single node, disable skinning
     mNodes.push_back({ "Grid", MatrixIdentity(), MatrixIdentity(), 0, {}, {0} });
     mHasBones = false;
 
-    mSubMeshes.resize(1); // Grid will be in a single sub-mesh
-
-    // Determine vertex layout based on parameters
+    mSubMeshes.resize(1); // Grid will be in a single sub-mesh  
+     
     std::vector<D3D11_INPUT_ELEMENT_DESC> vertexElements;
     unsigned int offset = 0;
 
@@ -396,9 +393,9 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp
 
 
 
-    //-----------------------------------
+    ////-----------------------------------
 
-    // Allocate space to create the grid vertices (CPU-side first)
+    //// Allocate space to create the grid vertices (CPU-side first)
     mSubMeshes[0].numVertices = (subDivX + 1) * (subDivZ + 1);
     auto vertexData = std::make_unique<char[]>(mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize); // Smart pointer
 
@@ -409,14 +406,36 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp
     float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
     CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
+    CVector3 cross = CVector3(0, 1, 0);           
     CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
-    // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
+    // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed 
+    
     auto currVert = vertexData.get();
-    int index = 0;
+
     for (int z = 0; z <= subDivZ; ++z)
     {
         for (int x = 0; x <= subDivX; ++x)
         {
+            //if (!(z == subDivZ || x == subDivX))
+            //{
+            //    CVector3 a, b, c;
+            //    a = CVector3(x, temp[z][x], z);
+            //    b = CVector3(x, temp[z][x + 1], float(z + 1));
+            //    c = CVector3(float(x + 1), temp[z + 1][x], z);
+
+            //    CVector3 ab(c.x - a.x, c.y - a.y, c.z - a.z);
+            //    CVector3 ac(b.x - a.x, b.y - a.y, b.z - a.z);
+
+            //    normal.x = ab.y * ac.z - ab.z * ac.y;
+            //    normal.y = ab.z * ac.x - ab.x * ac.z;
+            //    normal.z = ab.x * ac.y - ab.y * ac.x;
+
+            //    float mag = (normal.x * normal.x) + (normal.y * normal.y) + (normal.z + normal.z);
+            //    mag = sqrtf(mag);
+            //    normal.x /= mag;
+            //    normal.y /= mag;
+            //    normal.z /= mag;
+            //}
             *reinterpret_cast<CVector3*>(currVert) = pt;
             currVert += sizeof(CVector3);
             if (normals)
@@ -429,16 +448,12 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
+            //normal += cross;
             pt.x += xStep;
-            //pt.y = temp[x + z];
-            pt.y = temp[z][x];
-            //pt.y = temp1[(z * subDivX) + x];;
             uv.x += uStep;
-            ++index;
         }
         pt.x = minPt.x;
         pt.z += zStep;
-        //pt.y += heightMap[index];
         uv.x = 0;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
@@ -481,6 +496,8 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp
     bufferDesc.MiscFlags = 0;
     D3D11_SUBRESOURCE_DATA initData; // Initial data
     initData.pSysMem = vertexData.get();
+    initData.SysMemPitch = 0;
+    initData.SysMemSlicePitch = 0;
     if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].vertexBuffer)))
     {
         throw std::runtime_error("Failure creating vertex buffer for grid mesh");
@@ -501,9 +518,13 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp
    
 }
 
-void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
+CVector3 Mesh::GetPoint(std::vector<std::vector<float>>& temp, int x, int z)
 {
+    return CVector3(x, temp[x][z], z);
+}
 
+void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
+{
     //-----------------------------------
     // Allocate space to create the grid vertices (CPU-side first)
     mSubMeshes[0].numVertices = (subDivX + 1) * (subDivZ + 1);
@@ -516,19 +537,40 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
     CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
+    CVector3 cross = CVector3(0, 1, 0);          
     CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
     // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
     auto currVert = vertexData.get();
-    int index = 0;
+
     for (int z = 0; z <= subDivZ; ++z)
     {
         for (int x = 0; x <= subDivX; ++x)
         {
+            //if (!(z == subDivZ || x == subDivX))
+            //{
+            //    CVector3 a, b, c;
+            //    a = CVector3(x, temp[z][x], z);
+            //    b = CVector3(x, temp[z][x + 1], float(z + 1));
+            //    c = CVector3(float(x + 1), temp[z + 1][x], z);
+
+            //    CVector3 ab(c.x - a.x, c.y - a.y, c.z - a.z);
+            //    CVector3 ac(b.x - a.x, b.y - a.y, b.z - a.z);
+
+            //    normal.x = ab.y * ac.z - ab.z * ac.y;
+            //    normal.y = ab.z * ac.x - ab.x * ac.z;
+            //    normal.z = ab.x * ac.y - ab.y * ac.x;
+
+            //    float mag = (normal.x * normal.x) + (normal.y * normal.y) + (normal.z + normal.z);
+            //    mag = sqrtf(mag);
+            //    normal.x /= mag;
+            //    normal.y /= mag;
+            //    normal.z /= mag;
+            //}
+
             *reinterpret_cast<CVector3*>(currVert) = pt;
             currVert += sizeof(CVector3);
             if (normals)
             {
-                //CVector3 normal = CVector3(0, abs(heightMap[index] / 10), 0);
                 *reinterpret_cast<CVector3*>(currVert) = normal;
                 currVert += sizeof(CVector3);
             }
@@ -537,21 +579,18 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
+            //normal += cross;
+
+
             pt.x += xStep;
-            //pt.y = temp[x + z];
             pt.y = temp[z][x];
-            //pt.y = temp1[(z * subDivX) + x];
             uv.x += uStep;
-            ++index;
-            //index += 2;
         }
         pt.x = minPt.x;
         pt.z += zStep;
-        //pt.y += heightMap[index];
         uv.x = 0;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
-
 
     // Allocate space to create the grid indices. To keep model rendering code simpler using a triangle
     // list, even though a strip would work nicely here
@@ -599,6 +638,8 @@ void Mesh::RegenerateMesh(const void* vertices, const void* indices)
 
     D3D11_SUBRESOURCE_DATA initData; // Initial data
     initData.pSysMem = vertices;
+    initData.SysMemPitch = 0;
+    initData.SysMemSlicePitch = 0;
     if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].vertexBuffer)))
     {
         throw std::runtime_error("Failure creating vertex buffer for grid mesh");
@@ -649,9 +690,6 @@ void Mesh::RenderSubMesh(const SubMesh& subMesh)
     // Render mesh
     gD3DContext->DrawIndexed(subMesh.numIndices, 0, 0);
 }
-
-
-
 // Render the mesh with the given matrices
 // Handles rigid body meshes (including single part meshes) as well as skinned meshes
 // LIMITATION: The mesh must use a single texture throughout

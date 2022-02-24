@@ -13,7 +13,7 @@ void CResourceManager::loadTexture(const wchar_t* uniqueID, std::string filename
 	{
 		// Set the texture to the default on to make it easier
 		// to see which texture did not load correctly
-		filename = "../Media/tiles1.jpg";
+		filename = "../Media/DefaultDiffuse.jpg";
 	}
 
 	std::string dds = ".dds"; // So check the filename extension (case insensitive)
@@ -53,9 +53,9 @@ void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename)
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
-void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, float* temp1, bool normals, bool uvs)
+void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& HeightMap, std::vector<std::vector<CVector3>>& NormalMap, bool normals, bool uvs)
 {
-	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, temp1, temp, normals, uvs);
+	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, NormalMap, HeightMap, normals, uvs);
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 

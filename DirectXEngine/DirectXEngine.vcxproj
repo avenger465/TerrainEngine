@@ -103,6 +103,7 @@
   <ItemGroup>
     <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h" />
     <ClInclude Include="External\GUI\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Perlin.h" />
     <ClInclude Include="Src\BasicScene\BaseScene.h" />
     <ClInclude Include="Src\BasicScene\CLight.h" />
     <ClInclude Include="Src\BasicScene\Camera.h" />
@@ -130,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Perlin.cpp" />
     <ClCompile Include="Src\BasicScene\BaseScene.cpp" />
     <ClCompile Include="Src\BasicScene\CLight.cpp" />
     <ClCompile Include="Src\BasicScene\Camera.cpp" />

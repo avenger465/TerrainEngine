@@ -5,8 +5,6 @@
 #include "tepch.h"
 #include "CVector3.h"
 
-
-
 /*-----------------------------------------------------------------------------------------
     Operators
 -----------------------------------------------------------------------------------------*/
@@ -52,6 +50,37 @@ CVector3& CVector3::operator*= (const float s)
     y *= s;
     z *= s;
     return *this;
+}
+
+CVector3& CVector3::operator^(const CVector3& v)
+{
+    return Cross(v);
+    // TODO: insert return statement here
+}
+
+void CVector3::Normalise()
+{
+    // Reduce vector to unit length - member function
+    float lengthSq = x * x + y * y + z * z;
+
+    // Ensure vector is not zero length (use BaseMath.h float approx. fn with default epsilon)
+    if (IsZero(lengthSq))
+    {
+        x = y = z = 0.0f;
+    }
+    else
+    {
+        float invLength = InvSqrt(lengthSq);
+        x *= invLength;
+        y *= invLength;
+        z *= invLength;
+    }
+}
+
+CVector3 CVector3::Cross(const CVector3& v)
+{
+
+    return CVector3{ y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x };
 }
 
 
@@ -116,3 +145,5 @@ float Length(const CVector3& v)
 {
     return sqrt(Dot(v, v));
 }
+
+const CVector3 CVector3::kZero(0.0f, 0.0f, 0.0f);

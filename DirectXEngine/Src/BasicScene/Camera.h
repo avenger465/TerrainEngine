@@ -22,7 +22,7 @@ public:
 
 	// Constructor - initialise all settings, sensible defaults provided for everything.
 	Camera(CVector3 position = {0,0,0}, CVector3 rotation = {0,0,0}, 
-           float fov = PI/3, float aspectRatio = 4.0f / 3.0f, float nearClip = 0.1f, float farClip = 10000.0f)
+           float fov = PI/3, float aspectRatio = 4.0f / 3.0f, float nearClip = 0.1f, float farClip = 100000.0f)
         : mPosition(position), mRotation(rotation), mFOVx(fov), mAspectRatio(aspectRatio), mNearClip(nearClip), mFarClip(farClip)
     {
     }

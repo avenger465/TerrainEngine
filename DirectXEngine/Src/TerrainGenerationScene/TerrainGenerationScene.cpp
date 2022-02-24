@@ -9,7 +9,8 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     Map = new float[(SizeOfTerrain+1) * (SizeOfTerrain+1)];
 
     HeightMap.resize(SizeOfTerrain + 1, std::vector<float>(SizeOfTerrain + 1, 0));
-    BuildHeightMap();
+
+    BuildHeightMap(1);
    
 
     resourceManager->loadTexture(L"default", "Media/v.bmp");
@@ -17,11 +18,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     try
     {
-        resourceManager->loadMesh(L"GroundMesh", std::string("Data/Hills.x"));
-        //resourceManager->loadMesh(L"LightMesh", std::string("Data/Light.x"));
-        resourceManager->loadMesh(L"SphereMesh", std::string("Data/Sphere.x"));
-        resourceManager->loadGrid(L"TerrainMesh", CVector3(-200, 0, -200), CVector3(200, 0, 200), SizeOfTerrain, SizeOfTerrain, HeightMap, Map, true, true);
-        resourceManager->loadMesh(L"SkyMesh", std::string("Data/Skybox.x"));
+        resourceManager->loadGrid(L"TerrainMesh", CVector3(-500, 0, -500), CVector3(500, 0, 500), SizeOfTerrain, SizeOfTerrain, HeightMap, NormalMap, true, true);
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -35,7 +32,6 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
         resourceManager->loadTexture(L"Grass", "Media/Grass.png");
         resourceManager->loadTexture(L"Rock", "Media/rock1.png");
         resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
-        resourceManager->loadTexture(L"Moon", "Media/moon.jpg");
     }
     catch (std::runtime_error e)
     {
@@ -149,7 +145,6 @@ bool TerrainGenerationScene::InitScene()
 {
     //// Set up scene ////
     GroundModel = new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(0,0,0));
-    //gTerrain= new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(400,0,0));
 
     windowFlags |= ImGuiWindowFlags_NoScrollbar;
     windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
@@ -203,9 +198,7 @@ void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
         GroundModel->SetShaderResources(1, resourceManager->getTexture(L"Rock"));
         GroundModel->SetShaderResources(2, resourceManager->getTexture(L"Dirt"));
         GroundModel->SetShaderResources(3, resourceManager->getTexture(L"Default"));
-        gPerModelConstants.explodeAmount = 1;
         GroundModel->Render(gPerModelConstantBuffer, gPerModelConstants);
-        //gTerrain->Render(gPerModelConstantBuffer, gPerModelConstants);
     }
     gD3DContext->GSSetShader(nullptr, nullptr, 0);
 }
@@ -313,52 +306,61 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
     }
 }
 
-void TerrainGenerationScene::BuildHeightMap()
+void TerrainGenerationScene::BuildHeightMap(float height)
 {
-
-    float height = 1.0f;
     for (int i = 0; i <= SizeOfTerrain; ++i) {
         for (int j = 0; j <= SizeOfTerrain; ++j) {
-            m_HeightMap.at(i + j) = height;
-            Map[(i * SizeOfTerrain) + j] = height;
             HeightMap[i][j] = height;
+        }
+    }
+
+}
+
+void TerrainGenerationScene::NormaliseHeightMap(float normaliseAmount)
+{
+    for (int i = 0; i <= SizeOfTerrain; ++i) {
+        for (int j = 0; j <= SizeOfTerrain; ++j) {
+            HeightMap[i][j] /= normaliseAmount;
         }
     }
 }
 
-void TerrainGenerationScene::BuildPerlinHeightMap(int Amplitude, float frequency, bool bBrownianMotion)
+void TerrainGenerationScene::BuildPerlinHeightMap(float amplitude, float frequency, bool bBrownianMotion)
 {
     const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
+    const float waveLength = SizeOfTerrain / frequency;
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
     for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
     {
         for (int j = 0; j <= SizeOfTerrain; ++j) //loop through the x
         {
-            double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            if (!bBrownianMotion) {
-                HeightMap[i][j] += (float)pn->noise(x, y, 0.8) * 20;
+            double x = j * frequency * scale / 20;
+
+            if (bBrownianMotion)
+            {
+                HeightMap[i][j] += (float)pn->noise(x, y, 0.0) * amplitude;
             }
             else
-            {
-                HeightMap[i][j] = (float)pn->noise(x, y, 0.8) * 20;
+            {        
+                HeightMap[i][j] = (float)pn->noise(x, y, 0.0f) * amplitude;
             }
         }
     }
 }
 
-void TerrainGenerationScene::BrownianMotion(int Amplitude, float frequency, int octaves)
+void TerrainGenerationScene::BrownianMotion(float Amplitude, float frequency, int octaves)
 {
     for (int i = 0; i < octaves; ++i)
     {
         BuildPerlinHeightMap(Amplitude, frequency, true);
-        Amplitude = (int)(Amplitude * 0.5f);
-        frequency *= 2;
+        Amplitude *= AmplitudeReduction;
+        frequency *= FrequencyMultiplier;
     }
 }
 
-void TerrainGenerationScene::RigidNoise(int Amplitude, float frequency)
+void TerrainGenerationScene::RigidNoise()
 {
     const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
@@ -369,14 +371,14 @@ void TerrainGenerationScene::RigidNoise(int Amplitude, float frequency)
         {
             double x = j * frequency * scale / 20;
             double y = i * frequency * scale / 20;
-            m_HeightMap.at(i + j) += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
-            Map[(i * SizeOfTerrain) + j] += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
-            HeightMap[i][j] += -(1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+
+            float value = (1.0f - abs((float)pn->noise(x, y, 0.0) * (float)Amplitude));
+            HeightMap[i][j] += -value;
         }
     }
 }
 
-void TerrainGenerationScene::InverseRigidNoise(int Amplitude, float frequency)
+void TerrainGenerationScene::InverseRigidNoise()
 {
     const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
     CPerlinNoise* pn = new CPerlinNoise(seed);
@@ -387,16 +389,16 @@ void TerrainGenerationScene::InverseRigidNoise(int Amplitude, float frequency)
         {
              double x = j * frequency * scale / 20;
              double y = i * frequency * scale / 20;
-             m_HeightMap.at(i + j) += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
-             Map[(i * SizeOfTerrain) + j] += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
-             HeightMap[i][j] += (1.0f - abs((float)pn->noise(x, y, 0.8) * (float)Amplitude));
+
+             float value = (1.0f - abs((float)pn->noise(x, y, 0.0) * (float)Amplitude));
+             HeightMap[i][j] += value;
         }
     }
 }
 
-void TerrainGenerationScene::DiamondSquareMap(double range)
+void TerrainGenerationScene::DiamondSquareMap()
 {
-    DiamondSquare ds(SizeOfTerrain, range);
+    DiamondSquare ds(SizeOfTerrain, Spread, SpreadReduction);
     ds.process(HeightMap);
 }
 
@@ -461,9 +463,9 @@ void TerrainGenerationScene::IMGUI()
         {
             ImGui::Begin("Information", 0, windowFlags);
             //ImGui::Spacing();
-            ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", MainCamera->Position().x, MainCamera->Position().y, MainCamera->Position().z);
-            ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", MainCamera->Rotation().x, MainCamera->Rotation().y, MainCamera->Rotation().z);
-            ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)", GroundModel->Scale().x, GroundModel->Scale().y, GroundModel->Scale().z);
+            ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", MainCamera->Position().x,  MainCamera->Position().y,  MainCamera->Position().z);
+            ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", MainCamera->Rotation().x,  MainCamera->Rotation().y,  MainCamera->Rotation().z);
+            ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)",    GroundModel->Scale().x,    GroundModel->Scale().y,    GroundModel->Scale().z);
             ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", GroundModel->Position().x, GroundModel->Position().y, GroundModel->Position().z);
             ImGui::Text("");
             if(ImGui::Button("Toggle FPS", ImVec2(162, 20)))
@@ -485,8 +487,8 @@ void TerrainGenerationScene::IMGUI()
             ImGui::Text("");
             if (ImGui::Button("Reset Terrain", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                BuildHeightMap(1);
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
 
             }
 
@@ -502,24 +504,24 @@ void TerrainGenerationScene::IMGUI()
             }
             if (ImGui::Button("Reset Terrain Settings", ImVec2(162, 20)))
             {
-                frequency = 0.45f;
-                amplitude = 45;
+                frequency = 0.125f;
+                Amplitude = 200.0f;
                 resolution = 500;
                 seed = 0;
                 TerrainYScale = { 10, 10, 10 };
-                octaves = 10;
-                Range = 2.0;
+                octaves = 5;
+                Spread = 2.0;
             }
             ImGui::Text("");
 
             //---------------------//
             // Terrain Information //
             //---------------------//
-            ImGui::SliderFloat("Terrain Frequency", &frequency, 0.01f, 0.5f);
-            ImGui::SliderInt("Terrain amplitude", &amplitude, 5, 45);
+            ImGui::SliderFloat("Terrain Frequency", &frequency, 0.0f, 0.25f);
+            ImGui::SliderFloat("Terrain amplitude", &Amplitude, 100.0f, 300.0f);
             ImGui::SliderInt("Terrain Resolution", &resolution, 250, 750);
             ImGui::SliderInt("Perlin Noise Seed", &seed, 0, 250);
-            ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1.0f, 20.0f);
+            ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 1.0f, 60.0f);
             ImGui::Text("");
 
             //------------------------------------------------------//
@@ -527,9 +529,10 @@ void TerrainGenerationScene::IMGUI()
             //------------------------------------------------------//
             if (ImGui::Button("Perlin Noise", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                BuildPerlinHeightMap(amplitude, frequency, false);
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+               // BuildHeightMap(1);
+                BuildPerlinHeightMap(Amplitude, frequency, false);
+                NormaliseHeightMap(2.0f);
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
             }
 
             //-----------------------------------------------------//
@@ -538,9 +541,9 @@ void TerrainGenerationScene::IMGUI()
             ImGui::SameLine();
             if (ImGui::Button("Rigid Noise", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                RigidNoise(amplitude, frequency);
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                RigidNoise();
+                NormaliseHeightMap(2.0f);
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
             }
 
             //-------------------------------------------------------------//
@@ -548,29 +551,33 @@ void TerrainGenerationScene::IMGUI()
             //-------------------------------------------------------------//
             if (ImGui::Button("Inverse Rigid Noise", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                InverseRigidNoise(amplitude, frequency);
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                InverseRigidNoise();
+                NormaliseHeightMap(2.0f);
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
             }
 
             ImGui::Text("");
             ImGui::Separator();
             ImGui::Text("");
             ImGui::SliderInt("Brownian Octaves", &octaves, 1, 20);
-            ImGui::SliderFloat("Diamond Square Range", &Range, 1.0f, 10.0f);
+            ImGui::SliderFloat("Amplitude Reduction", &AmplitudeReduction, 0.1f, 0.5f);
+            ImGui::SliderFloat("Frequency Multiplier", &FrequencyMultiplier, 1.0f, 2.0f);
+            ImGui::SliderFloat("Diamond Square Spread", &Spread, 10.0f, 40.0f);
+            ImGui::SliderFloat("Diamond Square SpreadReduction", &SpreadReduction, 2.0f, 2.5f);
             ImGui::Text("");
             if (ImGui::Button("Brownian Motion", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                BrownianMotion(amplitude, frequency, 10);
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                BuildHeightMap(1);
+                BrownianMotion(Amplitude, frequency, octaves);
+                NormaliseHeightMap(2.0f);
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
             }
             ImGui::SameLine();
             if (ImGui::Button("Diamond Square", ImVec2(162, 20)))
             {
-                BuildHeightMap();
-                DiamondSquareMap((double)Range);
-                GroundModel->ResizeModel(HeightMap, Map, SizeOfTerrain, CVector3(-200, 0, -200), CVector3(200, 0, 200));
+                BuildHeightMap(1);
+                DiamondSquareMap();
+                GroundModel->ResizeModel(HeightMap, NormalMap, SizeOfTerrain, CVector3(-500, 0, -500), CVector3(500, 0, 500));
             }
             ImGui::Text("");
             ImGui::Separator();

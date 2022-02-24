@@ -6,6 +6,8 @@
 // expected to select these things
 
 #include "project/common.h"
+#include "Math/CVector2.h" 
+#include "Math/CVector3.h" 
 
 
 #ifndef _MESH_H_INCLUDED_
@@ -23,7 +25,7 @@ public:
     // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
     Mesh(const std::string& fileName, bool requireTangents = false);
 
-    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals = false, bool uvs = true);
+    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals = false, bool uvs = true);
     ~Mesh();
 
 
@@ -41,8 +43,9 @@ public:
     void Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 
     void RegenerateMesh(const void* vertices, const void* indices);
-    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, float* temp1, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
+    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
 
+    CVector3 GetPoint(std::vector<std::vector<float>>& temp, int x, int z);
 
 
 //--------------------------------------------------------------------------------------
@@ -99,8 +102,6 @@ private:
 	// Helper function for Render function - renders a given sub-mesh. World matrices / textures / states etc. must already be set
 	void RenderSubMesh(const SubMesh& subMesh);
 
-
-
 //--------------------------------------------------------------------------------------
 // Member data
 //--------------------------------------------------------------------------------------
@@ -112,6 +113,13 @@ private:
 
 protected:
     std::vector<SubMesh> mSubMeshes; // The mesh geometry. Nodes refer to sub-meshes in this vector
+
+    struct VertexType
+    {
+        CVector3 position;
+        CVector2 texture;
+        CVector3 normal;
+    };
 };
 
 
