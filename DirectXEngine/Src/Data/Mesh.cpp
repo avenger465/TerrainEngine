@@ -352,7 +352,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 }
 
 
-Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
+Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& heightMap, bool normals /* = false */, bool uvs /* = true */)
 {
     // Create a single node, disable skinning
     mNodes.push_back({ "Grid", MatrixIdentity(), MatrixIdentity(), 0, {}, {0} });
@@ -405,8 +405,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
     float uStep = 1.0f / subDivX;                // U-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
-    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
-    CVector3 cross = CVector3(0, 1, 0);           
+    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)         
     CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
     // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed 
     
@@ -416,26 +415,6 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
     {
         for (int x = 0; x <= subDivX; ++x)
         {
-            //if (!(z == subDivZ || x == subDivX))
-            //{
-            //    CVector3 a, b, c;
-            //    a = CVector3(x, temp[z][x], z);
-            //    b = CVector3(x, temp[z][x + 1], float(z + 1));
-            //    c = CVector3(float(x + 1), temp[z + 1][x], z);
-
-            //    CVector3 ab(c.x - a.x, c.y - a.y, c.z - a.z);
-            //    CVector3 ac(b.x - a.x, b.y - a.y, b.z - a.z);
-
-            //    normal.x = ab.y * ac.z - ab.z * ac.y;
-            //    normal.y = ab.z * ac.x - ab.x * ac.z;
-            //    normal.z = ab.x * ac.y - ab.y * ac.x;
-
-            //    float mag = (normal.x * normal.x) + (normal.y * normal.y) + (normal.z + normal.z);
-            //    mag = sqrtf(mag);
-            //    normal.x /= mag;
-            //    normal.y /= mag;
-            //    normal.z /= mag;
-            //}
             *reinterpret_cast<CVector3*>(currVert) = pt;
             currVert += sizeof(CVector3);
             if (normals)
@@ -448,12 +427,13 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
-            //normal += cross;
             pt.x += xStep;
+            pt.y = heightMap[z][x];
             uv.x += uStep;
         }
         pt.x = minPt.x;
         pt.z += zStep;
+        pt.y = heightMap[z][0];
         uv.x = 0;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
@@ -518,12 +498,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
    
 }
 
-CVector3 Mesh::GetPoint(std::vector<std::vector<float>>& temp, int x, int z)
-{
-    return CVector3(x, temp[x][z], z);
-}
-
-void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */)
+void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& heightMap, bool normals /* = false */, bool uvs /* = true */)
 {
     //-----------------------------------
     // Allocate space to create the grid vertices (CPU-side first)
@@ -536,36 +511,16 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     float uStep = 1.0f / subDivX;                // U-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     float vStep = 1.0f / subDivZ;                // V-size of a single grid square (UVs go from 0 to 1 over the whole grid)
     CVector3 pt = minPt;                         // Start position at bottom-left of grid (looking down on it)
-    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)
-    CVector3 cross = CVector3(0, 1, 0);          
+    CVector3 normal = CVector3(0, 1, 0);           // All normals will be up (useful to make grid use same data as ordinary models so it can use the same shaders)         
     CVector2 uv = CVector2(0, 1);                 // UVs also start at bottom-left (V axis is opposite direction to Z)
     // A 2D array of data, only complexity is that some data is optional. So byte-offsets and pointer casting is needed
+
     auto currVert = vertexData.get();
 
     for (int z = 0; z <= subDivZ; ++z)
     {
         for (int x = 0; x <= subDivX; ++x)
         {
-            //if (!(z == subDivZ || x == subDivX))
-            //{
-            //    CVector3 a, b, c;
-            //    a = CVector3(x, temp[z][x], z);
-            //    b = CVector3(x, temp[z][x + 1], float(z + 1));
-            //    c = CVector3(float(x + 1), temp[z + 1][x], z);
-
-            //    CVector3 ab(c.x - a.x, c.y - a.y, c.z - a.z);
-            //    CVector3 ac(b.x - a.x, b.y - a.y, b.z - a.z);
-
-            //    normal.x = ab.y * ac.z - ab.z * ac.y;
-            //    normal.y = ab.z * ac.x - ab.x * ac.z;
-            //    normal.z = ab.x * ac.y - ab.y * ac.x;
-
-            //    float mag = (normal.x * normal.x) + (normal.y * normal.y) + (normal.z + normal.z);
-            //    mag = sqrtf(mag);
-            //    normal.x /= mag;
-            //    normal.y /= mag;
-            //    normal.z /= mag;
-            //}
 
             *reinterpret_cast<CVector3*>(currVert) = pt;
             currVert += sizeof(CVector3);
@@ -579,15 +534,15 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
-            //normal += cross;
 
 
             pt.x += xStep;
-            pt.y = temp[z][x];
+            pt.y = heightMap[z][x];
             uv.x += uStep;
         }
         pt.x = minPt.x;
         pt.z += zStep;
+        pt.y = heightMap[z][0];
         uv.x = 0;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
@@ -622,7 +577,6 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     mSubMeshes[0].vertexBuffer->Release();
     mSubMeshes[0].vertexBuffer = 0;
     RegenerateMesh(vertexData.get(), indexData.get());
-
 }
 
 void Mesh::RegenerateMesh(const void* vertices, const void* indices)

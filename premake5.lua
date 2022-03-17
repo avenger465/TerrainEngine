@@ -72,6 +72,7 @@ project "DirectXEngine"
 		"d3d11.lib",
 		"assimp-vc140-mt.lib",
 		"DirectXTK.lib",
+		"DirectXTex.lib",
 		"d3dcompiler.lib",
 		"winmm.lib"
 	}

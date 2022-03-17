@@ -114,7 +114,6 @@
     <ClInclude Include="Src\tepch.h">
       <Filter>Src</Filter>
     </ClInclude>
-    <ClInclude Include="Perlin.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp">
@@ -186,7 +185,6 @@
     <ClCompile Include="Src\tepch.cpp">
       <Filter>Src</Filter>
     </ClCompile>
-    <ClCompile Include="Perlin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">
@@ -195,13 +193,19 @@
     <FxCompile Include="Src\Shaders\LightModel_ps.hlsl">
       <Filter>Src\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_vs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLightingWithAlpha_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Src\Shaders\PixelLighting_ps.hlsl">
       <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\PixelLighting_vs.hlsl">
-      <Filter>Src\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Src\Shaders\Skinning_vs.hlsl">
       <Filter>Src\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Src\Shaders\TerrainShader_ps.hlsl">

@@ -31,15 +31,6 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     {
         textureColour = rockColour;
     }
-
-    //if (all(voronoiDiagram >= (white - 0.02f)) && all(voronoiDiagram <= (white + 0.02f)))
-    //{
-    //    textureColour.rgb = float3(0.0f, 0.0f, 1.0f);
-    //}
-    //else
-    //{
-    //    textureColour.rgb = float3(1.0f, 0.0f, 0.0f);
-    //}
     
     /////////////////////
     
@@ -47,11 +38,22 @@ float4 main(LightingPixelShaderInput input) : SV_TARGET
     // Normal might have been scaled by model scaling or interpolation so renormalise
     input.worldNormal = normalize(input.worldNormal);
 
+    float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
+
+    	//// Light 1 ////
+
+	// Direction and distance from pixel to light
+    float3 lightDirection = normalize(gLightPosition - input.worldPosition);
+    float3 lightDist = length(gLightPosition - input.worldPosition);
+    
+    // Equations from lighting lecture
+    float3 diffuseLight = gAmbientColour + (gLightColour * max(dot(input.worldNormal, lightDirection), 0) / lightDist);
     //colour from the texture 
+
     float3 diffuseMaterialColour = textureColour.rgb;
     
     //float3 finalColour = diffuseLight * diffuseMaterialColour;
-    float3 finalColour = diffuseMaterialColour;
+    float3 finalColour = diffuseLight *  diffuseMaterialColour;
 
-    return float4(finalColour, 1.0f);
+    return float4(finalColour, textureColour.a);
 }

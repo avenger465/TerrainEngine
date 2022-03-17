@@ -34,6 +34,7 @@ ID3D11BlendState* gAlphaBlendingState = nullptr;
 ID3D11RasterizerState* gCullBackState  = nullptr;
 ID3D11RasterizerState* gCullFrontState = nullptr;
 ID3D11RasterizerState* gCullNoneState  = nullptr;
+ID3D11RasterizerState* gWireframeState = nullptr;
 
 // Depth-stencil states allow us change how the depth buffer is used
 ID3D11DepthStencilState* gUseDepthBufferState = nullptr;
@@ -174,6 +175,17 @@ bool CreateStates(std::string LastError)
         return false;
     }
 	
+    ////-------- Wireframe mode --------////
+    rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;  // Don't cull any faces
+    rasterizerDesc.DepthClipEnable = TRUE; // Advanced setting - only used in rare cases
+
+    // Create a DirectX object for the description above that can be used by a shader
+    if (FAILED(gD3DDevice->CreateRasterizerState(&rasterizerDesc, &gWireframeState)))
+    {
+        LastError = "Error creating WireFrame state";
+        return false;
+    }
 	
     //--------------------------------------------------------------------------------------
 	// Blending States
@@ -303,11 +315,16 @@ void ReleaseStates()
     if (gUseDepthBufferState)    gUseDepthBufferState->Release();
     if (gDepthReadOnlyState)     gDepthReadOnlyState->Release();
     if (gNoDepthBufferState)     gNoDepthBufferState->Release();
+
     if (gCullBackState)          gCullBackState->Release();
+    if (gWireframeState)         gWireframeState->Release();
     if (gCullFrontState)         gCullFrontState->Release();
     if (gCullNoneState)          gCullNoneState->Release();
+
     if (gNoBlendingState)        gNoBlendingState->Release();
     if (gAdditiveBlendingState)  gAdditiveBlendingState->Release();
+    if (gAlphaBlendingState)     gAlphaBlendingState->Release();
+
     if (gAnisotropic4xSampler)   gAnisotropic4xSampler->Release();
     if (gBilinearMirrorSampler)  gBilinearMirrorSampler->Release();
     if (gTrilinearSampler)       gTrilinearSampler->Release();

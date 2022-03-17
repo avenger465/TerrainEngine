@@ -17,21 +17,15 @@ struct BasicVertex
 };
 
 
-//*******************
-
-// The structure below describes the vertex data to be sent into the vertex shader for skinned models
-// In addition to the usual vextex data it contains the indexes of 4 bones that influence this vertex and influence weight of each (which sum to 1)
-struct SkinningVertex
+struct TangentVertex
 {
     float3 position : position;
-    float3 normal   : normal;
-    float2 uv       : uv;
-    uint4  bones    : bones;   // This is the first time we have used integers in a shader: these are indexes into the list of nodes for the skeleton
-    uint4 weights  : weights;
+    float3 normal : normal;
+    float3 tangent : tangent;
+    float2 uv : uv;
 };
 
 //*******************
-
 
 // This structure describes what data the lighting pixel shader receives from the vertex shader.
 // The projected position is a required output from all vertex shaders - where the vertex is on the screen
@@ -61,6 +55,17 @@ struct SimplePixelShaderInput
     float2 uv : uv;
 };
 
+struct NormalMappingPixelShaderInput
+{
+    float4 projectedPosition : SV_Position;
+    
+    float3 worldPosition : worldPosition;
+    float3 modelNormal : modelNormal;
+    float3 modelTangent : modelTangent;
+    
+    float2 uv : uv; // UVs are texture coordinates. The artist specifies for every vertex which point on the texture is "pinned" to that vertex.
+};
+
 
 //--------------------------------------------------------------------------------------
 // Constant Buffers
@@ -78,18 +83,13 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float4x4 gProjectionMatrix;
     float4x4 gViewProjectionMatrix; // The above two matrices multiplied together to combine their effects
 
-    float3   gLight1Position; // 3 floats: x, y z
+    float3   gLightPosition; // 3 floats: x, y z
     float    padding1;        // Pad above variable to float4 (HLSL requirement - copied in the the C++ version of this structure)
-    float3   gLight1Colour;
+    float3   gLightColour;
     float    padding2;
 
-    float3   gLight2Position;
-    float    padding3;
-    float3   gLight2Colour;
-    float    padding4;
-
     float3   gAmbientColour;
-    float    gSpecularPower;
+    float    padding3;
 
     float3   gCameraPosition;
     float    padding5;
@@ -109,31 +109,5 @@ cbuffer PerModelConstants : register(b1) // The b1 gives this constant buffer th
     float4x4 gWorldMatrix;
 
     float3   gObjectColour;
-    float    gExplodeAmount;  // See notes on padding in structure above
-
-    float4x4 gBoneMatrices[MAX_BONES];
-}
-
-cbuffer PostProcessingConstants : register(b1)
-{
-	// Tint post-process settings
-    float3 gTintColour;
-    float paddingA; // Pad things to collections of 4 floats (see notes in earlier labs to read about padding)
-
-	//// Grey noise post-process settings
- //   float2 gNoiseScale;
- //   float2 gNoiseOffset;
-
-	//// Burn post-process settings
- //   float gBurnHeight;
- //   float3 paddingC;
-
-	//// Distort post-process settings
- //   float gDistortLevel;
- //   float3 paddingD;
-
-	//// Spiral post-process settings
- //   float gSpiralLevel;
- //   float3 paddingE;
-
+    float    PaddingA;  // See notes on padding in structure above
 }

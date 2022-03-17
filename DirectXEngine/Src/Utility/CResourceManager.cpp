@@ -30,7 +30,22 @@ void CResourceManager::loadTexture(const wchar_t* uniqueID, std::string filename
 	//Check whether DirectX had an error when creating the texture
 	if (FAILED(result))
 	{
-		MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
+		DirectX::ScratchImage image;
+		result = DirectX::LoadFromTGAFile(CA2CT(filename.c_str()), DirectX::TGA_FLAGS_NONE, nullptr, image);
+		if (FAILED(result))
+		{
+			MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
+		}
+		else
+		{
+			result = DirectX::CreateShaderResourceView(gD3DDevice, image.GetImages(), image.GetImageCount(), image.GetMetadata(), &texture);
+			if(FAILED(result))
+			{ }
+			else
+			{
+				textureMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), texture));
+			}
+		}
 	}
 
 	//If no error found then add the texture to the TextureMap paired with the unique ID Created
@@ -40,37 +55,41 @@ void CResourceManager::loadTexture(const wchar_t* uniqueID, std::string filename
 	}
 }
 
-void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename)
+void CResourceManager::loadMesh(const wchar_t* uniqueID, std::string &filename, bool requireTangents)
 {
 	// Set the texture to the default one if this filename is not valid
 	if (!doesFileExist(filename))
 	{
 		// Set the texture to the default on to make it easier
 		// to see which texture did not load correctly
-		filename = "../Src/Data/DefaultDiffuse.png";
+		filename = "Media/DefaultDiffuse.png";
 	}
-	mesh = new Mesh(filename);
+	if(requireTangents) mesh = new Mesh(filename, true);
+	else mesh = new Mesh(filename);
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
-void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& HeightMap, std::vector<std::vector<CVector3>>& NormalMap, bool normals, bool uvs)
+void CResourceManager::loadGrid(const wchar_t* uniqueID, CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& HeightMap, bool normals, bool uvs)
 {
-	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, NormalMap, HeightMap, normals, uvs);
+	mesh = new Mesh(minPt, maxPt, subDivX, subDivZ, HeightMap, normals, uvs);
 	meshMap.insert(std::make_pair(const_cast<wchar_t*>(uniqueID), mesh));
 }
 
 // Release resource.
 CResourceManager::~CResourceManager()
 {
-	if (texture)
+	if (texture) texture->Release();
+	if (mesh) mesh->~Mesh();
+
+	for (auto it = textureMap.cbegin(), next_it = it; it != textureMap.cend(); it = next_it)
 	{
-		texture->Release();
-		texture = 0;
+		++next_it;
+		textureMap.erase(it);
 	}
-	if (mesh)
+	for (auto it = meshMap.cbegin(), next_it = it; it != meshMap.cend(); it = next_it)
 	{
-		mesh->~Mesh();
-		mesh = 0;
+		++next_it;
+		meshMap.erase(it);
 	}
 }
 

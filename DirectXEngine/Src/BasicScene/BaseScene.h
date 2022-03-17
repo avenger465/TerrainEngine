@@ -62,6 +62,12 @@ protected:
 	Camera* MainCamera;
 	Model* GroundModel;
 
+	CLight* Light;
+
+	float LightScale = 15000.0f;
+	CVector3 LightColour = { 0.9922f, 0.7217f, 0.0745f };
+	CVector3 LightPosition = { 5000.0f, 13000.0f, 5000.0f };
+
 	CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
 	float    gSpecularPower = 256; // Specular power controls shininess - same for all models in this app
 	ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };

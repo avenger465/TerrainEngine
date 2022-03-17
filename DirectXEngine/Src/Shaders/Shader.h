@@ -18,11 +18,16 @@
 extern ID3D11VertexShader* gPixelLightingVertexShader;
 extern ID3D11PixelShader*  gPixelLightingPixelShader;
 extern ID3D11VertexShader* gBasicTransformVertexShader;
-extern ID3D11VertexShader* gSkinningVertexShader;   // Skinning is performed in the vertex shader (matrix work), we can use any pixel shader for lighting etc.
 extern ID3D11PixelShader*  gLightModelPixelShader;
 extern ID3D11VertexShader* gTerrainVertexShader;
 extern ID3D11VertexShader* gWorldTransformVertexShader;
 extern ID3D11PixelShader* gTerrainPixelShader;
+extern ID3D11PixelShader* gPixelLightingWithAlphaShader;
+
+extern ID3D11VertexShader* gNormalMappingVertexShader;
+extern ID3D11PixelShader* gNormalMappingPixelShader;
+
+
 extern ID3D11GeometryShader* gTriangleGeometryShader;
 
 //--------------------------------------------------------------------------------------

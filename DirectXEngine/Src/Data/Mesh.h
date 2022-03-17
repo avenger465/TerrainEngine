@@ -25,7 +25,7 @@ public:
     // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
     Mesh(const std::string& fileName, bool requireTangents = false);
 
-    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals = false, bool uvs = true);
+    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals = false, bool uvs = true);
     ~Mesh();
 
 
@@ -43,7 +43,7 @@ public:
     void Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 
     void RegenerateMesh(const void* vertices, const void* indices);
-    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<CVector3>>& NormalMap, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
+    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
 
     CVector3 GetPoint(std::vector<std::vector<float>>& temp, int x, int z);
 

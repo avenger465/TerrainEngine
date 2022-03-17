@@ -14,12 +14,15 @@
 //**** Update Shader.h if you add things here ****//
 
 // Vertex and pixel shader DirectX objects
-ID3D11VertexShader* gPixelLightingVertexShader  = nullptr;
-ID3D11VertexShader* gWorldTransformVertexShader = nullptr;
-ID3D11PixelShader*  gPixelLightingPixelShader   = nullptr;
-ID3D11VertexShader* gBasicTransformVertexShader = nullptr;
-ID3D11VertexShader* gSkinningVertexShader       = nullptr; // Skinning is performed in the vertex shader (matrix work), we can use any pixel shader for lighting etc.
-ID3D11PixelShader*  gLightModelPixelShader      = nullptr;
+ID3D11VertexShader* gPixelLightingVertexShader    = nullptr;
+ID3D11VertexShader* gWorldTransformVertexShader   = nullptr;
+ID3D11PixelShader*  gPixelLightingPixelShader     = nullptr;
+ID3D11VertexShader* gBasicTransformVertexShader   = nullptr;
+ID3D11PixelShader*  gLightModelPixelShader        = nullptr;
+ID3D11PixelShader*  gPixelLightingWithAlphaShader = nullptr;
+
+ID3D11VertexShader* gNormalMappingVertexShader    = nullptr;
+ID3D11PixelShader*  gNormalMappingPixelShader     = nullptr;
 
 ID3D11PixelShader*  gTerrainPixelShader = nullptr;
 
@@ -39,17 +42,23 @@ bool LoadShaders(std::string LastError)
     gPixelLightingVertexShader  = LoadVertexShader("Src/Shaders/PixelLighting_vs"); // Note how the shader files are named to show what type they are
     gPixelLightingPixelShader   = LoadPixelShader ("Src/Shaders/PixelLighting_ps");
     gBasicTransformVertexShader = LoadVertexShader("Src/Shaders/BasicTransform_vs");
-    gSkinningVertexShader       = LoadVertexShader("Src/Shaders/Skinning_vs");
+
     gLightModelPixelShader      = LoadPixelShader ("Src/Shaders/LightModel_ps");
+    gPixelLightingWithAlphaShader = LoadPixelShader ("Src/Shaders/PixelLightingWithAlpha_ps");
     gWorldTransformVertexShader = LoadVertexShader("Src/Shaders/WorldTransformOnly_vs");
+
+
+    gNormalMappingVertexShader = LoadVertexShader("Src/Shaders/NormalMapping_vs");
+    gNormalMappingPixelShader  = LoadPixelShader("Src/Shaders/NormalMapping_ps");
 
  
     gTerrainPixelShader      = LoadPixelShader   ("Src/Shaders/TerrainShader_ps");
     gTriangleGeometryShader  = LoadGeometryShader("Src/Shaders/Triangle_Normals_gs");
 
-    if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
-        gBasicTransformVertexShader == nullptr || gSkinningVertexShader     == nullptr || gLightModelPixelShader      == nullptr ||
-        gTerrainPixelShader         == nullptr || gTriangleGeometryShader   == nullptr || gWorldTransformVertexShader == nullptr)
+    if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr || gPixelLightingWithAlphaShader  == nullptr ||
+        gBasicTransformVertexShader == nullptr || gLightModelPixelShader      == nullptr ||
+        gTerrainPixelShader         == nullptr || gTriangleGeometryShader   == nullptr || gWorldTransformVertexShader == nullptr ||
+        gNormalMappingVertexShader == nullptr || gNormalMappingPixelShader == nullptr)
     {
         LastError = "Error loading shaders";
         return false;
@@ -62,13 +71,16 @@ bool LoadShaders(std::string LastError)
 void ReleaseShaders()
 {
     if (gLightModelPixelShader)       gLightModelPixelShader->Release();
-    if (gSkinningVertexShader)        gSkinningVertexShader->Release();
+
     if (gBasicTransformVertexShader)  gBasicTransformVertexShader->Release();
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
     if (gTerrainPixelShader)          gTerrainPixelShader->Release();
     if (gTriangleGeometryShader)      gTriangleGeometryShader->Release();
     if (gWorldTransformVertexShader)  gWorldTransformVertexShader->Release();
+    if (gPixelLightingWithAlphaShader)  gPixelLightingWithAlphaShader->Release();
+    if (gNormalMappingVertexShader)  gNormalMappingVertexShader->Release();
+    if (gNormalMappingPixelShader)  gNormalMappingPixelShader->Release();
 }
 
 

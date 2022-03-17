@@ -27,6 +27,14 @@ CVector3& CVector3::operator-= (const CVector3& v)
     return *this;
 }
 
+CVector3& CVector3::operator*=(const CVector3& v)
+{
+    x *= v.x;
+    y *= v.y;
+    z *= v.z;
+    return *this;
+}
+
 // Negate this vector (e.g. Velocity = -Velocity)
 CVector3& CVector3::operator- ()
 {

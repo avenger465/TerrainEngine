@@ -51,6 +51,8 @@ public:
     // Subtraction of another vector from this one, e.g. Velocity -= Gravity
     CVector3& operator-= (const CVector3& v);
 
+    CVector3& operator*= (const CVector3& v);
+
     // Negate this vector (e.g. Velocity = -Velocity)
     CVector3& operator- ();
 
