@@ -8,7 +8,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 
     BuildHeightMap(1);
    
-    PlantModels.resize(resizeAmount);
+    PlantModels.resize(plantResizeAmount);
 
     resourceManager->loadTexture(L"default", "Media/v.bmp");
 
@@ -16,7 +16,6 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     try
     {
         resourceManager->loadGrid(L"TerrainMesh", CVector3(0, 0, 0), CVector3(1000, 0, 1000), SizeOfTerrainVertices, SizeOfTerrainVertices, HeightMap, true, true);
-        resourceManager->loadMesh(L"Bush", std::string("Data/bush-01.fbx"));
         resourceManager->loadMesh(L"plant", std::string("Data/plant.fbx"), true);
         resourceManager->loadMesh(L"Light", std::string("Data/Light.x"));
 
@@ -29,14 +28,9 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 
     try
     {
-        //resourceManager->loadTexture(L"Light", "Media/Flare.jpg");
         resourceManager->loadTexture(L"Grass", "Media/Grass1.png");
         resourceManager->loadTexture(L"Rock", "Media/rock1.png");
         resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
-        resourceManager->loadTexture(L"BarkTexture", "Media/Bark.jpg");
-        resourceManager->loadTexture(L"bushTexture", "Media/BushTexture2.jpg");
-        resourceManager->loadTexture(L"leaves", "Data/SampleLeaves_2.tga");
-        resourceManager->loadTexture(L"leaves_AlphaMap", "Data/SampleLeaves_2_Alpha.tga");
         resourceManager->loadTexture(L"plantTexture", "Media/plant.png");
         resourceManager->loadTexture(L"plantTextureNormal", "Data/plantNormal.jpg");
         resourceManager->loadTexture(L"lightTexture", "Media/Flare.jpg");
@@ -249,6 +243,7 @@ void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
             PlantModels[i]->SetStates(gAlphaBlendingState, gUseDepthBufferState, gCullBackState);
             PlantModels[i]->Render(gPerModelConstantBuffer, gPerModelConstants);
         }
+
     }
 
     gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
@@ -352,7 +347,6 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
 
     // Control camera (will update its view matrix)
     MainCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
-
     GroundModel->SetScale(TerrainYScale);
 
     // Show frame time / FPS in the window title //
@@ -395,7 +389,7 @@ void TerrainGenerationScene::UpdateFoliagePosition()
         position.y *= TerrainYScale.y;
         PlantModels[i]->SetScale(2);
         PlantModels[i]->SetPosition(position);
-    }    
+    }   
 }
 
 void TerrainGenerationScene::BuildHeightMap(float height)
@@ -586,6 +580,11 @@ void TerrainGenerationScene::IMGUI()
             ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", GroundModel->Position().x, GroundModel->Position().y, GroundModel->Position().z);
             ImGui::Text("");
             if(ImGui::Button("Toggle FPS", ImVec2(162, 20))) lockFPS = !lockFPS;
+            ImGui::SameLine();
+            if (ImGui::Button("Export Terrain", ImVec2(162, 20)))
+            {
+                resourceManager->getMesh(L"plant")->ExportModel();
+            }
             ImGui::End();
         }
         ImGui::Begin("Terrain Generation", 0, windowFlags);
@@ -687,7 +686,7 @@ void TerrainGenerationScene::IMGUI()
                 GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
                 UpdateFoliagePosition();
             }
-            if (ImGui::Button("Terracing Multiplier", ImVec2(162, 20)))
+            if (ImGui::Button("Terracing", ImVec2(162, 20)))
             {
                 Terracing(terracingMultiplier);
                 GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
@@ -726,32 +725,32 @@ void TerrainGenerationScene::IMGUI()
             ImGui::SameLine();
             if (ImGui::Button("Diamond Square", ImVec2(162, 20)))
             {
-                HeightMap.resize(SizeOfTerrain + 1, std::vector<float>(SizeOfTerrain + 1, 0));
+                
                 BuildHeightMap(1);
                 DiamondSquareMap();
                 GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
                 UpdateFoliagePosition();
-                /*HeightMap.resize(SizeOfTerrain, std::vector<float>(SizeOfTerrain, 0));*/
             }
             ImGui::Text("");
             ImGui::Separator();
 
             ImGui::Text("Number of plants per chunk: %i", PlantModels.size());
-            ImGui::SliderInt("Change size of TestVector", &resizeAmount, 1, 20);
+            ImGui::SliderInt("Change the number of Plants per terrain chunk", &plantResizeAmount, 1, 20);
             if (ImGui::Button("Update Size"))
             {
-                if (resizeAmount != CurrentPlantVectorSize)
+                if (plantResizeAmount != CurrentPlantVectorSize)
                 {
-                    CurrentPlantVectorSize = resizeAmount;
-                    PlantModels.resize(resizeAmount);
+                    CurrentPlantVectorSize = plantResizeAmount;
+                    PlantModels.resize(plantResizeAmount);
                     for (int i = 0; i < PlantModels.size(); ++i)
                     {
                         PlantModels[i] = new Model(resourceManager->getMesh(L"plant"));
                         PlantModels[i]->SetPosition(CVector3(0.0f, -1500.0f, 0.0f));
                         PlantModels[i]->SetScale(0.1f);
                     }
-                    UpdateFoliagePosition();
+                    
                 }
+                UpdateFoliagePosition();
             }
         }
         ImGui::End();

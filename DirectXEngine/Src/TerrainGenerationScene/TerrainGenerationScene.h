@@ -60,7 +60,7 @@ private:
 	int seed = 0;
 
 	std::vector<Model*> PlantModels;
-	int resizeAmount = 2;
+	int plantResizeAmount = 2;
 	int CurrentPlantVectorSize = 2;
 
 	std::vector<std::vector<float>> HeightMap;

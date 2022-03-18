@@ -93,7 +93,7 @@ public:
 
     void ResizeModel(std::vector<std::vector<float>>& temp, int resolution, CVector3 MinX, CVector3 MaxX);
 
-
+    Mesh* GetMesh() { return mMesh; }
 
 
 	//-------------------------------------

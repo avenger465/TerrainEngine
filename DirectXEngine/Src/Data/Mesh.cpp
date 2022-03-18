@@ -16,11 +16,11 @@
 // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
 Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 {
+    mFilename = fileName;
     Assimp::Importer importer;
-
     // Flags for processing the mesh. Assimp provides a huge amount of control - right click any of these
     // and "Peek Definition" to see documention above each constant
-    unsigned int assimpFlags = aiProcess_MakeLeftHanded |
+    assimpFlags = aiProcess_MakeLeftHanded |
                                aiProcess_GenSmoothNormals |
                                aiProcess_FixInfacingNormals |
                                aiProcess_GenUVCoords | 
@@ -71,10 +71,10 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 
     // Import mesh with assimp given above requirements - log output
     Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE);
-    const aiScene* scene = importer.ReadFile(fileName, assimpFlags);
+    scene = importer.ReadFile(mFilename, assimpFlags);
     Assimp::DefaultLogger::kill();
-    if (scene == nullptr)  throw std::runtime_error("Error loading mesh (" + fileName + "). " + importer.GetErrorString());
-    if (scene->mNumMeshes == 0)  throw std::runtime_error("No usable geometry in mesh: " + fileName);
+    if (scene == nullptr)  throw std::runtime_error("Error loading mesh (" + mFilename + "). " + importer.GetErrorString());
+    if (scene->mNumMeshes == 0)  throw std::runtime_error("No usable geometry in mesh: " + mFilename);
 
 
     //-----------------------------------
@@ -112,12 +112,12 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         std::vector<D3D11_INPUT_ELEMENT_DESC> vertexElements;
         unsigned int offset = 0;
     
-        if (!assimpMesh->HasPositions())  throw std::runtime_error("No position data for sub-mesh " + subMeshName + " in " + fileName);
+        if (!assimpMesh->HasPositions())  throw std::runtime_error("No position data for sub-mesh " + subMeshName + " in " + mFilename);
         unsigned int positionOffset = offset;
         vertexElements.push_back( { "position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, positionOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
         offset += 12;
 
-        if (!assimpMesh->HasNormals())  throw std::runtime_error("No normal data for sub-mesh " + subMeshName + " in " + fileName);
+        if (!assimpMesh->HasNormals())  throw std::runtime_error("No normal data for sub-mesh " + subMeshName + " in " + mFilename);
         unsigned int normalOffset = offset;
         vertexElements.push_back( { "normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, normalOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
         offset += 12;
@@ -125,7 +125,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         unsigned int tangentOffset = offset;
         if (requireTangents)
         {
-            if (!assimpMesh->HasTangentsAndBitangents())  throw std::runtime_error("No tangent data for sub-mesh " + subMeshName + " in " + fileName);
+            if (!assimpMesh->HasTangentsAndBitangents())  throw std::runtime_error("No tangent data for sub-mesh " + subMeshName + " in " + mFilename);
             vertexElements.push_back( { "tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, tangentOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
             offset += 12;
         }
@@ -133,7 +133,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         unsigned int uvOffset = offset;
         if (assimpMesh->GetNumUVChannels() > 0 && assimpMesh->HasTextureCoords(0))
         {
-            if (assimpMesh->mNumUVComponents[0] != 2)  throw std::runtime_error("Unsupported texture coordinates in " + subMeshName + " in " + fileName);
+            if (assimpMesh->mNumUVComponents[0] != 2)  throw std::runtime_error("Unsupported texture coordinates in " + subMeshName + " in " + mFilename);
             vertexElements.push_back( { "uv", 0, DXGI_FORMAT_R32G32_FLOAT, 0, uvOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
             offset += 8;
         }
@@ -156,7 +156,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
                                                    shaderSignature->GetBufferPointer(), shaderSignature->GetBufferSize(),
                                                    &subMesh.vertexLayout);
         if (shaderSignature)  shaderSignature->Release();
-        if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for " + fileName);
+        if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for " + mFilename);
 
 
 
@@ -256,7 +256,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 							break;
 						}
 					}
-                    if (nodeIndex == mNodes.size())  throw std::runtime_error("Bone with no matching node in " + fileName);
+                    if (nodeIndex == mNodes.size())  throw std::runtime_error("Bone with no matching node in " + mFilename);
 
 					// Go through each weight of the bone and update the vertex it influences
 					// Find the first 0 weight on that vertex and put the new influence / weight there.
@@ -310,7 +310,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         //-----------------------------------
 
         // Copy face data from assimp to our CPU-side index buffer
-        if (!assimpMesh->HasFaces())  throw std::runtime_error("No face data in " + subMeshName + " in " + fileName);
+        if (!assimpMesh->HasFaces())  throw std::runtime_error("No face data in " + subMeshName + " in " + mFilename);
 
         DWORD* index = reinterpret_cast<DWORD*>(indices.get());
         for (unsigned int face = 0; face < assimpMesh->mNumFaces; ++face)
@@ -335,7 +335,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         initData.pSysMem = vertices.get(); // Fill the new vertex buffer with data loaded by assimp
     
         hr = gD3DDevice->CreateBuffer(&bufferDesc, &initData, &subMesh.vertexBuffer);
-        if (FAILED(hr))  throw std::runtime_error("Failure creating vertex buffer for " + fileName);
+        if (FAILED(hr))  throw std::runtime_error("Failure creating vertex buffer for " + mFilename);
 
 
         // Create GPU-side index buffer and copy the vertices imported by assimp into it
@@ -347,7 +347,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         initData.pSysMem = indices.get(); // Fill the new index buffer with data loaded by assimp
 
         hr = gD3DDevice->CreateBuffer(&bufferDesc, &initData, &subMesh.indexBuffer);
-        if (FAILED(hr))  throw std::runtime_error("Failure creating index buffer for " + fileName);
+        if (FAILED(hr))  throw std::runtime_error("Failure creating index buffer for " + mFilename);
     }
 }
 
@@ -577,6 +577,42 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     mSubMeshes[0].vertexBuffer->Release();
     mSubMeshes[0].vertexBuffer = 0;
     RegenerateMesh(vertexData.get(), indexData.get());
+}
+
+void Mesh::ExportModel()
+{
+    Assimp::Exporter exporter;
+    const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
+    std::string path = "Media/KielanTheCunt.fbx";
+
+    assimpFlags;
+    assimpFlags;
+
+    if (!scene || mFilename.empty()) throw std::runtime_error("scene or file doesn't exist ");
+
+    const aiExportFormatDesc* formatD = exporter.GetExportFormatDescription(0);
+    if (!formatD) throw std::runtime_error("Failure to find support description");
+
+    aiScene aiscene;
+
+    if (scene->mNumMeshes > 0)
+    {
+        exporter.Export(scene, formatD->id, path);
+    }
+    //std::string path = "Media/";
+    //const aiExportFormatDesc* desc(exporter.GetExportFormatDescription(0));
+    //if (desc != nullptr)
+    //{
+    //    path.append(desc->fileExtension);
+    //}
+    //if (exporter.Export(scene, desc->id, path) == AI_SUCCESS)
+    //{
+
+    //}
+
+    //exporter.Export(scene, "fbx", path, assimpFlags);
+    //std::current_exception << exporter.GetErrorString() << std::endl;
+    //throw std::runtime_error("Cannot expor");
 }
 
 void Mesh::RegenerateMesh(const void* vertices, const void* indices)

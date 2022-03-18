@@ -8,6 +8,7 @@
 #include "project/common.h"
 #include "Math/CVector2.h" 
 #include "Math/CVector3.h" 
+#include "assimp/Exporter.hpp"
 
 
 #ifndef _MESH_H_INCLUDED_
@@ -45,7 +46,7 @@ public:
     void RegenerateMesh(const void* vertices, const void* indices);
     void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
 
-    CVector3 GetPoint(std::vector<std::vector<float>>& temp, int x, int z);
+    void ExportModel();
 
 
 //--------------------------------------------------------------------------------------
@@ -106,6 +107,10 @@ private:
 // Member data
 //--------------------------------------------------------------------------------------
 private:
+    const aiScene* scene;
+
+    std::string mFilename;
+    unsigned int assimpFlags;
 
     std::vector<Node>    mNodes;     // The mesh hierarchy. First entry is root. remainder aree stored in depth-first order
 
