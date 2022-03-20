@@ -349,6 +349,7 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
     MainCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
     GroundModel->SetScale(TerrainYScale);
 
+
     // Show frame time / FPS in the window title //
     const float fpsUpdateTime = 0.5f; // How long between updates (in seconds)
     static float totalFrameTime = 0;
@@ -372,23 +373,29 @@ void TerrainGenerationScene::UpdateFoliagePosition()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 10000);
+    std::uniform_int_distribution<> dis(0, 1000);
 
-    uint32_t OldRange = (10000 - 0);
+    uint32_t OldRange = 1000;
+    uint32_t newRange = 257;
+
     for (int i = 0; i < PlantModels.size(); ++i)
     {
         uint32_t randomXPos = dis(gen);
         uint32_t randomZPos = dis(gen);
 
-        uint32_t NewXPos = (((randomXPos - 0) * SizeOfTerrain) / OldRange) + 0;
-        uint32_t NewZPos = (((randomZPos - 0) * SizeOfTerrain) / OldRange) + 0;
+        uint32_t NewXPos = (((randomXPos - 0) * newRange) / OldRange) + 0;//((randomXPos - 0) / (1000 - 0)) * (257 - 0) + 0;
+        uint32_t NewZPos = (((randomZPos - 0) * newRange) / OldRange) + 0;
+
+        //uint32_t NewXPos = ((randomXPos - 0) / (1000 - 0)) * (257 - 0) + 0;
+        //uint32_t NewZPos = ((randomZPos - 0) / (1000 - 0)) * (257 - 0) + 0;
 
         float Heightvalue = HeightMap[NewZPos][NewXPos];
 
-        CVector3 position = { (float)randomXPos, (Heightvalue+0.1f), (float)randomZPos };
-        position.y *= TerrainYScale.y;
-        PlantModels[i]->SetScale(2);
-        PlantModels[i]->SetPosition(position);
+        CVector3 position = { (float)randomXPos, (Heightvalue), (float)randomZPos };
+        position *= TerrainYScale;
+
+        PlantModels[i]->SetScale(1);
+        PlantModels[i]->SetPosition({position.x, position.y-3, position.z});
     }   
 }
 
@@ -583,7 +590,7 @@ void TerrainGenerationScene::IMGUI()
             ImGui::SameLine();
             if (ImGui::Button("Export Terrain", ImVec2(162, 20)))
             {
-                resourceManager->getMesh(L"plant")->ExportModel();
+                resourceManager->getMesh(L"TerrainMesh")->ExportModel(GroundModel->GetMesh());
             }
             ImGui::End();
         }
@@ -680,29 +687,11 @@ void TerrainGenerationScene::IMGUI()
                 UpdateFoliagePosition();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Redistribute", ImVec2(162, 20)))
-            {
-                Redistribution(RedistributionPower);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
-                UpdateFoliagePosition();
-            }
             if (ImGui::Button("Terracing", ImVec2(162, 20)))
             {
                 Terracing(terracingMultiplier);
                 GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
                 UpdateFoliagePosition();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Display Height Map", ImVec2(162, 20)))
-            {
-                std::ofstream File("PerlinHeightMap.txt");
-
-                for (int i = 0; i <= SizeOfTerrain; ++i) {
-                    for (int j = 0; j <= SizeOfTerrain; ++j) {
-                        File << HeightMap[i][j] * GroundModel->Scale().y << " ";
-                    }
-                }
-                File.close();
             }
 
             ImGui::Text("");
@@ -711,11 +700,12 @@ void TerrainGenerationScene::IMGUI()
             ImGui::SliderInt("Number of Octaves", &octaves, 1, 20);
             ImGui::SliderFloat("Amplitude Reduction", &AmplitudeReduction, 0.1f, 0.5f);
             ImGui::SliderFloat("Frequency Multiplier", &FrequencyMultiplier, 1.0f, 2.0f);
-            ImGui::SliderFloat("Diamond Square Spread", &Spread, 10.0f, 40.0f);
-            ImGui::SliderFloat("Diamond Square SpreadReduction", &SpreadReduction, 2.0f, 2.5f);
+            ImGui::SliderFloat("DS Spread", &Spread, 10.0f, 40.0f);
+            ImGui::SliderFloat("DS Spread Reduction", &SpreadReduction, 2.0f, 2.5f);
             ImGui::Text("");
             if (ImGui::Button("Perlin with Octaves", ImVec2(162, 20)))
             {
+                //Reset the height map to a flat surface
                 BuildHeightMap(1);
                 PerlinNoiseWithOctaves(Amplitude, frequency, octaves);
                 NormaliseHeightMap(2.0f);
@@ -725,7 +715,7 @@ void TerrainGenerationScene::IMGUI()
             ImGui::SameLine();
             if (ImGui::Button("Diamond Square", ImVec2(162, 20)))
             {
-                
+                //Reset the height map to a flat surface
                 BuildHeightMap(1);
                 DiamondSquareMap();
                 GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
@@ -734,9 +724,8 @@ void TerrainGenerationScene::IMGUI()
             ImGui::Text("");
             ImGui::Separator();
 
-            ImGui::Text("Number of plants per chunk: %i", PlantModels.size());
-            ImGui::SliderInt("Change the number of Plants per terrain chunk", &plantResizeAmount, 1, 20);
-            if (ImGui::Button("Update Size"))
+            ImGui::SliderInt("Number of plants per chunk", &plantResizeAmount, 1, 20);
+            if (ImGui::Button("Update Size", ImVec2(162, 20)))
             {
                 if (plantResizeAmount != CurrentPlantVectorSize)
                 {

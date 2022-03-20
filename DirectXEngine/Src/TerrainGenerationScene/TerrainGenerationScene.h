@@ -10,7 +10,7 @@
 class TerrainGenerationScene :
     public BaseScene
 {
-	const int SizeOfTerrain = 256;
+	const int SizeOfTerrain = 256;	
 	const int SizeOfTerrainVertices = 255;
 
 	virtual bool InitGeometry(std::string& LastError) override;

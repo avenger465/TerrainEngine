@@ -46,7 +46,7 @@ public:
     void RegenerateMesh(const void* vertices, const void* indices);
     void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
 
-    void ExportModel();
+    void ExportModel(Mesh* mMesh);
 
 
 //--------------------------------------------------------------------------------------
@@ -108,6 +108,7 @@ private:
 //--------------------------------------------------------------------------------------
 private:
     const aiScene* scene;
+    char* b;
 
     std::string mFilename;
     unsigned int assimpFlags;
@@ -118,6 +119,9 @@ private:
 
 protected:
     std::vector<SubMesh> mSubMeshes; // The mesh geometry. Nodes refer to sub-meshes in this vector
+
+    std::vector<CVector3> Point;
+    std::vector<uint32_t> Indix;
 
     struct VertexType
     {

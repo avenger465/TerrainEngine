@@ -411,6 +411,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
     
     auto currVert = vertexData.get();
 
+
     for (int z = 0; z <= subDivZ; ++z)
     {
         for (int x = 0; x <= subDivX; ++x)
@@ -430,6 +431,7 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
             pt.x += xStep;
             pt.y = heightMap[z][x];
             uv.x += uStep;
+            Point.push_back(pt);
         }
         pt.x = minPt.x;
         pt.z += zStep;
@@ -461,11 +463,11 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
             *currIndex++ = tlIndex + subDivX + 1;
             *currIndex++ = tlIndex + subDivX + 2;
 
+            Indix.push_back(tlIndex);
             ++tlIndex;
         }
         ++tlIndex;
     }
-
 
     // Create the vertex buffer and fill it with the loaded vertex data
     D3D11_BUFFER_DESC bufferDesc;
@@ -579,40 +581,91 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     RegenerateMesh(vertexData.get(), indexData.get());
 }
 
-void Mesh::ExportModel()
+void Mesh::ExportModel(Mesh* mMesh)
 {
+    aiVector3D* vertices = new aiVector3D[Point.size()];        // deleted: mesh.h:758
+
+    for (int i = 0; i < Point.size(); ++i)
+    {
+        vertices[i].Set(Point[i].x, Point[i].y, Point[i].z);
+    }
+
+    aiFace* faces = new aiFace[1];                      // deleted: mesh.h:784
+    faces[0].mNumIndices = 3;
+    faces[0].mIndices = new unsigned [] { 0, 1, 2 };
+    // deleted: mesh.h:149
+
+    aiMesh* mesh = new aiMesh();                        // deleted: Version.cpp:150
+    mesh->mNumVertices = mSubMeshes[0].numVertices;
+    mesh->mVertices = vertices;
+    mesh->mNumFaces = 1;
+    mesh->mFaces = faces;
+    mesh->mPrimitiveTypes = aiPrimitiveType_POLYGON; // workaround, issue #3778
+
+    // a valid material is needed, even if its empty
+
+    aiMaterial* material = new aiMaterial();            // deleted: Version.cpp:155
+
+    // a root node with the mesh list is needed; if you have multiple meshes, this must match.
+
+    aiNode* root = new aiNode();                        // deleted: Version.cpp:143
+    root->mNumMeshes = 1;
+    root->mMeshes = new unsigned [] { 0 };              // deleted: scene.cpp:77
+
+    // pack mesh(es), material, and root node into a new minimal aiScene
+
+    aiScene* out = new aiScene();                       // deleted: by us after use
+    out->mNumMeshes = 1;
+    out->mMeshes = new aiMesh * [] { mesh };            // deleted: Version.cpp:151
+    out->mNumMaterials = 1;
+    out->mMaterials = new aiMaterial * [] { material }; // deleted: Version.cpp:158
+    out->mRootNode = root;
+    out->mMetaData = new aiMetadata(); // workaround, issue #3781
+
+    // and we're good to go. do whatever:
+
     Assimp::Exporter exporter;
+    if (exporter.Export(out, "objnomtl", "Media/triangle1.obj") != AI_SUCCESS)
+        std::cerr << exporter.GetErrorString() << std::endl;
+
+
+    //aiScene* Scene4 = new aiScene();
+    //Scene4->mRootNode = new aiNode();
+    //Scene4->mMaterials = new aiMaterial * [1];
+    //Scene4->mMaterials[0] = nullptr;
+    //Scene4->mNumMaterials = 1;
+    //Scene4->mMaterials[0] = new aiMaterial();
+
+    //Scene4->mMeshes = new aiMesh * [] {mMesh};
+    //Scene4->mMeshes[0] = nullptr;
+    //Scene4->mNumMeshes = mSubMeshes.size();
+
+    //for (int i = 0; i < mSubMeshes.size(); ++i)
+    //{
+    //    Scene4->mMeshes[i] = new aiMesh();
+    //    Scene4->mMeshes[i]->mMaterialIndex = 0;
+    //}
+
+    //Scene4->mRootNode->mMeshes = new unsigned int[1];
+    //Scene4->mRootNode->mMeshes[0] = 0;
+    //Scene4->mRootNode->mNumMeshes = 1;
+
+
+    //auto pMesh = Scene4->mMeshes[0];
+
+    //Assimp::Importer importer;
+    //Assimp::Exporter exporter;
+    //const aiScene* scene2 = importer.ReadFile("Data/rock.fbx", aiProcess_ValidateDataStructure);
+    //const aiScene* scene3 = importer.ReadFileFromMemory(mSubMeshes[0].vertexBuffer, mSubMeshes[0].vertexSize,assimpFlags);
+
+    //exporter.Export(scene2, "fbx", "Data/rock2.fbx");
     const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
     std::string path = "Media/KielanTheCunt.fbx";
 
-    assimpFlags;
-    assimpFlags;
+    ////mExportFormatDesc->id is "collada"  and mFilePath is "C:/Users/kevin/Desktop/myColladaFile.dae"
+    exporter.Export(out, "fbx", path);
 
-    if (!scene || mFilename.empty()) throw std::runtime_error("scene or file doesn't exist ");
 
-    const aiExportFormatDesc* formatD = exporter.GetExportFormatDescription(0);
-    if (!formatD) throw std::runtime_error("Failure to find support description");
-
-    aiScene aiscene;
-
-    if (scene->mNumMeshes > 0)
-    {
-        exporter.Export(scene, formatD->id, path);
-    }
-    //std::string path = "Media/";
-    //const aiExportFormatDesc* desc(exporter.GetExportFormatDescription(0));
-    //if (desc != nullptr)
-    //{
-    //    path.append(desc->fileExtension);
-    //}
-    //if (exporter.Export(scene, desc->id, path) == AI_SUCCESS)
-    //{
-
-    //}
-
-    //exporter.Export(scene, "fbx", path, assimpFlags);
-    //std::current_exception << exporter.GetErrorString() << std::endl;
-    //throw std::runtime_error("Cannot expor");
 }
 
 void Mesh::RegenerateMesh(const void* vertices, const void* indices)
@@ -792,3 +845,4 @@ unsigned int Mesh::ReadNodes(aiNode* assimpNode, unsigned int nodeIndex, unsigne
 
     return nodeIndex;
 }
+
