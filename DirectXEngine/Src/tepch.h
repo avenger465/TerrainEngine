@@ -1,6 +1,5 @@
 #pragma once
 
-
 //------------------------//
 //	 String Manipulation
 //------------------------//
@@ -8,7 +7,6 @@
 #include <cctype>
 #include <atlbase.h> // C-string to unicode conversion function CA2CT
 #include <stdint.h>
-#include <windows.h>
 #include <Windows.h>
 
 
@@ -43,11 +41,11 @@
 #include <d3dcompiler.h>
 #include <d3d11.h>
 
+
 //------------------------//
 //	  Asset Importing
 //------------------------//
 #include <assimp/Importer.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/postprocess.h>
-#include <assimp/scene.h>
 #include <assimp/scene.h>

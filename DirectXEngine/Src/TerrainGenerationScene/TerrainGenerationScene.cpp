@@ -1,31 +1,40 @@
 #include "TerrainGenerationScene.h"
 
+//Function to setup all the geometry to be used in the scene
 bool TerrainGenerationScene::InitGeometry(std::string& LastError)
 {
+    //Create a new resourceManager
     resourceManager = new CResourceManager();
 
+    //Update the size of the HeightMap
+    // --Has to be equal to 2^n + 1 in order for the Diamond Square algorithm to work on the HeightMap
     HeightMap.resize(SizeOfTerrain + 1, std::vector<float>(SizeOfTerrain + 1, 0));
 
+    //Build the HeightMap with the value of 1
     BuildHeightMap(1);
    
+    //Update the size of the PlantModels vectors
     PlantModels.resize(plantResizeAmount);
 
-    resourceManager->loadTexture(L"default", "Media/v.bmp");
+    //Load the texture that will be used if a texture cannot be loaded in correctly
+    resourceManager->loadTexture(L"default", "Media/DefaultDiffuse.png");
 
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
+    // add the meshes to the resourceManager to make getting these meshes later easier
     try
     {
-        resourceManager->loadGrid(L"TerrainMesh", CVector3(0, 0, 0), CVector3(1000, 0, 1000), SizeOfTerrainVertices, SizeOfTerrainVertices, HeightMap, true, true);
+        resourceManager->loadGrid(L"TerrainMesh", TerrainMeshMinPt, TerrainMeshMaxPt, SizeOfTerrainVertices, SizeOfTerrainVertices, HeightMap);
         resourceManager->loadMesh(L"plant", std::string("Data/plant.fbx"), true);
         resourceManager->loadMesh(L"Light", std::string("Data/Light.x"));
 
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
-        LastError = e.what(); // This picks up the error message put in the exception (see Mesh.cpp)
+        LastError = e.what();     // This picks up the error message put in the exception (see Mesh.cpp)
         return false;
     }
 
+    //Load the textures that will be used with the models to the resource manager
     try
     {
         resourceManager->loadTexture(L"Grass", "Media/Grass1.png");
@@ -35,9 +44,9 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
         resourceManager->loadTexture(L"plantTextureNormal", "Data/plantNormal.jpg");
         resourceManager->loadTexture(L"lightTexture", "Media/Flare.jpg");
     }
-    catch (std::runtime_error e)
+    catch (std::runtime_error e) // Constructors cannot return error messages so use exceptions to catch texture errors (fairly standard approach this)
     {
-        LastError = e.what();
+        LastError = e.what();  // This picks up the error message put in the exception (see Mesh.cpp)
         return false;
     }
 
@@ -133,7 +142,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
         return false;
     }
 
-    // Create all filtering modes, blending modes etc.
+    // Create all states that can be used in the scene
     if (!CreateStates(LastError))
     {
         LastError = "Error creating states";
@@ -143,32 +152,33 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     return true;
 }
 
+//Function to setup the scene 
 bool TerrainGenerationScene::InitScene()
 {
-    //// Set up scene ////
+    //Setup the GroundModel and the Light in the scene
     GroundModel = new Model(resourceManager->getMesh(L"TerrainMesh"), CVector3(0,0,0));
-    Light = new CLight(resourceManager->getMesh(L"Light"), LightScale, LightColour, LightPosition, 0);
+    Light       = new CLight(resourceManager->getMesh(L"Light"), LightScale, LightColour, LightPosition, 0);
 
+    //Loop through every plant in the vector and create a plant model
     for (int i = 0; i < PlantModels.size(); ++i)
     {
         PlantModels[i] = new Model(resourceManager->getMesh(L"plant"), CVector3(0.0f, -500.0f, 0.0f));
         PlantModels[i]->SetScale(0.1f);
     }
 
-    //PlantModel = new Model(resourceManager->getMesh(L"plant"));
-    //PlantModel->SetScale(2);
-
+    //Setting up the flags that will be used when creating the ImGui windows
     windowFlags |= ImGuiWindowFlags_NoScrollbar;
     windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
     //// Set up camera ////
-
     MainCamera = new Camera();
     MainCamera->SetPosition(CameraPosition);
     MainCamera->SetRotation(CameraRotation);
+
     return true;
 }
 
+//Function to release everything in the scene from memory
 void TerrainGenerationScene::ReleaseResources()
 {
     ReleaseStates();
@@ -184,7 +194,6 @@ void TerrainGenerationScene::ReleaseResources()
 
     ReleaseShaders();
 
-    // See note in InitGeometry about why we're not using unique_ptr and having to manually delete
     delete MainCamera;     MainCamera = nullptr;
     delete GroundModel;     GroundModel = nullptr;
     for (int i = 0; i < PlantModels.size(); ++i)
@@ -192,13 +201,11 @@ void TerrainGenerationScene::ReleaseResources()
         delete PlantModels[i];
         PlantModels[i] = nullptr;
     }
-
     delete resourceManager; resourceManager = nullptr;
-
     delete Light; Light = nullptr;
-
 }
 
+//Function to render scene from the Camera's perspective
 void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
 {
     // Set camera matrices in the constant buffer and send over to GPU
@@ -211,31 +218,32 @@ void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
     gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer); // First parameter must match constant buffer number in the shader 
     gD3DContext->GSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
     gD3DContext->PSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
-
-
-    //// Render skinned models ////
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
+    //Only render these models if the terrain has been chosen to be rendered
     if (enableTerrain)
     {
+        //set the Pixel, Vertex and Geometry shaders that will be used for the ground Model
         GroundModel->Setup(gWorldTransformVertexShader, gTerrainPixelShader);
         gD3DContext->GSSetShader(gTriangleGeometryShader, nullptr, 0);
-        if (enableWireFrame)
-        {
-            GroundModel->SetStates(gNoBlendingState, gUseDepthBufferState, gWireframeState);
-        }
-        else
-        {
-            GroundModel->SetStates(gNoBlendingState, gUseDepthBufferState, gCullBackState);
-        }
+
+        //check if the model needs to be renderedin wireframe mode
+        if (enableWireFrame) GroundModel->SetStates(gNoBlendingState, gUseDepthBufferState, gWireframeState);
+        else GroundModel->SetStates(gNoBlendingState, gUseDepthBufferState, gCullBackState);
+
+        //Set the resources that the Pixel shader will need to have to work
         GroundModel->SetShaderResources(0, resourceManager->getTexture(L"Grass"));
         GroundModel->SetShaderResources(1, resourceManager->getTexture(L"Rock"));
         GroundModel->SetShaderResources(2, resourceManager->getTexture(L"Dirt"));
-        GroundModel->SetShaderResources(3, resourceManager->getTexture(L"Default"));
+
+        //Render the model
         GroundModel->Render(gPerModelConstantBuffer, gPerModelConstants);
 
+        //Set the Geometry shader to be a nullptr as we do not need it anymore
         gD3DContext->GSSetShader(nullptr, nullptr, 0);
 
+        //Loop through each plant in the scene and update the shaders and the required resources for the shaders.
+        //Also update the states for the model and then render the model
         for (int i = 0; i < PlantModels.size(); ++i)
         {
             PlantModels[i]->Setup(gNormalMappingVertexShader, gNormalMappingPixelShader);
@@ -246,50 +254,45 @@ void TerrainGenerationScene::RenderSceneFromCamera(Camera* camera)
 
     }
 
+    //Update the Pixel and Vertex shaders that will be used when rendering a light
     gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gLightModelPixelShader, nullptr, 0);
 
     // Select the texture and sampler to use in the pixel shader
     ID3D11ShaderResourceView* temp = resourceManager->getTexture(L"lightTexture");
-    gD3DContext->PSSetShaderResources(0, 1, &temp); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetShaderResources(0, 1, &temp); 
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler); 
 
-    // States - additive blending, read-only depth buffer and no culling (standard set-up for blending
-    gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
-    gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
-    gD3DContext->RSSetState(gCullNoneState);
+    //Update the states required for the Light Model
+    Light->SetLightStates(gAdditiveBlendingState, gDepthReadOnlyState, gCullNoneState);
 
     // Render all the lights in the array
-     gPerModelConstants.objectColour = Light->LightColour; // Set any per-model constants apart from the world matrix just before calling render (light colour here)
+     gPerModelConstants.objectColour = Light->LightColour; 
      Light->RenderLight(gPerModelConstantBuffer, gPerModelConstants);
 
 }
 
+//Function to render the scene, called every frame
 void TerrainGenerationScene::RenderScene(float frameTime)
 {
-    //IMGUI
-    //*******************************
-    // Prepare ImGUI for this frame
-    //*******************************
-
+    //------------------------------//
+    // Prepare ImGUI for this frame //
+    //------------------------------//
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    //*********************//
-    //// Common settings ////
-
-    // Set up the light information in the constant buffer
-    // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
+    //-----------------//
+    // Common settings //
+    //-----------------//
     
     gPerFrameConstants.light1Colour = Light->LightColour * Light->LightStrength;
     gPerFrameConstants.light1Position = Light->LightModel->Position();
     gPerFrameConstants.ambientColour  = gAmbientColour;
-
     gPerFrameConstants.cameraPosition = MainCamera->Position();
 
     //// Main scene rendering ////
-
+    
     // Set the back buffer as the target for rendering and select the main depth buffer.
     // When finished the back buffer is sent to the "front buffer" - which is the monitor.
     gD3DContext->OMSetRenderTargets(1, &SceneRenderTarget, SceneDepthStencilView);
@@ -311,6 +314,7 @@ void TerrainGenerationScene::RenderScene(float frameTime)
     // Render the scene from the main camera
     RenderSceneFromCamera(MainCamera);
 
+    //Setup the ImGui elements to be rendered
     IMGUI();
 
     //*******************************
@@ -334,21 +338,12 @@ void TerrainGenerationScene::RenderScene(float frameTime)
     gSwapChain->Present(lockFPS ? 1 : 0, 0);
 }
 
+//Updating the scene, called every frame
 void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
 {
-
-    if (KeyHit(Key_F2))
-    {
-        MainCamera->SetPosition(CameraPosition);
-        MainCamera->SetRotation(CameraRotation);
-    }
-    // Toggle FPS limiting
-    if (KeyHit(Key_T))  lockFPS = !lockFPS;
-
     // Control camera (will update its view matrix)
     MainCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
     GroundModel->SetScale(TerrainYScale);
-
 
     // Show frame time / FPS in the window title //
     const float fpsUpdateTime = 0.5f; // How long between updates (in seconds)
@@ -369,38 +364,50 @@ void TerrainGenerationScene::UpdateScene(float frameTime, HWND HWnd)
     }
 }
 
+//Function to update the position of every plant in the scene
 void TerrainGenerationScene::UpdateFoliagePosition()
 {
+    //Creation of a random number generation device
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1000);
 
-    uint32_t OldRange = 1000;
-    uint32_t newRange = 257;
+    //The two ranges to convert the random number to
+    uint32_t TerrainRange = 1000;
+    uint32_t HeightMapRange = 256;
 
+    //Loop through each plant in the vector
     for (int i = 0; i < PlantModels.size(); ++i)
     {
+        //Get the random X and Z positions
         uint32_t randomXPos = dis(gen);
         uint32_t randomZPos = dis(gen);
 
-        uint32_t NewXPos = (((randomXPos - 0) * newRange) / OldRange) + 0;//((randomXPos - 0) / (1000 - 0)) * (257 - 0) + 0;
-        uint32_t NewZPos = (((randomZPos - 0) * newRange) / OldRange) + 0;
+        //Convert the X and Z positions from the range (0 - 1000) to (0 - 256)
+        uint32_t NewXPos = (((randomXPos - 0) * HeightMapRange) / TerrainRange) + 0;
+        uint32_t NewZPos = (((randomZPos - 0) * HeightMapRange) / TerrainRange) + 0;
 
-        //uint32_t NewXPos = ((randomXPos - 0) / (1000 - 0)) * (257 - 0) + 0;
-        //uint32_t NewZPos = ((randomZPos - 0) / (1000 - 0)) * (257 - 0) + 0;
-
+        //Get the height Value from these new X and Z coordinates
         float Heightvalue = HeightMap[NewZPos][NewXPos];
 
+        //Create a position Vector with the X and Z positions and the new height value 
         CVector3 position = { (float)randomXPos, (Heightvalue), (float)randomZPos };
+
+        //Scale the vector by the overall TerrainYScale
         position *= TerrainYScale;
 
+        //Scale the current plant
         PlantModels[i]->SetScale(1);
+
+        //Update the position of the current plant to the new position vector
         PlantModels[i]->SetPosition({position.x, position.y-3, position.z});
     }   
 }
 
+//Building the HeightMap
 void TerrainGenerationScene::BuildHeightMap(float height)
 {
+    //Loop through the HeightMap and set each value to the chosen height value
     for (int i = 0; i <= SizeOfTerrain; ++i) {
         for (int j = 0; j <= SizeOfTerrain; ++j) {
             HeightMap[i][j] = height;
@@ -408,8 +415,10 @@ void TerrainGenerationScene::BuildHeightMap(float height)
     }
 }
 
+//Normalisation of the HeightMap
 void TerrainGenerationScene::NormaliseHeightMap(float normaliseAmount)
 {
+    //Loop through the HeightMap and divide each value by the normalisation amount
     for (int i = 0; i <= SizeOfTerrain; ++i) {
         for (int j = 0; j <= SizeOfTerrain; ++j) {
             HeightMap[i][j] /= normaliseAmount;
@@ -417,110 +426,137 @@ void TerrainGenerationScene::NormaliseHeightMap(float normaliseAmount)
     }
 }
 
-void TerrainGenerationScene::BuildPerlinHeightMap(float amplitude, float frequency, bool bBrownianMotion)
+//Function to build the height map with the Perlin Noise Algorithm
+void TerrainGenerationScene::BuildPerlinHeightMap(float amplitude, float frequency, bool bOctaves)
 {
+    //get the scale to make sure that the terrain looks consistent 
     const float scale = (float)resolution / (float)SizeOfTerrain; 
+
+    //Create a PerlinNoise object to get the Perlin Noise values
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int y = 0; y <= SizeOfTerrain; ++y) // loop through the y 
+    for (int z = 0; z <= SizeOfTerrain; ++z) // loop through the z 
     {
         for (int x = 0; x <= SizeOfTerrain; ++x) //loop through the x
         {
-            double YCoord = y * frequency * scale / 20;
+            //Get the current X and Z coordinates 
+            double ZCoord = z * frequency * scale / 20;
             double XCoord = x * frequency * scale / 20;
 
-            if (bBrownianMotion)
+            //get the Current Perlin Noise value
+            float noiseValue = (float)pn->noise(XCoord, 0.0f, ZCoord) * amplitude;
+
+            //Check if Perlin with Octaves has been selected and add it to the current HeightMap value if it has
+            //Otherwise just update the HeightMap value to the new noiseValue
+            if (bOctaves)
             {
-                float noiseValue = (float)pn->noise(XCoord, YCoord, 0.0) * amplitude;
-                HeightMap[y][x] += noiseValue;
+                HeightMap[z][x] += noiseValue;
             }
             else
             {        
-                float noiseValue = (float)pn->noise(XCoord, YCoord, 0.0f) * amplitude;
-                HeightMap[y][x] = noiseValue;
+                HeightMap[z][x] = noiseValue;
             }
         }
     }
 }
 
+//Perlin Noise with Octaves Function
 void TerrainGenerationScene::PerlinNoiseWithOctaves(float Amplitude, float frequency, int octaves)
 {
+    //loop through the number of octaves
     for (int i = 0; i < octaves; ++i)
     {
+        //Update the HeightMap with the Perlin noise function using the current Amplitude and Frequency
         BuildPerlinHeightMap(Amplitude, frequency, true);
+
+        //Update the Amplitude and Frequency variables
         Amplitude *= AmplitudeReduction;
         frequency *= FrequencyMultiplier;
     }
 }
 
+//Rigid Noise Function
 void TerrainGenerationScene::RigidNoise()
 {
-    const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
+    //get the scale to make sure that the terrain looks consistent 
+    const float scale = (float)resolution / (float)SizeOfTerrain;
+
+    //Create a PerlinNoise object to get the Perlin Noise values
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
+    for (int z = 0; z <= SizeOfTerrain; ++z) // loop through the z
     {
-        for (int j = 0; j < SizeOfTerrain; ++j) //loop through the x
+        for (int x = 0; x < SizeOfTerrain; ++x) //loop through the x
         {
-            double x = j * frequency * scale / 20;
-            double y = i * frequency * scale / 20;
+            //Get the current X and Z coordinates 
+            double XCoord = x * frequency * scale / 20;
+            double ZCoord = z * frequency * scale / 20;
 
-            float value = (1.0f - abs((float)pn->noise(x, y, 0.0) * (float)Amplitude));
-            HeightMap[i][j] += -value;
+            //Get the absolute value of the perlin noise function and subtract it from 1
+            float value = (1.0f - abs((float)pn->noise(XCoord, 0.0f, ZCoord) * (float)Amplitude));
+
+            //Then add the negated value to the current HeighMap value
+            HeightMap[z][x] += -value;
         }
     }
 }
 
+//Inverse Rigid Noise Function
 void TerrainGenerationScene::InverseRigidNoise()
 {
-    const float scale = (float)resolution / (float)SizeOfTerrain; //make sure that the terrain looks consistent 
+    //get the scale to make sure that the terrain looks consistent 
+    const float scale = (float)resolution / (float)SizeOfTerrain;
+
+    //Create a PerlinNoise object to get the Perlin Noise values
     CPerlinNoise* pn = new CPerlinNoise(seed);
 
-    for (int i = 0; i <= SizeOfTerrain; ++i) // loop through the y 
+    for (int z = 0; z <= SizeOfTerrain; ++z) // loop through the z
     {
-        for (int j = 0; j <= SizeOfTerrain; ++j) //loop through the x
+        for (int x = 0; x <= SizeOfTerrain; ++x) //loop through the x
         {
-             double x = j * frequency * scale / 20;
-             double y = i * frequency * scale / 20;
+            //Get the current X and Z coordinates 
+             double currentX = x * frequency * scale / 20;
+             double currentZ = z * frequency * scale / 20;
 
-             float value = (1.0f - abs((float)pn->noise(x, y, 0.0) * (float)Amplitude));
-             HeightMap[i][j] += value;
+             //Get the absolute value of the perlin noise function and subtract it from 1
+             float value = (1.0f - abs((float)pn->noise(currentX, 0.0f, currentZ) * (float)Amplitude));
+
+             //Then add the value to the current HeighMap value
+             HeightMap[z][x] += value;
         }
     }
 }
 
+//Function to call the Diamond Sqaure Algorithm
 void TerrainGenerationScene::DiamondSquareMap()
 {
+    //Create a new DiamondSqaure object with the required information
     DiamondSquare ds(SizeOfTerrain, Spread, SpreadReduction);
+
+    //perform the Diamond Square Algorithm on the HeightMap
     ds.process(HeightMap);
 }
 
-void TerrainGenerationScene::Redistribution(float power)
-{
-    const float scale = (float)resolution / (float)SizeOfTerrain;
-    for (int y = 0; y <= SizeOfTerrain; ++y) // loop through the y 
-    {
-        for (int x = 0; x <= SizeOfTerrain; ++x) //loop through the x
-        {
-            float noise_value = (abs(HeightMap[y][x]));
-            HeightMap[y][x] = pow(noise_value, power);
-        }
-    }
-}
-
+//Terracing Function
 void TerrainGenerationScene::Terracing(float terracingMultiplier)
 {
-    for (int y = 0; y <= SizeOfTerrain; ++y) // loop through the y 
+    for (int x = 0; x <= SizeOfTerrain; ++x) // loop through the x
     {
-        for (int x = 0; x <= SizeOfTerrain; ++x) //loop through the x
+        for (int z = 0; z <= SizeOfTerrain; ++z) //loop through the z
         {
-            float MapValue = HeightMap[y][x];
+            //Get the current height value
+            float MapValue = HeightMap[x][z];
+
+            //Round this height value
             float roundedValue = round(MapValue);
-            HeightMap[y][x] = roundedValue / terracingMultiplier;
+
+            //and then set the height to the rounded value divided by the multiplier
+            HeightMap[x][z] = roundedValue / terracingMultiplier;
         }
     }
 }
 
+//Function to contain all of the ImGui code
 void TerrainGenerationScene::IMGUI()
 {
 
@@ -577,58 +613,70 @@ void TerrainGenerationScene::IMGUI()
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
-    //New ImGui window to contain all the buttons and sliders that the user will be able to use
+    //New ImGui window to contain all the buttons and sliders that
+    //the user will be able to interact with
     {
+        //a new Window showing information of the scene and provides a few toggle buttons
         {
             ImGui::Begin("Information", 0, windowFlags);;
             ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", MainCamera->Position().x,  MainCamera->Position().y,  MainCamera->Position().z);
             ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", MainCamera->Rotation().x,  MainCamera->Rotation().y,  MainCamera->Rotation().z);
-            ImGui::Text("Ground Scale: (%.2f, %.2f, %.2f)",    GroundModel->Scale().x,    GroundModel->Scale().y,    GroundModel->Scale().z);
-            ImGui::Text("Ground Position: (%.2f, %.2f, %.2f)", GroundModel->Position().x, GroundModel->Position().y, GroundModel->Position().z);
             ImGui::Text("");
-            if(ImGui::Button("Toggle FPS", ImVec2(162, 20))) lockFPS = !lockFPS;
+            if(ImGui::Button("Toggle FPS", ButtonSize)) lockFPS = !lockFPS;
             ImGui::SameLine();
-            if (ImGui::Button("Export Terrain", ImVec2(162, 20)))
-            {
-                resourceManager->getMesh(L"TerrainMesh")->ExportModel(GroundModel->GetMesh());
-            }
+            if (ImGui::Button("Toggle WireFrame", ButtonSize)) enableWireFrame = !enableWireFrame;
+
+            //end of the information window
             ImGui::End();
         }
+
+        //a new window for generating new terrain
         ImGui::Begin("Terrain Generation", 0, windowFlags);
         ImGui::Checkbox("Render Terrain", &enableTerrain);
        
+        //If the terrain checkbox is checked, then show the information that changes the terrain
         if (enableTerrain)
         {
+            ImGui::Text("");
 
             //----------------------//
             // Reset Terrain Button //
             //----------------------//
-            ImGui::Text("");
-            if (ImGui::Button("Reset Terrain", ImVec2(162, 20)))
+            //goes through every value in the height map and resets it to 1 and
+            //then goes through each plant in the scene and updates its position to the new height map
+            if (ImGui::Button("Reset Terrain", ButtonSize))
             {
                 BuildHeightMap(1);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
+                for (auto i : PlantModels)
+                {
+                    i->SetPosition(CVector3{i->Position().x, 1, i->Position().z});
+                }
 
             }
-
             ImGui::SameLine();
 
             //---------------------//
             // Reset Camera Button //
             //---------------------//
-            if (ImGui::Button("Reset Camera", ImVec2(162, 20)))
+            //move the camera back to its starting position and rotates it accordingly
+            if (ImGui::Button("Reset Camera", ButtonSize))
             {
                 MainCamera->SetPosition(CameraPosition);
                 MainCamera->SetRotation(CameraRotation);
             }
-            if (ImGui::Button("Reset Terrain Settings", ImVec2(162, 20)))
+
+            //----------------------//
+            // Reset Terrain Button //
+            //----------------------//
+            //resets every variable that affects the terrain generation to their starting values
+            if (ImGui::Button("Reset Terrain Settings", ButtonSize))
             {
                 frequency = 0.125f;
                 Amplitude = 200.0f;
                 resolution = 500;
                 seed = 0;
                 TerrainYScale = { 10, 30, 10 };
-                RedistributionPower = 0.937f;
                 terracingMultiplier = 1.1f;
 
                 octaves = 5;
@@ -637,95 +685,135 @@ void TerrainGenerationScene::IMGUI()
                 Spread = 30.0;
                 SpreadReduction = 2.0f;
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Toggle WireFrame", ImVec2(162, 20))) enableWireFrame = !enableWireFrame;
             ImGui::Text("");
 
-            //---------------------//
-            // Terrain Information //
-            //---------------------//
+            //-----------------------------------//
+            // Terrain Information and Variables //
+            //-----------------------------------//
+            //Sliders to update the terrain generation variables
             ImGui::SliderFloat("Terrain Frequency", &frequency, 0.0f, 0.25f);
             ImGui::SliderFloat("Terrain amplitude", &Amplitude, 100.0f, 300.0f);
             ImGui::SliderInt("Terrain Resolution", &resolution, 250, 750);
             ImGui::SliderInt("Perlin Noise Seed", &seed, 0, 250);
             ImGui::SliderFloat("Terrain Scale", &TerrainYScale.y, 0.5f, 60.0f);
-            ImGui::SliderFloat("Redistribution Power", &RedistributionPower, 0.900f, 0.975f);
-            ImGui::SliderFloat("Terracing multiplier", &terracingMultiplier, 0.950f, 1.25f);
             ImGui::Text("");
 
             //------------------------------------------------------//
             // Generate new Terrain with the Perlin Noise Algorithm //
             //------------------------------------------------------//
-            if (ImGui::Button("Perlin Noise", ImVec2(162, 20)))
+            //generates new height values with the Perlin Noise Algorithm
+            //then normalises the height map and resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
+            if (ImGui::Button("Perlin Noise", ButtonSize))
             {
                 BuildPerlinHeightMap(Amplitude, frequency, false);
-                NormaliseHeightMap(2.0f);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                NormaliseHeightMap(HeightMapNormaliseAmount);
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
                 UpdateFoliagePosition();
             }
 
             //-----------------------------------------------------//
             // Generate new Terrain with the Rigid Noise Algorithm //
             //-----------------------------------------------------//
+            //generates new height values with the Rigid Noise Algorithm
+            //then normalises the height map and resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
             ImGui::SameLine();
-            if (ImGui::Button("Rigid Noise", ImVec2(162, 20)))
+            if (ImGui::Button("Rigid Noise", ButtonSize))
             {
                 RigidNoise();
-                NormaliseHeightMap(2.0f);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                NormaliseHeightMap(HeightMapNormaliseAmount);
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
                 UpdateFoliagePosition();
             }
 
             //-------------------------------------------------------------//
             // Generate new Terrain with the Inverse Rigid Noise Algorithm //
             //-------------------------------------------------------------//
-            if (ImGui::Button("Inverse Rigid Noise", ImVec2(162, 20)))
+            //generates new height values with the Inverse Rigid Noise Algorithm
+            //then normalises the height map and resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
+            if (ImGui::Button("Inverse Rigid Noise", ButtonSize))
             {
                 InverseRigidNoise();
-                NormaliseHeightMap(2.0f);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                NormaliseHeightMap(HeightMapNormaliseAmount);
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
                 UpdateFoliagePosition();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Terracing", ImVec2(162, 20)))
-            {
-                Terracing(terracingMultiplier);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
-                UpdateFoliagePosition();
-            }
-
+            
             ImGui::Text("");
             ImGui::Separator();
             ImGui::Text("");
+
+            //-----------------------------------//
+            // Terrain Information and Variables //
+            //-----------------------------------//
+            //Sliders to update the terrain generation variables
             ImGui::SliderInt("Number of Octaves", &octaves, 1, 20);
             ImGui::SliderFloat("Amplitude Reduction", &AmplitudeReduction, 0.1f, 0.5f);
             ImGui::SliderFloat("Frequency Multiplier", &FrequencyMultiplier, 1.0f, 2.0f);
             ImGui::SliderFloat("DS Spread", &Spread, 10.0f, 40.0f);
             ImGui::SliderFloat("DS Spread Reduction", &SpreadReduction, 2.0f, 2.5f);
+            ImGui::SliderFloat("Terracing multiplier", &terracingMultiplier, 0.950f, 1.25f);
             ImGui::Text("");
-            if (ImGui::Button("Perlin with Octaves", ImVec2(162, 20)))
+
+            //-----------------------------------------------------------------------//
+            // Generate new Terrain with the Perlin Noise Algorithm with octaves     //
+            //-----------------------------------------------------------------------//
+            //generates new height values with the Perlin Noise algorithm but with octaves
+            //then normalises the height map and resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
+            if (ImGui::Button("Perlin with Octaves", ButtonSize))
             {
                 //Reset the height map to a flat surface
                 BuildHeightMap(1);
                 PerlinNoiseWithOctaves(Amplitude, frequency, octaves);
-                NormaliseHeightMap(2.0f);
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                NormaliseHeightMap(HeightMapNormaliseAmount);
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
                 UpdateFoliagePosition();
             }
+
+            //-------------------------------------------------------------//
+            // Generate new Terrain with the Diamond Square Algorithm      //
+            //-------------------------------------------------------------//
+            //generates new height values with the Diamond Square algorithm
+            //then resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
             ImGui::SameLine();
-            if (ImGui::Button("Diamond Square", ImVec2(162, 20)))
+            if (ImGui::Button("Diamond Square", ButtonSize))
             {
                 //Reset the height map to a flat surface
                 BuildHeightMap(1);
                 DiamondSquareMap();
-                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, CVector3(0, 0, 0), CVector3(1000, 0, 1000));
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
+                UpdateFoliagePosition();
+            }
+
+            //-------------------------------------------------------------//
+            // Update the Terrain with Terraces                            //
+            //-------------------------------------------------------------//
+            //updates the values of the heightMap to generate terraces in the terrain
+            //then resizes the terrain mesh with these new height values
+            //finally updates the positions of the plants in the scene
+            if (ImGui::Button("Terracing", ButtonSize))
+            {
+                Terracing(terracingMultiplier);
+                GroundModel->ResizeModel(HeightMap, SizeOfTerrainVertices, TerrainMeshMinPt, TerrainMeshMaxPt);
                 UpdateFoliagePosition();
             }
             ImGui::Text("");
             ImGui::Separator();
 
+            //----------------------------------------------------------------------//
+            // Changing the amount of plants that can be spawned per Terrain chunks //
+            //----------------------------------------------------------------------//
+            //Sliders to update the variables used for creating new plants
             ImGui::SliderInt("Number of plants per chunk", &plantResizeAmount, 1, 20);
-            if (ImGui::Button("Update Size", ImVec2(162, 20)))
+
+            //Checks if the ResizeAmount is equal to the current size of the plant vector
+            //if it is not, resize the plant vector to the new size and add new models for every new index.
+            //Finally update the position of every plant in the scene
+            if (ImGui::Button("Update Size", ButtonSize))
             {
                 if (plantResizeAmount != CurrentPlantVectorSize)
                 {
@@ -739,9 +827,10 @@ void TerrainGenerationScene::IMGUI()
                     }
                     
                 }
-                UpdateFoliagePosition();
+                UpdateFoliagePosition();    
             }
         }
+        //End of the Terrain Generation window
         ImGui::End();
     }
 
@@ -752,5 +841,6 @@ void TerrainGenerationScene::IMGUI()
         ImGui::End();
     }
 
+    //End the ImGui window
     ImGui::End();
 }

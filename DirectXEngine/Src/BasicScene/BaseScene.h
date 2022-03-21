@@ -20,35 +20,32 @@ class BaseScene
 {
 public:
 	//--------------------------------------------------------------------------------------
-// Scene Geometry and Layout
-//--------------------------------------------------------------------------------------
+	// Scene Geometry and Layout
+	//--------------------------------------------------------------------------------------
 
-// Prepare the geometry required for the scene
-// Returns true on success
+	//Function to setup all the geometry to be used in the scene
 	virtual bool InitGeometry(std::string& LastError) = 0;
 
-	// Layout the scene
-	// Returns true on success
+	//Function to setup the scene 
 	virtual bool InitScene() = 0;
 
 	// Release the geometry resources created above
 	virtual void ReleaseResources() = 0;
 
+	//Function to render scene from the Camera's perspective
 	virtual void RenderSceneFromCamera(Camera* camera) = 0;
 
 	//--------------------------------------------------------------------------------------
 	// Scene Render and Update
 	//--------------------------------------------------------------------------------------
-
+	//Function to render the scene, called every frame
 	virtual void RenderScene(float frameTime) = 0;
 
 	// frameTime is the time passed since the last frame
 	virtual void UpdateScene(float frameTime, HWND HWnd) = 0;
 
+	//Function to contain all of the ImGui code
 	virtual void IMGUI() = 0;
-
-	int viewportWidth;
-	int viewportHeight;
 
 protected:
 
@@ -62,14 +59,18 @@ protected:
 	Camera* MainCamera;
 	Model* GroundModel;
 
+	//-------------------//
+	// Light Information //
+	//-------------------//
 	CLight* Light;
-
 	float LightScale = 15000.0f;
 	CVector3 LightColour = { 0.9922f, 0.7217f, 0.0745f };
 	CVector3 LightPosition = { 5000.0f, 13000.0f, 5000.0f };
 
-	CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
-	float    gSpecularPower = 256; // Specular power controls shininess - same for all models in this app
+	//-------------------------//
+	// Basic Scene Information //
+	//-------------------------//
+	CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f };
 	ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
 
 	std::ostringstream frameTimeMs;
@@ -78,7 +79,7 @@ protected:
 	std::string FPS_String;
 	int FPS;
 
-	// Dimensions of portal texture - controls quality of rendered scene in portal
+	// Dimensions of scene texture - controls quality of rendered scene
 	int textureWidth = 900;
 	int textureHeight = 900;
 

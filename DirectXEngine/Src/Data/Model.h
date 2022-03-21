@@ -23,9 +23,6 @@ public:
 
     Model(Mesh* mesh, CVector3 position = { 0,0,0 }, CVector3 rotation = { 0,0,0 }, float scale = 1);
 
-    //Model::Model(TerrainMesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*= { 0,0,0 }*/, float scale /*= 1*/);
-
-
     // The render function simply passes this model's matrices over to Mesh:Render.
     // All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
     void Render(ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
@@ -79,22 +76,23 @@ public:
     //    New Code    //
     //----------------//
 
+    //Set the states that DirectX will use when rendering this model
     void SetStates(ID3D11BlendState* BlendState, ID3D11DepthStencilState* DepthStencilState, ID3D11RasterizerState* Rasterizerstate);
 
+    //Set the resources that the Pixel shader will need to render this model
     void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture);
+
+    //Set the resources that the Pixel shader will need to render this model.
+    //Adds a normal map if the model requires one
+    void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
 
     //Function overloading for the different scenarios of setting the shaders
     void Setup(ID3D11VertexShader* VertexShader);
     void Setup(ID3D11PixelShader* PixelShader);
     void Setup(ID3D11VertexShader* VertexShader, ID3D11PixelShader* PixelShader);
 
-
-    void SetShaderResources(UINT TextureSlot, ID3D11ShaderResourceView* Texture, UINT NormalMapSlot, ID3D11ShaderResourceView* NormalMap);
-
-    void ResizeModel(std::vector<std::vector<float>>& heightMap, int resolution, CVector3 MinX, CVector3 MaxX);
-
-    Mesh* GetMesh() { return mMesh; }
-
+    //Resizes the model with the new HeighMap values that are generated
+    void ResizeModel(std::vector<std::vector<float>>& heightMap, int Width, CVector3 MinX, CVector3 MaxX);
 
 	//-------------------------------------
 	// Private data / members

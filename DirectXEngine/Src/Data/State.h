@@ -30,7 +30,7 @@ extern ID3D11BlendState* gAlphaBlendingState;
 extern ID3D11RasterizerState*   gCullBackState;
 extern ID3D11RasterizerState*   gCullFrontState;
 extern ID3D11RasterizerState*   gCullNoneState;
-extern ID3D11RasterizerState* gWireframeState;
+extern ID3D11RasterizerState*	gWireframeState;
 
 extern ID3D11DepthStencilState* gUseDepthBufferState;
 extern ID3D11DepthStencilState* gDepthReadOnlyState;

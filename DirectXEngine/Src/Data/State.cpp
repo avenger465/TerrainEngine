@@ -20,15 +20,15 @@
 // GPU "States" //
 
 // A sampler state object represents a way to filter textures, such as bilinear or trilinear. We have one object for each method we want to use
-ID3D11SamplerState* gPointSampler         = nullptr;
-ID3D11SamplerState* gTrilinearSampler     = nullptr;
-ID3D11SamplerState* gAnisotropic4xSampler = nullptr;
+ID3D11SamplerState* gPointSampler          = nullptr;
+ID3D11SamplerState* gTrilinearSampler      = nullptr;
+ID3D11SamplerState* gAnisotropic4xSampler  = nullptr;
 ID3D11SamplerState* gBilinearMirrorSampler = nullptr;
 
 // Blend states allow us to switch between blending modes (none, additive, multiplicative etc.)
 ID3D11BlendState* gNoBlendingState       = nullptr;
 ID3D11BlendState* gAdditiveBlendingState = nullptr;
-ID3D11BlendState* gAlphaBlendingState = nullptr;
+ID3D11BlendState* gAlphaBlendingState    = nullptr;
 
 // Rasterizer states affect how triangles are drawn
 ID3D11RasterizerState* gCullBackState  = nullptr;
@@ -87,7 +87,7 @@ bool CreateStates(std::string LastError)
 	// Then create a DirectX object for your description that can be used by a shader
 	if (FAILED(gD3DDevice->CreateSamplerState(&samplerDesc, &gTrilinearSampler)))
 	{
-		LastError = "Error creating point sampler";
+		LastError = "Error creating Trilinear sampler";
 		return false;
 	}
 

@@ -28,7 +28,6 @@ CVector3 CMatrix4x4::GetRow(int iRow) const
     return CVector3(pfElts[0], pfElts[1], pfElts[2]);
 }
 
-
 // Post-multiply this matrix by the given one
 CMatrix4x4& CMatrix4x4::operator*=(const CMatrix4x4& m)
 {

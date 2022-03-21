@@ -26,9 +26,11 @@ public:
     // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
     Mesh(const std::string& fileName, bool requireTangents = false);
 
-    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals = false, bool uvs = true);
-    ~Mesh();
+    //Mesh Constructor to generate a Grid Mesh 
+    Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals = true, bool uvs = true);
 
+    //Class deconstructor
+    ~Mesh();
 
     // How many nodes are in the hierarchy for this mesh. Nodes can control individual parts (rigid body animation),
 	// or bones (skinned animation), or they can be dummy nodes to create child parts in a more convenient way
@@ -43,10 +45,11 @@ public:
 	// LIMITATION: The mesh must use a single texture throughout
     void Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, PerModelConstants& ModelConstants);
 
-    void RegenerateMesh(const void* vertices, const void* indices);
-    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals /* = false */, bool uvs /* = true */);
+    //Generate the Vertex and Index buffers with the new vertices of the mesh
+    void GenerateBuffers(const void* vertices, const void* indices);
 
-    void ExportModel(Mesh* mMesh);
+    //Updates the vertices and indices for the mesh 
+    void UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& temp, bool normals = true, bool uvs = true);
 
 
 //--------------------------------------------------------------------------------------
@@ -107,12 +110,6 @@ private:
 // Member data
 //--------------------------------------------------------------------------------------
 private:
-    const aiScene* scene;
-    char* b;
-
-    std::string mFilename;
-    unsigned int assimpFlags;
-
     std::vector<Node>    mNodes;     // The mesh hierarchy. First entry is root. remainder aree stored in depth-first order
 
 	bool mHasBones; // If any submesh has bones, then all submeshes are given bones - makes rendering easier (one shader for the whole mesh)

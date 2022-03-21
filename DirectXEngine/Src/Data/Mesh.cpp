@@ -10,17 +10,16 @@
 #include "Shaders/Shader.h" // Needed for helper function CreateSignatureForVertexLayout
 #include "Utility/GraphicsHelpers.h" // Helper functions to unclutter the code here
 
-
 // Pass the name of the mesh file to load. Uses assimp (http://www.assimp.org/) to support many file types
 // Optionally request tangents to be calculated (for normal and parallax mapping - see later lab)
 // Will throw a std::runtime_error exception on failure (since constructors can't return errors).
 Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 {
-    mFilename = fileName;
+
     Assimp::Importer importer;
     // Flags for processing the mesh. Assimp provides a huge amount of control - right click any of these
     // and "Peek Definition" to see documention above each constant
-    assimpFlags = aiProcess_MakeLeftHanded |
+    unsigned int assimpFlags = aiProcess_MakeLeftHanded |
                                aiProcess_GenSmoothNormals |
                                aiProcess_FixInfacingNormals |
                                aiProcess_GenUVCoords | 
@@ -71,11 +70,10 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 
     // Import mesh with assimp given above requirements - log output
     Assimp::DefaultLogger::create("", Assimp::DefaultLogger::VERBOSE);
-    scene = importer.ReadFile(mFilename, assimpFlags);
+    const aiScene* scene = importer.ReadFile(fileName, assimpFlags);
     Assimp::DefaultLogger::kill();
-    if (scene == nullptr)  throw std::runtime_error("Error loading mesh (" + mFilename + "). " + importer.GetErrorString());
-    if (scene->mNumMeshes == 0)  throw std::runtime_error("No usable geometry in mesh: " + mFilename);
-
+    if (scene == nullptr)  throw std::runtime_error("Error loading mesh (" + fileName + "). " + importer.GetErrorString());
+    if (scene->mNumMeshes == 0)  throw std::runtime_error("No usable geometry in mesh: " + fileName);
 
     //-----------------------------------
 
@@ -86,15 +84,12 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
     mNodes.resize(CountNodes(scene->mRootNode));
     ReadNodes(scene->mRootNode, 0, 0);
 
-
-
     //******************************************//
     // Read geometry - multiple parts supported //
 
 	mHasBones = false;
 	for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
         if (scene->mMeshes[m]->HasBones())  mHasBones = true;
-
 
     // A mesh is made of sub-meshes, each one can have a different material (texture)
     // Import each sub-mesh in the file to seperate index / vertex buffer (could share buffers between sub-meshes but that would make things more complex)
@@ -105,19 +100,18 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         std::string subMeshName = assimpMesh->mName.C_Str();
         auto& subMesh = mSubMeshes[m]; // Short name for the submesh we're currently preparing - makes code below more readable
 
-    
         //-----------------------------------
 
         // Check for presence of position and normal data. Tangents and UVs are optional.
         std::vector<D3D11_INPUT_ELEMENT_DESC> vertexElements;
         unsigned int offset = 0;
     
-        if (!assimpMesh->HasPositions())  throw std::runtime_error("No position data for sub-mesh " + subMeshName + " in " + mFilename);
+        if (!assimpMesh->HasPositions())  throw std::runtime_error("No position data for sub-mesh " + subMeshName + " in " + fileName);
         unsigned int positionOffset = offset;
         vertexElements.push_back( { "position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, positionOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
         offset += 12;
 
-        if (!assimpMesh->HasNormals())  throw std::runtime_error("No normal data for sub-mesh " + subMeshName + " in " + mFilename);
+        if (!assimpMesh->HasNormals())  throw std::runtime_error("No normal data for sub-mesh " + subMeshName + " in " + fileName);
         unsigned int normalOffset = offset;
         vertexElements.push_back( { "normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, normalOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
         offset += 12;
@@ -125,7 +119,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         unsigned int tangentOffset = offset;
         if (requireTangents)
         {
-            if (!assimpMesh->HasTangentsAndBitangents())  throw std::runtime_error("No tangent data for sub-mesh " + subMeshName + " in " + mFilename);
+            if (!assimpMesh->HasTangentsAndBitangents())  throw std::runtime_error("No tangent data for sub-mesh " + subMeshName + " in " + fileName);
             vertexElements.push_back( { "tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, tangentOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
             offset += 12;
         }
@@ -133,7 +127,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
         unsigned int uvOffset = offset;
         if (assimpMesh->GetNumUVChannels() > 0 && assimpMesh->HasTextureCoords(0))
         {
-            if (assimpMesh->mNumUVComponents[0] != 2)  throw std::runtime_error("Unsupported texture coordinates in " + subMeshName + " in " + mFilename);
+            if (assimpMesh->mNumUVComponents[0] != 2)  throw std::runtime_error("Unsupported texture coordinates in " + subMeshName + " in " + fileName);
             vertexElements.push_back( { "uv", 0, DXGI_FORMAT_R32G32_FLOAT, 0, uvOffset, D3D11_INPUT_PER_VERTEX_DATA, 0 } );
             offset += 8;
         }
@@ -149,16 +143,13 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 
         subMesh.vertexSize = offset;
 
-
         // Create a "vertex layout" to describe to DirectX what is data in each vertex of this mesh
         auto shaderSignature = CreateSignatureForVertexLayout(vertexElements.data(), static_cast<int>(vertexElements.size()));
         HRESULT hr = gD3DDevice->CreateInputLayout(vertexElements.data(), static_cast<UINT>(vertexElements.size()),
                                                    shaderSignature->GetBufferPointer(), shaderSignature->GetBufferSize(),
                                                    &subMesh.vertexLayout);
         if (shaderSignature)  shaderSignature->Release();
-        if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for " + mFilename);
-
-
+        if (FAILED(hr))  throw std::runtime_error("Failure creating input layout for " + fileName);
 
         //-----------------------------------
 
@@ -220,7 +211,6 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
             }
         }
 
-
 		if (mHasBones)
 		{
 			if (assimpMesh->HasBones())
@@ -256,7 +246,7 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 							break;
 						}
 					}
-                    if (nodeIndex == mNodes.size())  throw std::runtime_error("Bone with no matching node in " + mFilename);
+                    if (nodeIndex == mNodes.size())  throw std::runtime_error("Bone with no matching node in " + fileName);
 
 					// Go through each weight of the bone and update the vertex it influences
 					// Find the first 0 weight on that vertex and put the new influence / weight there.
@@ -304,13 +294,10 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
 
 			}
 		}
-            
-
-
         //-----------------------------------
 
         // Copy face data from assimp to our CPU-side index buffer
-        if (!assimpMesh->HasFaces())  throw std::runtime_error("No face data in " + subMeshName + " in " + mFilename);
+        if (!assimpMesh->HasFaces())  throw std::runtime_error("No face data in " + subMeshName + " in " + fileName);
 
         DWORD* index = reinterpret_cast<DWORD*>(indices.get());
         for (unsigned int face = 0; face < assimpMesh->mNumFaces; ++face)
@@ -318,39 +305,10 @@ Mesh::Mesh(const std::string& fileName, bool requireTangents /*= false*/)
             *index++ = assimpMesh->mFaces[face].mIndices[0];
             *index++ = assimpMesh->mFaces[face].mIndices[1];
             *index++ = assimpMesh->mFaces[face].mIndices[2];
-        }
-
-
-        //-----------------------------------
-
-        D3D11_BUFFER_DESC bufferDesc;
-        D3D11_SUBRESOURCE_DATA initData;
-
-        // Create GPU-side vertex buffer and copy the vertices imported by assimp into it
-        bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER; // Indicate it is a vertex buffer
-        bufferDesc.Usage = D3D11_USAGE_DEFAULT;          // Default usage for this buffer - we'll see other usages later
-        bufferDesc.ByteWidth = subMesh.numVertices * subMesh.vertexSize; // Size of the buffer in bytes
-        bufferDesc.CPUAccessFlags = 0;
-        bufferDesc.MiscFlags = 0;
-        initData.pSysMem = vertices.get(); // Fill the new vertex buffer with data loaded by assimp
-    
-        hr = gD3DDevice->CreateBuffer(&bufferDesc, &initData, &subMesh.vertexBuffer);
-        if (FAILED(hr))  throw std::runtime_error("Failure creating vertex buffer for " + mFilename);
-
-
-        // Create GPU-side index buffer and copy the vertices imported by assimp into it
-        bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER; // Indicate it is an index buffer
-        bufferDesc.Usage = D3D11_USAGE_DEFAULT;         // Default usage for this buffer - we'll see other usages later
-        bufferDesc.ByteWidth = subMesh.numIndices * sizeof(DWORD); // Size of the buffer in bytes
-        bufferDesc.CPUAccessFlags = 0;
-        bufferDesc.MiscFlags = 0;
-        initData.pSysMem = indices.get(); // Fill the new index buffer with data loaded by assimp
-
-        hr = gD3DDevice->CreateBuffer(&bufferDesc, &initData, &subMesh.indexBuffer);
-        if (FAILED(hr))  throw std::runtime_error("Failure creating index buffer for " + mFilename);
+        }      
+        GenerateBuffers(vertices.get(), indices.get());
     }
 }
-
 
 Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& heightMap, bool normals /* = false */, bool uvs /* = true */)
 {
@@ -411,9 +369,10 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
     
     auto currVert = vertexData.get();
 
-
+    //Go through each z coordinate of the grid
     for (int z = 0; z <= subDivZ; ++z)
     {
+        //Go through each x Coordinate of the grid
         for (int x = 0; x <= subDivX; ++x)
         {
             *reinterpret_cast<CVector3*>(currVert) = pt;
@@ -428,15 +387,22 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
+            //Increase the pt and uv's X position
             pt.x += xStep;
-            pt.y = heightMap[z][x];
             uv.x += uStep;
-            Point.push_back(pt);
+
+            //set the Y value of the vertex point to the HeightMap value
+            pt.y = heightMap[z][x];
         }
+        //Reset the Point and UV's X value
         pt.x = minPt.x;
-        pt.z += zStep;
-        pt.y = heightMap[z][0];
         uv.x = 0;
+
+        //Set the current Points Y value to the HeightMap value at the Z coordinate
+        pt.y = heightMap[z][0];
+
+        //Increase the pt and uv's Z and T position
+        pt.z += zStep;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
 
@@ -449,8 +415,11 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
     // Create the grid indexes (CPU-side first)
     uint32_t tlIndex = 0;
     auto currIndex = reinterpret_cast<uint32_t*>(indexData.get()); // uint32_t = 4-byte indexes
+
+    //Go through each z coordinate of the grid
     for (int z = 0; z < subDivZ; ++z)
     {
+        //Go through each x coordinate of the grid
         for (int x = 0; x < subDivX; ++x)
         {
             // Bottom-left triangle in grid square (looking down on the grid)
@@ -469,37 +438,11 @@ Mesh::Mesh(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector
         ++tlIndex;
     }
 
-    // Create the vertex buffer and fill it with the loaded vertex data
-    D3D11_BUFFER_DESC bufferDesc;
-    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT; // Not a dynamic buffer
-    bufferDesc.ByteWidth = mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize; // Buffer size
-    bufferDesc.CPUAccessFlags = 0;
-    bufferDesc.MiscFlags = 0;
-    D3D11_SUBRESOURCE_DATA initData; // Initial data
-    initData.pSysMem = vertexData.get();
-    initData.SysMemPitch = 0;
-    initData.SysMemSlicePitch = 0;
-    if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].vertexBuffer)))
-    {
-        throw std::runtime_error("Failure creating vertex buffer for grid mesh");
-    }
-
-
-    // Create the index buffer
-    bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferDesc.ByteWidth = mSubMeshes[0].numIndices * 4;
-    bufferDesc.CPUAccessFlags = 0;
-    bufferDesc.MiscFlags = 0;
-    initData.pSysMem = indexData.get();
-    if (FAILED(gD3DDevice->CreateBuffer(&bufferDesc, &initData, &mSubMeshes[0].indexBuffer)))
-    {
-        throw std::runtime_error("Failure creating index buffer for grid mesh");
-    }
-   
+    //Generate the Vertex and Index Buffers
+    GenerateBuffers(vertexData.get(), indexData.get());  
 }
 
+//Update the vertices of the Mesh
 void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDivZ, std::vector<std::vector<float>>& heightMap, bool normals /* = false */, bool uvs /* = true */)
 {
     //-----------------------------------
@@ -519,11 +462,12 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
 
     auto currVert = vertexData.get();
 
+    //Go through each z coordinate of the grid
     for (int z = 0; z <= subDivZ; ++z)
     {
+        //Go through each x coordinate of the grid
         for (int x = 0; x <= subDivX; ++x)
         {
-
             *reinterpret_cast<CVector3*>(currVert) = pt;
             currVert += sizeof(CVector3);
             if (normals)
@@ -536,16 +480,22 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
                 *reinterpret_cast<CVector2*>(currVert) = uv;
                 currVert += sizeof(CVector2);
             }
-
-
+            //Increase the pt and uv's X position
             pt.x += xStep;
-            pt.y = heightMap[z][x];
             uv.x += uStep;
+
+            //set the Y value of the vertex point to the HeightMap value
+            pt.y = heightMap[z][x];
         }
+        //Reset the Point and UV's X value
         pt.x = minPt.x;
-        pt.z += zStep;
-        pt.y = heightMap[z][0];
         uv.x = 0;
+
+        //Set the current Points Y value to the HeightMap value at the Z coordinate
+        pt.y = heightMap[z][0];
+
+        //Increase the pt and uv's Z and T position
+        pt.z += zStep;
         uv.y -= vStep; // V axis is opposite direction to Z
     }
 
@@ -557,8 +507,11 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
     // Create the grid indexes (CPU-side first)
     uint32_t tlIndex = 0;
     auto currIndex = reinterpret_cast<uint32_t*>(indexData.get()); // uint32_t = 4-byte indexes
+
+    //Go through each z coordinate of the grid
     for (int z = 0; z < subDivZ; ++z)
     {
+        //Go through each x coordinate of the grid
         for (int x = 0; x < subDivX; ++x)
         {
             // Bottom-left triangle in grid square (looking down on the grid)
@@ -576,105 +529,22 @@ void Mesh::UpdateVertices(CVector3 minPt, CVector3 maxPt, int subDivX, int subDi
         ++tlIndex;
     }
 
+    //Release the vertex buffer to ensure that the Mesh is regenerated properly 
     mSubMeshes[0].vertexBuffer->Release();
     mSubMeshes[0].vertexBuffer = 0;
-    RegenerateMesh(vertexData.get(), indexData.get());
+
+    //Generate the Vertex and Index Buffers
+    GenerateBuffers(vertexData.get(), indexData.get());
 }
 
-void Mesh::ExportModel(Mesh* mMesh)
-{
-    aiVector3D* vertices = new aiVector3D[Point.size()];        // deleted: mesh.h:758
-
-    for (int i = 0; i < Point.size(); ++i)
-    {
-        vertices[i].Set(Point[i].x, Point[i].y, Point[i].z);
-    }
-
-    aiFace* faces = new aiFace[1];                      // deleted: mesh.h:784
-    faces[0].mNumIndices = 3;
-    faces[0].mIndices = new unsigned [] { 0, 1, 2 };
-    // deleted: mesh.h:149
-
-    aiMesh* mesh = new aiMesh();                        // deleted: Version.cpp:150
-    mesh->mNumVertices = mSubMeshes[0].numVertices;
-    mesh->mVertices = vertices;
-    mesh->mNumFaces = 1;
-    mesh->mFaces = faces;
-    mesh->mPrimitiveTypes = aiPrimitiveType_POLYGON; // workaround, issue #3778
-
-    // a valid material is needed, even if its empty
-
-    aiMaterial* material = new aiMaterial();            // deleted: Version.cpp:155
-
-    // a root node with the mesh list is needed; if you have multiple meshes, this must match.
-
-    aiNode* root = new aiNode();                        // deleted: Version.cpp:143
-    root->mNumMeshes = 1;
-    root->mMeshes = new unsigned [] { 0 };              // deleted: scene.cpp:77
-
-    // pack mesh(es), material, and root node into a new minimal aiScene
-
-    aiScene* out = new aiScene();                       // deleted: by us after use
-    out->mNumMeshes = 1;
-    out->mMeshes = new aiMesh * [] { mesh };            // deleted: Version.cpp:151
-    out->mNumMaterials = 1;
-    out->mMaterials = new aiMaterial * [] { material }; // deleted: Version.cpp:158
-    out->mRootNode = root;
-    out->mMetaData = new aiMetadata(); // workaround, issue #3781
-
-    // and we're good to go. do whatever:
-
-    Assimp::Exporter exporter;
-    if (exporter.Export(out, "objnomtl", "Media/triangle1.obj") != AI_SUCCESS)
-        std::cerr << exporter.GetErrorString() << std::endl;
-
-
-    //aiScene* Scene4 = new aiScene();
-    //Scene4->mRootNode = new aiNode();
-    //Scene4->mMaterials = new aiMaterial * [1];
-    //Scene4->mMaterials[0] = nullptr;
-    //Scene4->mNumMaterials = 1;
-    //Scene4->mMaterials[0] = new aiMaterial();
-
-    //Scene4->mMeshes = new aiMesh * [] {mMesh};
-    //Scene4->mMeshes[0] = nullptr;
-    //Scene4->mNumMeshes = mSubMeshes.size();
-
-    //for (int i = 0; i < mSubMeshes.size(); ++i)
-    //{
-    //    Scene4->mMeshes[i] = new aiMesh();
-    //    Scene4->mMeshes[i]->mMaterialIndex = 0;
-    //}
-
-    //Scene4->mRootNode->mMeshes = new unsigned int[1];
-    //Scene4->mRootNode->mMeshes[0] = 0;
-    //Scene4->mRootNode->mNumMeshes = 1;
-
-
-    //auto pMesh = Scene4->mMeshes[0];
-
-    //Assimp::Importer importer;
-    //Assimp::Exporter exporter;
-    //const aiScene* scene2 = importer.ReadFile("Data/rock.fbx", aiProcess_ValidateDataStructure);
-    //const aiScene* scene3 = importer.ReadFileFromMemory(mSubMeshes[0].vertexBuffer, mSubMeshes[0].vertexSize,assimpFlags);
-
-    //exporter.Export(scene2, "fbx", "Data/rock2.fbx");
-    const aiExportFormatDesc* format = exporter.GetExportFormatDescription(0);
-    std::string path = "Media/KielanTheCunt.fbx";
-
-    ////mExportFormatDesc->id is "collada"  and mFilePath is "C:/Users/kevin/Desktop/myColladaFile.dae"
-    exporter.Export(out, "fbx", path);
-
-
-}
-
-void Mesh::RegenerateMesh(const void* vertices, const void* indices)
+//Generate the Vertex and Index buffers with the new vertices of the mesh
+void Mesh::GenerateBuffers(const void* vertices, const void* indices)
 {
 
     // Create the vertex buffer and fill it with the loaded vertex data
     D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT; // Not a dynamic buffer
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT; ////Do not generate a Dynamic Buffer
     bufferDesc.ByteWidth = mSubMeshes[0].numVertices * mSubMeshes[0].vertexSize; // Buffer size
     bufferDesc.CPUAccessFlags = 0;
     bufferDesc.MiscFlags = 0;
@@ -700,6 +570,7 @@ void Mesh::RegenerateMesh(const void* vertices, const void* indices)
     }
 }
 
+//Release all buffers and layouts of the mesh before deconstruction of the class
 Mesh::~Mesh()
 {
     for (auto& subMesh : mSubMeshes)
@@ -709,7 +580,6 @@ Mesh::~Mesh()
         if (subMesh.vertexLayout)  subMesh.vertexLayout->Release();
     }
 }
-
 
 //--------------------------------------------------------------------------------------
 
@@ -733,6 +603,7 @@ void Mesh::RenderSubMesh(const SubMesh& subMesh)
     // Render mesh
     gD3DContext->DrawIndexed(subMesh.numIndices, 0, 0);
 }
+
 // Render the mesh with the given matrices
 // Handles rigid body meshes (including single part meshes) as well as skinned meshes
 // LIMITATION: The mesh must use a single texture throughout
@@ -802,7 +673,6 @@ void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices, ID3D11Buffer* buffer, 
 	}
 }
 
-
 //--------------------------------------------------------------------------------------
 // Helper functions
 //--------------------------------------------------------------------------------------
@@ -815,7 +685,6 @@ unsigned int Mesh::CountNodes(aiNode* assimpNode)
         count += CountNodes(assimpNode->mChildren[child]);
     return count;
 }
-
 
 // Help build the arrays of submeshes and nodes from the assimp data - recursive
 unsigned int Mesh::ReadNodes(aiNode* assimpNode, unsigned int nodeIndex, unsigned int parentIndex)
@@ -845,4 +714,3 @@ unsigned int Mesh::ReadNodes(aiNode* assimpNode, unsigned int nodeIndex, unsigne
 
     return nodeIndex;
 }
-

@@ -1,14 +1,16 @@
 #include "System.h"
-//#include "project/Scene.h"
 
+//Constructor to initialise everything in the system and scene
 System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWidth, int screenHeight, bool VSYNC, bool FULL_SCREEN)
 {
+    //Set the width and height of the viewport (Window)
     viewportWidth = screenWidth;
     viewportHeight = screenHeight;
+
     // Create a window to display the scene
     if (!InitWindow(hInstance, nCmdShow)) { exit(0); }
 
-    // Prepare TL-Engine style input functions
+    // Prepare the user input functions
     InitInput();
 
     // Initialise Direct3D
@@ -17,47 +19,44 @@ System::System(BaseScene* scene, HINSTANCE hInstance, int nCmdShow, int screenWi
         MessageBoxA(HWnd, LastError.c_str(), NULL, MB_OK);
         exit(0);
     }
-
+       
+    //Update the Systems Scene pointer to the current scene 
+    //Allowing for the system to load the scene
     Scene = scene;
-    Scene->viewportWidth = screenWidth;
-    Scene->viewportHeight = screenHeight;
 
-    //IMGUI
-    //*******************************
-    // Initialise ImGui
-    //*******************************
+    //------------------//
+    // Initialise ImGui //
+    //------------------//
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; //Enable docking of the viewports 
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; //Enable each window to be a seperate viewport
 
-    // Setup Dear ImGui style
-    SetupIMGUIiStyle(true, 0.5f);
-    //ImGui::StyleColorsClassic();
+    // Setup ImGui style
+    SetupIMGUIiStyle(0.5f);
 
     // Setup Platform/Renderer bindings
     ImGui_ImplWin32_Init(HWnd);
     ImGui_ImplDX11_Init(gD3DDevice, gD3DContext);
 
-    //*******************************
-
     // Initialise scene
+    // If scene cannot be initialised then release the resources from system memory
     if (!Scene->InitGeometry(LastError) || !Scene->InitScene())
     {
         MessageBoxA(HWnd, LastError.c_str(), NULL, MB_OK);
         Scene->ReleaseResources();
-        //ReleaseResources();
         ShutdownDirect3D();
         exit(0);
     }
 }
 
+//Class deconstructor 
 System::~System()
 {
+    //Check if Scene exists and then delete the current scene
     if (Scene)
     {
         delete Scene;
@@ -65,13 +64,14 @@ System::~System()
     }
 }
 
+//Function that is called every frame to run the scene
 void System::run()
 {
-    // Will use a timer class to help in this tutorial (not part of DirectX). It's like a stopwatch - start it counting now
+    //Use a Timer to get the frameTime
     gTimer.Start();
 
 
-    // Main message loop - this is a Windows equivalent of the loop in a TL-Engine application
+    // Main message loop
     MSG msg = {};
     while (msg.message != WM_QUIT) // As long as window is open
     {
@@ -89,11 +89,10 @@ void System::run()
             // Update the scene by the amount of time since the last frame
             float frameTime = gTimer.GetLapTime();
             Scene->UpdateScene(frameTime, HWnd);
-            //UpdateScene(frameTime, HWnd);
 
-            // Draw the scene
+            // Render the scene
             Scene->RenderScene(frameTime);
-            //RenderScene();
+
 
             if (KeyHit(Key_Escape))
             {
@@ -113,12 +112,12 @@ void System::run()
 
     //*******************************
 
-    // Release everything before quitting
-    //ReleaseResources();
+    // Release everything from memory before quitting
     Scene->ReleaseResources();
-    //ShutdownDirect3D();
+    ShutdownDirect3D();
 }
 
+//Functions to handle user input in the window
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT System::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -139,9 +138,9 @@ LRESULT System::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         break;
 
-        // The WM_KEYXXXX messages report keyboard input to our window.
-        // This application has added some simple functions (not DirectX) to process these messages (all in Input.cpp/h)
-        // so you don't need to change this code. Instead simply use KeyHit, KeyHeld etc.
+    // The WM_KEYXXXX messages report keyboard input to our window.
+    // This application has added some simple functions (not DirectX) to process these messages (all in Input.cpp/h)
+    // so you don't need to change this code. Instead simply use KeyHit, KeyHeld etc.
     case WM_KEYDOWN:
         KeyDownEvent(static_cast<KeyCode>(wParam));
         break;
@@ -151,8 +150,8 @@ LRESULT System::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
 
-        // The following WM_XXXX messages report mouse movement and button presses
-        // Use KeyHit to get mouse buttons, GetMouseX, GetMouseY for its position
+    // The following WM_XXXX messages report mouse movement and button presses
+    // Use KeyHit to get mouse buttons, GetMouseX, GetMouseY for its position
     case WM_MOUSEMOVE:
     {
         MouseMoveEvent(LOWORD(lParam), HIWORD(lParam));
@@ -198,6 +197,7 @@ LRESULT System::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+//Initialise the window that will appear on the screen
 BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
 {
     // Get a stock icon to show on the taskbar for this program.
@@ -230,9 +230,6 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
 
     // Select the type of window to show our application in
     DWORD windowStyle = WS_OVERLAPPEDWINDOW; // Standard window
-    //DWORD windowStyle = WS_POPUP;          // Alternative: borderless. If you also set the viewport size to the monitor resolution, you 
-                                             // get a "fullscreen borderless" window, which works better with alt-tab than DirectX fullscreen,
-                                             // which is an option in Direct3DSetup.cpp. DirectX fullscreen has slight better performance though.
 
     // Calculate overall dimensions for the window. We will render to the *inside* of the window. But the
     // overall winder will be larger because it includes the borders, title bar etc. This code calculates
@@ -241,7 +238,6 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
     AdjustWindowRect(&rc, windowStyle, FALSE);
 
     // Create window, the second parameter is the text that appears in the title bar
-    HInst = hInstance;
     HWnd = CreateWindow(L"Window", L"Procedural Terrain Generation", windowStyle,
         CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
     if (!HWnd)
@@ -255,10 +251,11 @@ BOOL System::InitWindow(HINSTANCE hInstance, int nCmdShow)
     return TRUE;
 }
 
-void System::SetupIMGUIiStyle(bool bDarkStyle, float alpha)
+//Update the Colour Scheme (Style) of ImGui to a black Background and Golden highlights
+void System::SetupIMGUIiStyle(float alpha)
 {
     ImGuiStyle& style = ImGui::GetStyle();
-    //style.Alpha = 1.0f;
+
     style.FrameRounding = 15.0f;
     style.Colors[ImGuiCol_Text]               = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     style.Colors[ImGuiCol_TextDisabled]       = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
@@ -299,37 +296,22 @@ void System::SetupIMGUIiStyle(bool bDarkStyle, float alpha)
     style.Colors[ImGuiCol_TabUnfocused]       = ImVec4(1.0f, 0.8f, 0.4f, 0.20f);
     style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(1.0f, 0.8f, 0.4f, 0.60f);
 
-    if (bDarkStyle)
+    //Go through each 
+    for (int i = 0; i <= ImGuiCol_COUNT; i++)
     {
-        for (int i = 0; i <= ImGuiCol_COUNT; i++)
-        {
-            ImVec4& col = style.Colors[i];
-            float H, S, V;
-            ImGui::ColorConvertRGBtoHSV(col.x, col.y, col.z, H, S, V);
+        ImVec4& col = style.Colors[i];
+        float H, S, V;
+        ImGui::ColorConvertRGBtoHSV(col.x, col.y, col.z, H, S, V);
 
-            if (S < 0.1f)
-            {
-                V = 1.0f - V;
-            }
-            ImGui::ColorConvertHSVtoRGB(H, S, V, col.x, col.y, col.z);
-            if (col.w < 1.00f)
-            {
-                col.w *= alpha;
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i <= ImGuiCol_COUNT; i++)
+        if (S < 0.1f)
         {
-            ImVec4& col = style.Colors[i];
-            if (col.w < 1.00f)
-            {
-                col.x *= alpha;
-                col.y *= alpha;
-                col.z *= alpha;
-                col.w *= alpha;
-            }
+            V = 1.0f - V;
+        }
+        ImGui::ColorConvertHSVtoRGB(H, S, V, col.x, col.y, col.z);
+        if (col.w < 1.00f)
+        {
+            col.w *= alpha;
         }
     }
+
 }

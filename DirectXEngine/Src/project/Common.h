@@ -27,7 +27,7 @@ extern IDXGISwapChain*         gSwapChain;
 extern ID3D11RenderTargetView* gBackBufferRenderTarget;  // Back buffer is where we render to
 extern ID3D11DepthStencilView* gDepthStencil;            // The depth buffer contains a depth for each back buffer pixel
 
-// Input constsnts
+// Input constants
 const float ROTATION_SPEED = 2.0f;
 const float MOVEMENT_SPEED = 3000.0f;
 
@@ -73,7 +73,6 @@ struct PerModelConstants
     CMatrix4x4 worldMatrix;
     CVector3   objectColour; // Allows each light model to be tinted to match the light colour they cast
     float      paddingA;
-
 };
 
 extern PerModelConstants gPerModelConstants;      // This variable holds the CPU-side constant buffer described above

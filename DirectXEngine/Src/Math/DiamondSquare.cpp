@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+//Constructor to initialise the data
 DiamondSquare::DiamondSquare(int size, float spread, float spreadReduction)
 {
 	m_Size = size + 1;
@@ -9,22 +10,27 @@ DiamondSquare::DiamondSquare(int size, float spread, float spreadReduction)
 	m_SpreadReduction = spreadReduction;
 }
 
+//Deconstructor 
 DiamondSquare::~DiamondSquare()
 {
 }
 
+//Function to reset the time to generate a new seed for the random function
 void DiamondSquare::timeReset()
 {
 	srand(time(0));
 }
 
-void DiamondSquare::process(std::vector<std::vector<float>>& temp)
+//Function to go through the Diamond Square Algorithm and generate the new HeightMap
+void DiamondSquare::process(std::vector<std::vector<float>>& HeightMap)
 {
+	//Reset the Seed of the random generator
 	timeReset();
-	_on_start(temp);
+
+	//Set the corners of the HeightMap
+	_on_start(HeightMap);
 
 	//side length is distance of a single square side
-	//or distance of diagonal in diamond
 	for (int sideLength = m_Size - 1; sideLength >= 2; sideLength /= 2, m_Spread /= m_SpreadReduction)
 	{
 		//side length must be >= 2 so we always have
@@ -46,14 +52,14 @@ void DiamondSquare::process(std::vector<std::vector<float>>& temp)
 			{
 				//x, y is upper left corner of square
 				//calculate average of existing corners
-				double avg = temp[x][y] //top left
-						   + temp[x + sideLength][y]//top right
-					       + temp[x][y + sideLength]//lower left
-						   + temp[x + sideLength][y + sideLength];//lower right
+				double avg = HeightMap[x][y] //top left
+						   + HeightMap[x + sideLength][y]//top right
+					       + HeightMap[x][y + sideLength]//lower left
+						   + HeightMap[x + sideLength][y + sideLength];//lower right
 				avg /= 4.0;
 
 				//add a random value on to the average
-				temp[x + halfSide][y + halfSide] = abs(avg + fRand2(-m_Spread, m_Spread));
+				HeightMap[x + halfSide][y + halfSide] = abs(avg + fRand2(-m_Spread, m_Spread));
 			}
 		}
 
@@ -75,10 +81,10 @@ void DiamondSquare::process(std::vector<std::vector<float>>& temp)
 				//x, y is center of diamond
 				//note we must use mod  and add DATA_SIZE for subtraction 
 				//so that we can wrap around the array to find the corners
-				double avg = temp[(x - halfSide + m_Size - 1) % (m_Size - 1)][y] //left of center
-						   + temp[(x + halfSide) % (m_Size - 1)][y]  //right of center
-						   + temp[x][(y + halfSide) % (m_Size - 1)]  //below center
-						   + temp[x][(y - halfSide + m_Size - 1) % (m_Size - 1)]; //above center
+				double avg = HeightMap[(x - halfSide + m_Size - 1) % (m_Size - 1)][y] //left of center
+						   + HeightMap[(x + halfSide) % (m_Size - 1)][y]  //right of center
+						   + HeightMap[x][(y + halfSide) % (m_Size - 1)]  //below center
+						   + HeightMap[x][(y - halfSide + m_Size - 1) % (m_Size - 1)]; //above center
 
 
 				avg /= 4.0;
@@ -86,35 +92,28 @@ void DiamondSquare::process(std::vector<std::vector<float>>& temp)
 				//add a random value on to the average
 				avg = abs(avg + fRand2(-m_Spread, m_Spread));
 				//update value for center of diamond
-				temp[x][y] = avg;
+				HeightMap[x][y] = avg;
 
 				//wrap values on the edges, remove
 				//this and adjust loop condition above
 				//for non-wrapping values.
-				if (x == 0)  temp[m_Size - 1][y] = avg;
-				if (y == 0)  temp[x][m_Size - 1] = avg;
-				              
+				if (x == 0)  HeightMap[m_Size - 1][y] = avg;
+				if (y == 0)  HeightMap[x][m_Size - 1] = avg;	              
 			}
 		}
 	}
-
-	_on_end();
 }
 
-void DiamondSquare::_on_start(std::vector<std::vector<float>>& temp)
+//Function to set the corners of the HeightMap to a random value of the Spread
+void DiamondSquare::_on_start(std::vector<std::vector<float>>& HeightMap)
 {
-	//Set the corners of the HeightMap to a rand point before performing the diamond square algorithm 
-	temp[0][0] = fRand2(-m_Spread, m_Spread);
-	temp[0][m_Size - 1] = fRand2(-m_Spread, m_Spread);
-	temp[m_Size - 1][0] = fRand2(-m_Spread, m_Spread);
-	temp[m_Size - 1][m_Size - 1] = fRand2(-m_Spread, m_Spread);
+	HeightMap[0][0] = fRand2(-m_Spread, m_Spread);
+	HeightMap[0][m_Size - 1] = fRand2(-m_Spread, m_Spread);
+	HeightMap[m_Size - 1][0] = fRand2(-m_Spread, m_Spread);
+	HeightMap[m_Size - 1][m_Size - 1] = fRand2(-m_Spread, m_Spread);
 }
 
-void DiamondSquare::_on_end()
-{
-
-}
-
+//Function to generate a random value between two values
 double DiamondSquare::fRand2(float dMin, float dMax)
 {
 	return dMin + (dMax - dMin) * (static_cast<double>(rand()) / RAND_MAX);
