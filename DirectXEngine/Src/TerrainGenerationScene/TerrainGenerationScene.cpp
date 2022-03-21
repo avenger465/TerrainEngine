@@ -24,7 +24,7 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     try
     {
         resourceManager->loadGrid(L"TerrainMesh", TerrainMeshMinPt, TerrainMeshMaxPt, SizeOfTerrainVertices, SizeOfTerrainVertices, HeightMap);
-        resourceManager->loadMesh(L"plant", std::string("Data/plant.fbx"), true);
+        resourceManager->loadMesh(L"plant", std::string("Data/Plant.fbx"), true);
         resourceManager->loadMesh(L"Light", std::string("Data/Light.x"));
 
     }
@@ -37,11 +37,11 @@ bool TerrainGenerationScene::InitGeometry(std::string& LastError)
     //Load the textures that will be used with the models to the resource manager
     try
     {
-        resourceManager->loadTexture(L"Grass", "Media/Grass1.png");
-        resourceManager->loadTexture(L"Rock", "Media/rock1.png");
-        resourceManager->loadTexture(L"Dirt", "Media/Dirt2.png");
-        resourceManager->loadTexture(L"plantTexture", "Media/plant.png");
-        resourceManager->loadTexture(L"plantTextureNormal", "Data/plantNormal.jpg");
+        resourceManager->loadTexture(L"Grass", "Media/Grass.png");
+        resourceManager->loadTexture(L"Rock", "Media/Rock.png");
+        resourceManager->loadTexture(L"Dirt", "Media/Dirt.png");
+        resourceManager->loadTexture(L"plantTexture", "Media/Plant.png");
+        resourceManager->loadTexture(L"plantTextureNormal", "Data/PlantNormal.jpg");
         resourceManager->loadTexture(L"lightTexture", "Media/Flare.jpg");
     }
     catch (std::runtime_error e) // Constructors cannot return error messages so use exceptions to catch texture errors (fairly standard approach this)
