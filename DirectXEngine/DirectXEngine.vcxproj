@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EEEF6CCA-5AB0-E800-23EB-317E8F6A2DDD}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>DirectXEngine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\bin\Debug-windows-x86_64\DirectXEngine\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\DirectXEngine\</IntDir>
+    <TargetName>DirectXEngine</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\Release-windows-x86_64\DirectXEngine\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\DirectXEngine\</IntDir>
+    <TargetName>DirectXEngine</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DXE_PLATFORM_WINDOWS;DXE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Src;External\assimp\include;External\GUI;External\GUI\backends;External\DirectXTK;External\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;assimp-vc140-mt.lib;DirectXTK.lib;DirectXTex.lib;d3dcompiler.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>External\assimp\lib\xSixtyFour;External\DirectXTK\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DXE_PLATFORM_WINDOWS;DXE_Release;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Src;External\assimp\include;External\GUI;External\GUI\backends;External\DirectXTK;External\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d11.lib;assimp-vc140-mt.lib;DirectXTK.lib;DirectXTex.lib;d3dcompiler.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>External\assimp\lib\xSixtyFour;External\DirectXTK\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="External\GUI\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Src\BasicScene\BaseScene.h" />
+    <ClInclude Include="Src\BasicScene\CLight.h" />
+    <ClInclude Include="Src\BasicScene\Camera.h" />
+    <ClInclude Include="Src\Data\Mesh.h" />
+    <ClInclude Include="Src\Data\Model.h" />
+    <ClInclude Include="Src\Data\State.h" />
+    <ClInclude Include="Src\Math\CMatrix4x4.h" />
+    <ClInclude Include="Src\Math\CPerlinNoise.h" />
+    <ClInclude Include="Src\Math\CVector2.h" />
+    <ClInclude Include="Src\Math\CVector3.h" />
+    <ClInclude Include="Src\Math\DiamondSquare.h" />
+    <ClInclude Include="Src\Math\MathHelpers.h" />
+    <ClInclude Include="Src\Shaders\Shader.h" />
+    <ClInclude Include="Src\System\Direct3DSetup.h" />
+    <ClInclude Include="Src\System\System.h" />
+    <ClInclude Include="Src\TerrainGenerationScene\TerrainGenerationScene.h" />
+    <ClInclude Include="Src\Utility\CResourceManager.h" />
+    <ClInclude Include="Src\Utility\ColourRGBA.h" />
+    <ClInclude Include="Src\Utility\GraphicsHelpers.h" />
+    <ClInclude Include="Src\Utility\Input.h" />
+    <ClInclude Include="Src\Utility\Timer.h" />
+    <ClInclude Include="Src\project\Common.h" />
+    <ClInclude Include="Src\tepch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\BasicScene\BaseScene.cpp" />
+    <ClCompile Include="Src\BasicScene\CLight.cpp" />
+    <ClCompile Include="Src\BasicScene\Camera.cpp" />
+    <ClCompile Include="Src\Data\Mesh.cpp" />
+    <ClCompile Include="Src\Data\Model.cpp" />
+    <ClCompile Include="Src\Data\State.cpp" />
+    <ClCompile Include="Src\Math\CMatrix4x4.cpp" />
+    <ClCompile Include="Src\Math\CPerlinNoise.cpp" />
+    <ClCompile Include="Src\Math\CVector2.cpp" />
+    <ClCompile Include="Src\Math\CVector3.cpp" />
+    <ClCompile Include="Src\Math\DiamondSquare.cpp" />
+    <ClCompile Include="Src\Shaders\Shader.cpp" />
+    <ClCompile Include="Src\System\Direct3DSetup.cpp" />
+    <ClCompile Include="Src\System\System.cpp" />
+    <ClCompile Include="Src\TerrainGenerationScene\TerrainGenerationScene.cpp" />
+    <ClCompile Include="Src\Utility\CResourceManager.cpp" />
+    <ClCompile Include="Src\Utility\GraphicsHelpers.cpp" />
+    <ClCompile Include="Src\Utility\Input.cpp" />
+    <ClCompile Include="Src\Utility\Timer.cpp" />
+    <ClCompile Include="Src\project\Main.cpp" />
+    <ClCompile Include="Src\tepch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>Src/Shaders/BasicTransform_vs.cso</ObjectFileOutput>
+      <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\LightModel_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/LightModel_ps.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/NormalMapping_ps.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_vs.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>Src/Shaders/NormalMapping_vs.cso</ObjectFileOutput>
+      <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLightingWithAlpha_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/PixelLightingWithAlpha_ps.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/PixelLighting_ps.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_vs.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>Src/Shaders/PixelLighting_vs.cso</ObjectFileOutput>
+      <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\TerrainShader_ps.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>Src/Shaders/TerrainShader_ps.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\Triangle_Normals_gs.hlsl">
+      <ShaderType>Geometry</ShaderType>
+      <ObjectFileOutput>Src/Shaders/Triangle_Normals_gs.cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\WorldTransformOnly_vs.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>Src/Shaders/WorldTransformOnly_vs.cso</ObjectFileOutput>
+      <AdditionalOptions>/WX %(AdditionalOptions)</AdditionalOptions>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Shaders\Common.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="External\GUI\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

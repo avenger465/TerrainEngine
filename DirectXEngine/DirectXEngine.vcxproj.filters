@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="External">
+      <UniqueIdentifier>{089DB854-F469-1360-1D83-010809AF48EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\GUI">
+      <UniqueIdentifier>{1CE06A0A-0843-FAAE-B1C8-32659D0AC631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\GUI\backends">
+      <UniqueIdentifier>{C63964FF-32A6-1FFA-FB99-B75767C54162}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src">
+      <UniqueIdentifier>{0D23880B-792C-887C-02A8-9E7C6EB0937C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\BasicScene">
+      <UniqueIdentifier>{CCBDC7D3-B88B-BBD9-A11F-2C008D8C973E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Data">
+      <UniqueIdentifier>{9688E246-8255-3D52-AB6E-2BFA979A72E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Math">
+      <UniqueIdentifier>{0678E746-F244-4252-1B5E-30FA078A77E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Shaders">
+      <UniqueIdentifier>{E6043150-52BA-A945-DBAE-A31C4763A049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\System">
+      <UniqueIdentifier>{818556AE-6D3D-98FB-D644-7157C21B33EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\TerrainGenerationScene">
+      <UniqueIdentifier>{AB72490D-9782-F5DD-003C-5AFCEC6AE476}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Utility">
+      <UniqueIdentifier>{509EB806-BC53-31FC-4548-2BD3B1FC2700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\project">
+      <UniqueIdentifier>{731CDE20-DFD1-5616-68C6-50EDD47A4D1A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="External\GUI\backends\imgui_impl_dx11.h">
+      <Filter>External\GUI\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="External\GUI\backends\imgui_impl_win32.h">
+      <Filter>External\GUI\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\BasicScene\BaseScene.h">
+      <Filter>Src\BasicScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\BasicScene\CLight.h">
+      <Filter>Src\BasicScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\BasicScene\Camera.h">
+      <Filter>Src\BasicScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data\Mesh.h">
+      <Filter>Src\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data\Model.h">
+      <Filter>Src\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data\State.h">
+      <Filter>Src\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\CMatrix4x4.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\CPerlinNoise.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\CVector2.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\CVector3.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\DiamondSquare.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\MathHelpers.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Shaders\Shader.h">
+      <Filter>Src\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\System\Direct3DSetup.h">
+      <Filter>Src\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\System\System.h">
+      <Filter>Src\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\TerrainGenerationScene\TerrainGenerationScene.h">
+      <Filter>Src\TerrainGenerationScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\CResourceManager.h">
+      <Filter>Src\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\ColourRGBA.h">
+      <Filter>Src\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\GraphicsHelpers.h">
+      <Filter>Src\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\Input.h">
+      <Filter>Src\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Utility\Timer.h">
+      <Filter>Src\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\project\Common.h">
+      <Filter>Src\project</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\tepch.h">
+      <Filter>Src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="External\GUI\backends\imgui_impl_dx11.cpp">
+      <Filter>External\GUI\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="External\GUI\backends\imgui_impl_win32.cpp">
+      <Filter>External\GUI\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\BasicScene\BaseScene.cpp">
+      <Filter>Src\BasicScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\BasicScene\CLight.cpp">
+      <Filter>Src\BasicScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\BasicScene\Camera.cpp">
+      <Filter>Src\BasicScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data\Mesh.cpp">
+      <Filter>Src\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data\Model.cpp">
+      <Filter>Src\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data\State.cpp">
+      <Filter>Src\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\CMatrix4x4.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\CPerlinNoise.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\CVector2.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\CVector3.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\DiamondSquare.cpp">
+      <Filter>Src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Shaders\Shader.cpp">
+      <Filter>Src\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\System\Direct3DSetup.cpp">
+      <Filter>Src\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\System\System.cpp">
+      <Filter>Src\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TerrainGenerationScene\TerrainGenerationScene.cpp">
+      <Filter>Src\TerrainGenerationScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utility\CResourceManager.cpp">
+      <Filter>Src\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utility\GraphicsHelpers.cpp">
+      <Filter>Src\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utility\Input.cpp">
+      <Filter>Src\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Utility\Timer.cpp">
+      <Filter>Src\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\project\Main.cpp">
+      <Filter>Src\project</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\tepch.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shaders\BasicTransform_vs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\LightModel_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\NormalMapping_vs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLightingWithAlpha_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\PixelLighting_vs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\TerrainShader_ps.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\Triangle_Normals_gs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Src\Shaders\WorldTransformOnly_vs.hlsl">
+      <Filter>Src\Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Shaders\Common.hlsli">
+      <Filter>Src\Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
